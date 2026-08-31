@@ -1,18 +1,17 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
 import { ProductStatus } from "@/lib/constants";
-import { requireAdmin } from "@/lib/auth";
 
-/**
- * GET /api/admin/products
- * Admin-only product listing with all products.
- */
-export async function GET() {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+export async function GET(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-  const { searchParams } = new URL("http://localhost" + "/api/admin/products");
+  const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const limit = parseInt(searchParams.get("limit") ?? "20", 10);
   const gender = searchParams.get("gender");
@@ -34,14 +33,11 @@ export async function GET() {
   return Response.json({ products, total, page, limit });
 }
 
-/**
- * PATCH /api/admin/products
- * Admin-only product update.
- * Body: { id, ...fields }
- */
 export async function PATCH(request: Request) {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const body = await request.json();
   const { id, ...fields } = body;
@@ -56,7 +52,9 @@ export async function PATCH(request: Request) {
     where: { id },
     data: {
       ...productFields,
-      ...(images !== undefined ? { images: { deleteMany: {}, create: images.map((url: string, i: number) => ({ imageUrl: url, sortOrder: i })) } } : {}),
+      ...(images !== undefined ? {
+        images: { deleteMany: {}, create: images.map((url: string, i: number) => ({ imageUrl: url, sortOrder: i })) }
+      } : {}),
       ...(variants !== undefined ? { variants: { deleteMany: {}, create: variants } } : {}),
     },
     include: { images: true, variants: true },
@@ -65,13 +63,11 @@ export async function PATCH(request: Request) {
   return Response.json(updated);
 }
 
-/**
- * DELETE /api/admin/products
- * Body: { id }
- */
 export async function DELETE(request: Request) {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const body = await request.json();
   const { id } = body;
@@ -81,6 +77,5 @@ export async function DELETE(request: Request) {
   }
 
   await prisma.product.delete({ where: { id } });
-
   return Response.json({ success: true });
 }

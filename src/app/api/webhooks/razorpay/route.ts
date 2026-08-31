@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
-import { verifyWebhookSignature, verifyRazorpaySignature } from "@/lib/razorpay";
+import { verifyWebhookSignature } from "@/lib/razorpay";
 import { prisma } from "@/lib/db";
-
-/**
- * POST /api/webhooks/razorpay
- *
- * Authoritative Razorpay webhook endpoint.
- * Verifies HMAC-SHA256 signature before processing any event.
- */
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -35,30 +28,32 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
 
-      // Verify signature before trusting payment
-      const signatureValid = verifyRazorpaySignature(razorpayOrderId, razorpayPaymentId, payment.id);
+      await prisma.$transaction(async (tx) => {
+        const currentOrder = await tx.order.findUnique({ where: { id: order.id } });
+        if (currentOrder?.paymentStatus === "PAID") return;
 
-      if (!signatureValid) {
-        return NextResponse.json({ error: "Invalid payment signature" }, { status: 401 });
-      }
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: "PAID",
-          orderStatus: "PAID",
-          razorpayPaymentId,
-        },
-      });
-
-      // Stock decrement — note: in production, track variant IDs on OrderItem
-      // to allow precise per-variant stock deduction.
-      for (const item of order.items) {
-        await prisma.productVariant.updateMany({
-          where: { productId: item.productId },
-          data: { stock: { decrement: item.quantity } },
+        await tx.order.update({
+          where: { id: order.id },
+          data: { paymentStatus: "PAID", orderStatus: "PROCESSING", razorpayPaymentId },
         });
-      }
+
+        for (const item of order.items) {
+          if (item.productId) {
+            const variant = await tx.productVariant.findFirst({
+              where: { productId: item.productId, size: item.size }
+            });
+            if (variant) {
+              await tx.productVariant.update({
+                where: { id: variant.id },
+                data: { stock: { decrement: item.quantity } }
+              });
+            }
+          }
+        }
+        
+        // Also clear cart just in case
+        await tx.cart.deleteMany({ where: { userId: order.userId } });
+      });
 
       return NextResponse.json({ received: true });
     }
@@ -66,24 +61,28 @@ export async function POST(request: Request) {
     case "payment.failed": {
       const payment = payload.payment.entity;
       const razorpayOrderId = payment.order_id;
-
-      await prisma.order.updateMany({
-        where: { razorpayOrderId },
-        data: { paymentStatus: "FAILED" },
-      });
-
+      
+      const order = await prisma.order.findFirst({ where: { razorpayOrderId } });
+      if (order && order.paymentStatus !== "PAID") {
+        await prisma.order.update({ 
+          where: { id: order.id }, 
+          data: { paymentStatus: "FAILED" } 
+        });
+      }
       return NextResponse.json({ received: true });
     }
 
     case "order.paid": {
       const orderEntity = payload.order.entity;
       const razorpayOrderId = orderEntity.id;
-
-      await prisma.order.updateMany({
-        where: { razorpayOrderId },
-        data: { orderStatus: "PAID" },
-      });
-
+      
+      const order = await prisma.order.findFirst({ where: { razorpayOrderId } });
+      if (order && order.paymentStatus !== "PAID") {
+         await prisma.order.update({ 
+           where: { id: order.id }, 
+           data: { orderStatus: "PROCESSING" } 
+         });
+      }
       return NextResponse.json({ received: true });
     }
 

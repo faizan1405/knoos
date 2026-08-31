@@ -1,13 +1,12 @@
 "use server";
 
-import { signOut } from "@/app/api/auth/[...nextauth]/route";
-import { NextResponse } from "next/server";
+import { auth, signOut } from "@/lib/auth";
 
-/**
- * POST /api/auth/signout
- * Signs the user out and redirects to home.
- */
+export async function GET() {
+  await signOut({ redirectTo: "/" });
+}
+
 export async function POST() {
   await signOut({ redirectTo: "/" });
-  return NextResponse.json({ ok: true });
+  return Response.json({ ok: true });
 }

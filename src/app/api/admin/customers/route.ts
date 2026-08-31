@@ -1,39 +1,64 @@
-"use server";
-
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-/**
- * GET /api/admin/customers
- * Admin-only customer listing.
- */
-export async function GET() {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+export async function GET(request: Request) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
 
-  const { searchParams } = new URL("http://localhost" + "/api/admin/customers");
+  const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const limit = parseInt(searchParams.get("limit") ?? "20", 10);
-  const search = searchParams.get("q");
+  const q = searchParams.get("q");
 
-  const where: Record<string, unknown> = {};
-  if (search) {
+  const where: Record<string, unknown> = { role: "CUSTOMER" };
+  if (q) {
     where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { email: { contains: search, mode: "insensitive" } },
+      { name: { contains: q } },
+      { email: { contains: q } },
     ];
   }
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
-      where: { ...where, role: "CUSTOMER" },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
-      select: { id: true, name: true, email: true, image: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        createdAt: true,
+        orders: {
+          select: { id: true, total: true, paymentStatus: true },
+        },
+      },
     }),
     prisma.user.count({ where }),
   ]);
 
-  return Response.json({ customers: users, total, page, limit });
+  // Compute spending and order count
+  const customers = users.map((u) => {
+    const paidOrders = u.orders.filter((o) => o.paymentStatus === "PAID");
+    const totalSpent = paidOrders.reduce((sum, o) => sum + o.total, 0);
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      image: u.image,
+      createdAt: u.createdAt,
+      totalOrders: u.orders.length,
+      totalSpent,
+    };
+  });
+
+  return Response.json({
+    customers,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  });
 }

@@ -1,25 +1,22 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-/**
- * GET /api/orders/[id]
- * Get a single order with items for the authenticated user.
- */
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { auth } = await import("@/app/api/auth/[...nextauth]/route");
   const session = await auth();
-
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await params;
+
   const order = await prisma.order.findFirst({
-    where: { id: params.id, userId: session.user.id },
-    include: { items: true },
+    where: { id: id, userId: session.user.id },
+    include: { items: true, address: true },
   });
 
   if (!order) {

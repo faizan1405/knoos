@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 /**
@@ -33,33 +34,35 @@ model User {
  * Product category: MEN or WOMEN.
  */
 model Product {
-  id          String    @id @default(cuid())
-  name        String    @db.VarChar(255)
-  slug        String    @unique @db.VarChar(255)
-  description String?   @db.Text
-  gender      String    @db.VarChar(10)
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  description String?  @db.Text
+  gender      String   @db.VarChar(10)
+  category    String?  @db.VarChar(50)
   price       Int
   salePrice   Int?
-  sku         String    @unique @db.VarChar(100)
-  status      String    @default("ACTIVE") @db.VarChar(20)
-  createdAt   DateTime  @default(now()) @db.DateTime(0)
-  updatedAt   DateTime  @updatedAt @db.DateTime(0)
+  sku         String   @unique @db.VarChar(100)
+  status      String   @default("ACTIVE") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @db.DateTime(0)
+  updatedAt   DateTime @updatedAt @db.DateTime(0)
 
-  images    ProductImage[]
-  variants  ProductVariant[]
-  cartItems CartItem[]
+  images     ProductImage[]
+  variants   ProductVariant[]
+  cartItems  CartItem[]
   orderItems OrderItem[]
 
   @@index([gender, status])
+  @@index([category])
   @@index([slug])
   @@index([status, createdAt])
 }
 
 model ProductImage {
-  id        String  @id @default(cuid())
-  productId String  @db.VarChar(36)
-  imageUrl  String  @db.VarChar(500)
-  sortOrder Int     @default(0)
+  id        String @id @default(cuid())
+  productId String @db.VarChar(36)
+  imageUrl  String @db.VarChar(500)
+  sortOrder Int    @default(0)
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -67,13 +70,13 @@ model ProductImage {
 }
 
 model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String  @db.VarChar(36)
-  size      String  @db.VarChar(10)
-  stock     Int     @default(0)
-  sku       String  @unique @db.VarChar(100)
+  id        String @id @default(cuid())
+  productId String @db.VarChar(36)
+  size      String @db.VarChar(10)
+  stock     Int    @default(0)
+  sku       String @unique @db.VarChar(100)
 
-  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   cartItems CartItem[]
 
   @@unique([productId, size])
@@ -109,21 +112,21 @@ model Cart {
   createdAt DateTime @default(now()) @db.DateTime(0)
   updatedAt DateTime @updatedAt @db.DateTime(0)
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items    CartItem[]
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
 
   @@index([userId])
 }
 
 model CartItem {
-  id        String   @id @default(cuid())
-  cartId    String   @db.VarChar(36)
-  productId String   @db.VarChar(36)
-  variantId String   @db.VarChar(36)
+  id        String @id @default(cuid())
+  cartId    String @db.VarChar(36)
+  productId String @db.VarChar(36)
+  variantId String @db.VarChar(36)
   quantity  Int
 
-  cart    Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, variantId])
@@ -134,25 +137,42 @@ model CartItem {
  * Order. Payment and delivery amounts are authoritative server-side values.
  */
 model Order {
-  id                String     @id @default(cuid())
-  userId            String     @db.VarChar(36)
+  id                String   @id @default(cuid())
+  userId            String   @db.VarChar(36)
   subtotal          Int
   deliveryCharge    Int
   total             Int
-  deliveryMethod    String     @db.VarChar(20)
-  orderStatus       String     @default("PENDING") @db.VarChar(20)
-  paymentStatus     String     @default("PENDING") @db.VarChar(20)
-  razorpayOrderId   String?    @unique @db.VarChar(100)
-  razorpayPaymentId String?    @unique @db.VarChar(100)
+  deliveryMethod    String   @db.VarChar(20)
+  orderStatus       String   @default("PENDING") @db.VarChar(20)
+  paymentStatus     String   @default("PENDING") @db.VarChar(20)
+  razorpayOrderId   String?  @unique @db.VarChar(100)
+  razorpayPaymentId String?  @unique @db.VarChar(100)
   razorpaySignature String?
-  createdAt         DateTime   @default(now()) @db.DateTime(0)
-  updatedAt         DateTime   @updatedAt @db.DateTime(0)
+  createdAt         DateTime @default(now()) @db.DateTime(0)
+  updatedAt         DateTime @updatedAt @db.DateTime(0)
 
-  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items  OrderItem[]
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items   OrderItem[]
+  address OrderAddress?
 
   @@index([userId, createdAt])
   @@index([orderStatus, paymentStatus])
+}
+
+/**
+ * Snapshot of the delivery address at the time of order creation.
+ */
+model OrderAddress {
+  id      String @id @default(cuid())
+  orderId String @unique @db.VarChar(36)
+  name    String @db.VarChar(100)
+  phone   String @db.VarChar(20)
+  address String @db.VarChar(500)
+  city    String @db.VarChar(100)
+  state   String @db.VarChar(100)
+  pincode String @db.VarChar(10)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 /**
@@ -161,17 +181,17 @@ model Order {
  * even if the product is later edited.
  */
 model OrderItem {
-  id           String  @id @default(cuid())
-  orderId      String  @db.VarChar(36)
-  productId    String? @db.VarChar(36)
-  productName  String  @db.VarChar(255)
-  size         String  @db.VarChar(10)
-  quantity     Int
-  price        Int
-  total        Int
+  id          String  @id @default(cuid())
+  orderId     String  @db.VarChar(36)
+  productId   String? @db.VarChar(36)
+  productName String  @db.VarChar(255)
+  size        String  @db.VarChar(10)
+  quantity    Int
+  price       Int
+  total       Int
 
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([productId])

@@ -1,42 +1,58 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-
-export const dynamic = "force-dynamic";
+import { prisma } from "@/lib/db";
+import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductInfo } from "@/components/product/ProductInfo";
 
 interface ProductPageProps {
-  params: { slug: string };
-}
-
-export async function generateStaticParams() {
-  // Will be populated once products exist
-  return [];
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  return { title: "Product — KNOOS" };
+  const resolvedParams = await params;
+  const product = await prisma.product.findUnique({
+    where: { slug: resolvedParams.slug },
+  });
+
+  if (!product) {
+    return {
+      title: "Product Not Found | KNOOS",
+    };
+  }
+
+  return {
+    title: `${product.name} | KNOOS`,
+    description: product.description?.slice(0, 160) || `Buy ${product.name} at KNOOS. Premium footwear for the discerning individual.`,
+  };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = null; // TODO: fetch from /api/products/[slug]
+  const resolvedParams = await params;
+  const product = await prisma.product.findUnique({
+    where: {
+      slug: resolvedParams.slug,
+      status: "ACTIVE", // Only show active products to customers
+    },
+    include: {
+      images: {
+        orderBy: { sortOrder: "asc" },
+      },
+      variants: true,
+    },
+  });
 
   if (!product) {
     notFound();
   }
 
   return (
-    <main className="pt-24 px-6 md:px-12 lg:px-24">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product images */}
-          <div className="aspect-square bg-brand-gray-100" />
-          {/* Product info */}
-          <div>
-            <h1 className="font-serif text-3xl md:text-4xl mb-4">{product.name}</h1>
-            <p className="text-brand-gray-500 mb-6">{product.description}</p>
-            <p className="text-2xl font-medium mb-8">
-              ₹{product.salePrice ?? product.price}
-            </p>
-          </div>
+    <main className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-16 md:py-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+        <ProductGallery images={product.images} productName={product.name} />
+        <div className="lg:py-12">
+          <ProductInfo product={product} variants={product.variants} />
         </div>
       </div>
     </main>

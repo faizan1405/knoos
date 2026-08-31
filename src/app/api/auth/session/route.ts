@@ -1,11 +1,6 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-/**
- * GET /api/auth/session
- * Returns the current session (or null) without requiring a redirect.
- */
 export async function GET() {
   try {
     const session = await auth();

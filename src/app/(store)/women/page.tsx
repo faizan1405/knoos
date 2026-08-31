@@ -1,21 +1,40 @@
 import { Metadata } from "next";
+import { getProducts } from "@/lib/products";
+import { ProductGrid } from "@/components/product/ProductGrid";
+import { CollectionLayout } from "@/components/product/CollectionLayout";
 
 export const metadata: Metadata = {
-  title: "Women — KNOOS",
+  title: "Women's Collection | KNOOS",
+  description: "Shop the latest premium footwear for women.",
 };
 
-export default function WomenPage() {
+interface WomenPageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function WomenPage({ searchParams }: WomenPageProps) {
+  const params = {
+    gender: "WOMEN", // Hardcode gender for this page
+    q: typeof searchParams.q === "string" ? searchParams.q : undefined,
+    category: typeof searchParams.category === "string" ? searchParams.category : undefined,
+    size: typeof searchParams.size === "string" ? searchParams.size : undefined,
+    min: typeof searchParams.min === "string" ? searchParams.min : undefined,
+    max: typeof searchParams.max === "string" ? searchParams.max : undefined,
+    stock: typeof searchParams.stock === "string" ? searchParams.stock : undefined,
+    sort: typeof searchParams.sort === "string" ? searchParams.sort : undefined,
+  };
+
+  const products = await getProducts(params);
+
   return (
-    <main className="pt-24 px-6 md:px-12 lg:px-24">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="font-serif text-4xl md:text-5xl mb-8">Women</h1>
-        <p className="text-brand-gray-500 mb-12 max-w-xl">
-          Elegant footwear designed for the contemporary woman. Coming soon.
-        </p>
-        <div className="flex items-center justify-center h-64 border border-brand-gray-200">
-          <span className="text-brand-gray-400 font-mono text-sm">Product grid — Phase 3</span>
-        </div>
-      </div>
-    </main>
+    <CollectionLayout 
+      title="Women's Collection" 
+      count={products.length}
+    >
+      <ProductGrid 
+        products={products} 
+        emptyMessage="No products available in the women's collection yet." 
+      />
+    </CollectionLayout>
   );
 }

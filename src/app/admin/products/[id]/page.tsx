@@ -1,21 +1,40 @@
 import { Metadata } from "next";
+import { prisma } from "@/lib/db";
+import AdminProductForm from "./ProductForm";
 
 export const metadata: Metadata = {
   title: "Edit Product — Admin",
 };
 
-export default function AdminEditProductPage({
+async function getProduct(id: string) {
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      images: { orderBy: { sortOrder: "asc" } },
+      variants: { orderBy: { size: "asc" } },
+    },
+  });
+  return product;
+}
+
+export default async function AdminEditProductPage({
   params,
 }: {
   params: { id: string };
 }) {
-  return (
-    <div>
-      <h1 className="font-serif text-3xl mb-8">Edit Product</h1>
-      <p className="text-brand-gray-500 font-mono text-sm">
-        Editing product ID: {params.id}
-      </p>
-      <p className="text-brand-gray-400 font-mono text-sm mt-2">Edit form — Phase 4</p>
-    </div>
-  );
+  const product = await getProduct(params.id);
+
+  if (!product) {
+    return (
+      <div className="p-8">
+        <h1 className="font-serif text-3xl mb-4">Product Not Found</h1>
+        <p className="text-brand-gray-500 font-mono text-sm">The product you are looking for does not exist.</p>
+        <a href="/admin/products" className="inline-block mt-6 text-sm font-mono uppercase tracking-wide hover:underline">
+          Back to Products
+        </a>
+      </div>
+    );
+  }
+
+  return <AdminProductForm product={product} />;
 }

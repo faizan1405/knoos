@@ -1,25 +1,35 @@
-"use server";
-
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { OrderStatus, PaymentStatus } from "@/lib/constants";
+import { orderStatusUpdateSchema, mapZodErrors } from "@/lib/validation/admin";
 
-/**
- * GET /api/admin/orders
- * Admin-only order listing.
- */
-export async function GET() {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+export async function GET(request: Request) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
 
-  const { searchParams } = new URL("http://localhost" + "/api/admin/orders");
+  const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
+  const payment = searchParams.get("payment");
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const limit = parseInt(searchParams.get("limit") ?? "20", 10);
+  const q = searchParams.get("q");
 
   const where: Record<string, unknown> = {};
-  if (status && Object.values(OrderStatus).includes(status)) {
+  if (status && Object.values(OrderStatus).includes(status as OrderStatus)) {
     where.orderStatus = status;
+  }
+  if (payment && Object.values(PaymentStatus).includes(payment as PaymentStatus)) {
+    where.paymentStatus = payment;
+  }
+  if (q) {
+    where.OR = [
+      { id: { contains: q } },
+      { razorpayOrderId: { contains: q } },
+      { razorpayPaymentId: { contains: q } },
+      { user: { email: { contains: q } } },
+      { user: { name: { contains: q } } },
+    ];
   }
 
   const [orders, total] = await Promise.all([
@@ -36,41 +46,42 @@ export async function GET() {
     prisma.order.count({ where }),
   ]);
 
-  return Response.json({ orders, total, page, limit });
+  return Response.json({
+    orders,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  });
 }
 
-/**
- * PATCH /api/admin/orders
- * Admin-only order status update.
- * Body: { id, orderStatus }
- */
 export async function PATCH(request: Request) {
-  const authResult = await requireAdmin();
-  if (authResult instanceof Response) return authResult;
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
 
   const body = await request.json();
-  const { id, orderStatus, paymentStatus } = body;
+  const { id } = body;
 
   if (!id) {
-    return Response.json({ error: "Order ID required" }, { status: 400 });
+    return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+  }
+
+  const parsed = orderStatusUpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", fieldErrors: mapZodErrors(parsed.error) },
+      { status: 400 }
+    );
   }
 
   const data: Record<string, string> = {};
-  if (orderStatus && Object.values(OrderStatus).includes(orderStatus)) {
-    data.orderStatus = orderStatus;
-  }
-  if (paymentStatus && Object.values(PaymentStatus).includes(paymentStatus)) {
-    data.paymentStatus = paymentStatus;
-  }
-
-  if (Object.keys(data).length === 0) {
-    return Response.json({ error: "No valid status fields provided" }, { status: 400 });
-  }
+  if (parsed.data.orderStatus) data.orderStatus = parsed.data.orderStatus;
+  if (parsed.data.paymentStatus) data.paymentStatus = parsed.data.paymentStatus;
 
   const updated = await prisma.order.update({
     where: { id },
     data,
-    include: { items: true },
+    include: { items: true, user: { select: { name: true, email: true } } },
   });
 
   return Response.json(updated);

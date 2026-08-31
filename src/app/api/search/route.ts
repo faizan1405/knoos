@@ -2,11 +2,6 @@
 
 import { prisma } from "@/lib/db";
 
-/**
- * GET /api/search
- * Search products by name, SKU, or category.
- * Query: ?q=searchTerm&gender=MEN&size=9&min=1500&max=4000&sort=price-low&page=1
- */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
@@ -19,15 +14,12 @@ export async function GET(request: Request) {
   const limit = parseInt(searchParams.get("limit") ?? "20", 10);
 
   const where: Record<string, unknown> = { status: "ACTIVE" };
-
-  if (gender) {
-    where.gender = gender;
-  }
+  if (gender) where.gender = gender;
 
   if (q) {
     where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { sku: { contains: q, mode: "insensitive" } },
+      { name: { contains: q } },
+      { sku: { contains: q } },
     ];
   }
 
@@ -44,7 +36,6 @@ export async function GET(request: Request) {
       orderBy.createdAt = "desc";
   }
 
-  // Price range filter is applied post-query via variant aggregation
   const products = await prisma.product.findMany({
     where,
     orderBy,
@@ -56,7 +47,6 @@ export async function GET(request: Request) {
     },
   });
 
-  // Apply size and price filters
   let filtered = products;
 
   if (size) {

@@ -1,0 +1,126 @@
+"use server";
+
+import { requireAdmin } from "@/lib/auth-helpers";
+import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { updateProductSchema, mapZodErrors } from "@/lib/validation/admin";
+
+// @ts-ignore - Next.js 16 type compatibility
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
+
+  const { id } = await params;
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      images: { orderBy: { sortOrder: "asc" } },
+      variants: { orderBy: { size: "asc" } },
+    },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
+
+  return Response.json(product);
+}
+
+// @ts-ignore - Next.js 16 type compatibility
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
+
+  const { id } = await params;
+  const body = await request.json();
+  const parsed = updateProductSchema.safeParse({ ...body, id });
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", fieldErrors: mapZodErrors(parsed.error) },
+      { status: 400 }
+    );
+  }
+
+  const { images, variants, ...productFields } = parsed.data;
+
+  try {
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        ...productFields,
+        ...(images !== undefined
+          ? {
+              images: {
+                deleteMany: {},
+                create: images.map((img) => ({
+                  imageUrl: img.imageUrl,
+                  sortOrder: img.sortOrder ?? 0,
+                })),
+              },
+            }
+          : {}),
+        ...(variants !== undefined
+          ? {
+              variants: {
+                deleteMany: {},
+                create: variants.map((v) => ({
+                  size: v.size,
+                  stock: v.stock,
+                  sku: v.sku,
+                })),
+              },
+            }
+          : {}),
+      },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
+        variants: { orderBy: { size: "asc" } },
+      },
+    });
+
+    return Response.json(updated);
+  } catch (err) {
+    if ((err as any).code === "P2002") {
+      const target = (err as any).meta?.target;
+      if (target?.includes("slug")) {
+        return NextResponse.json(
+          { error: "A product with this slug already exists" },
+          { status: 409 }
+        );
+      }
+      if (target?.includes("sku")) {
+        return NextResponse.json(
+          { error: "A product with this SKU already exists" },
+          { status: 409 }
+        );
+      }
+    }
+    throw err;
+  }
+}
+
+// @ts-ignore - Next.js 16 type compatibility
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
+
+  const { id } = await params;
+
+  await prisma.product.update({
+    where: { id },
+    data: { status: "INACTIVE" },
+  });
+
+  return Response.json({ success: true });
+}

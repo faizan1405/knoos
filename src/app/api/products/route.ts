@@ -1,14 +1,12 @@
-"use server";
-
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
 import { Gender, ProductStatus } from "@/lib/constants";
 
-/**
- * Public GET /api/products
- * Supports filtering and sorting via query params.
- * Query: ?gender=MEN&status=ACTIVE&sort=newest&page=1&limit=20
- */
 export async function GET(request: Request) {
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
+
   const { searchParams } = new URL(request.url);
   const gender = searchParams.get("gender") as Gender | null;
   const status = searchParams.get("status") ?? "ACTIVE";
@@ -20,8 +18,8 @@ export async function GET(request: Request) {
   if (gender && Object.values(Gender).includes(gender)) {
     where.gender = gender;
   }
-  if (status && Object.values(ProductStatus).includes(status)) {
-    where.status = status;
+  if (status && Object.values(ProductStatus).includes(status as ProductStatus)) {
+    where.status = status as ProductStatus;
   }
 
   const orderBy: Record<string, string> = {};
@@ -33,9 +31,6 @@ export async function GET(request: Request) {
       orderBy.price = "desc";
       break;
     case "newest":
-      orderBy.createdAt = "desc";
-      break;
-    case "featured":
     default:
       orderBy.createdAt = "desc";
   }
@@ -46,10 +41,7 @@ export async function GET(request: Request) {
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
-      include: {
-        images: { orderBy: { sortOrder: "asc" } },
-        variants: true,
-      },
+      include: { images: { orderBy: { sortOrder: "asc" } }, variants: true },
     }),
     prisma.product.count({ where }),
   ]);
@@ -57,14 +49,11 @@ export async function GET(request: Request) {
   return Response.json({ products, total, page, limit, totalPages: Math.ceil(total / limit) });
 }
 
-/**
- * POST /api/products
- * Admin only — creates a new product.
- * Protected via admin middleware at the route level.
- */
 export async function POST(request: Request) {
-  const body = await request.json();
+  const adminResult = await requireAdmin();
+  if (adminResult instanceof Response) return adminResult;
 
+  const body = await request.json();
   const { name, gender, price, salePrice, description, sku, status, images, variants } = body;
 
   if (!name || !gender || price == null || !sku) {
@@ -78,14 +67,11 @@ export async function POST(request: Request) {
       price,
       salePrice: salePrice ?? null,
       description: description ?? null,
-      slug: generateSlug(name),
+      slug: slugify(name),
       sku,
       status: status ?? "ACTIVE",
       images: {
-        create: (images ?? []).map((url: string, i: number) => ({
-          imageUrl: url,
-          sortOrder: i,
-        })),
+        create: (images ?? []).map((url: string, i: number) => ({ imageUrl: url, sortOrder: i })),
       },
       variants: {
         create: (variants ?? []).map((v: { size: string; stock: number; sku: string }) => ({
@@ -101,7 +87,7 @@ export async function POST(request: Request) {
   return Response.json(product, { status: 201 });
 }
 
-function generateSlug(name: string): string {
+function slugify(name: string): string {
   return name
     .toLowerCase()
     .trim()
