@@ -1,0 +1,15 @@
+/**
+ * Shared utility functions.
+ */
+
+/**
+ * Generate a URL-friendly slug from a product name.
+ */
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
