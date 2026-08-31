@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { loginWithGoogle } from "@/lib/auth-actions";
 
 interface OrderAddress {
   name: string;
@@ -128,7 +129,7 @@ export default function OrderDetailsPage() {
         const res = await fetch(`/api/orders/${id}`);
         if (!res.ok) {
           if (res.status === 401) {
-            router.push("/api/auth/signin");
+            await loginWithGoogle(`/account/orders/${id}`);
             return;
           }
           if (res.status === 404) {

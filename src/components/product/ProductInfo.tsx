@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Product, ProductVariant } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { loginWithGoogle } from "@/lib/auth-actions";
 
 interface ProductInfoProps {
   product: Product;
@@ -35,8 +36,8 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
     if (!selectedVariantId) return;
     
     if (!user) {
-      // Redirect to Google signin
-      window.location.href = "/api/auth/signin/google";
+      // Trigger Google sign-in server action
+      await loginWithGoogle(window.location.pathname);
       return;
     }
 

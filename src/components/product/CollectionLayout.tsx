@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { ProductFilters } from "./ProductFilters";
 import { MobileFilters } from "./MobileFilters";
 
@@ -20,10 +20,14 @@ export function CollectionLayout({ title, count, description, children }: Collec
         </p>
       </div>
 
-      <MobileFilters />
+      <Suspense fallback={null}>
+        <MobileFilters />
+      </Suspense>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        <ProductFilters />
+        <Suspense fallback={<div className="hidden lg:block w-64 flex-shrink-0" />}>
+          <ProductFilters />
+        </Suspense>
         <div className="flex-1">
           {children}
         </div>

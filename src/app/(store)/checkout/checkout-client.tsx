@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
+import { loginWithGoogle } from "@/lib/auth-actions";
 
 interface Address {
   id: string;
@@ -55,7 +56,7 @@ export function CheckoutClient() {
         ]);
 
         if (addressesRes.status === 401 || cartRes.status === 401) {
-          router.push("/api/auth/signin?callbackUrl=/checkout");
+          await loginWithGoogle("/checkout");
           return;
         }
 

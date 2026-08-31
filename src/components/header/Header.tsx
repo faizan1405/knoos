@@ -1,4 +1,4 @@
-import { auth, signOut } from "@/lib/auth";
+import { auth, signIn, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { HeaderClient } from "./HeaderClient";
 
@@ -16,6 +16,11 @@ export async function Header() {
     }
   }
 
+  const signInAction = async () => {
+    "use server";
+    await signIn("google");
+  };
+
   const signOutAction = async () => {
     "use server";
     await signOut();
@@ -25,6 +30,7 @@ export async function Header() {
     <HeaderClient 
       cartCount={cartCount}
       userName={session?.user?.name}
+      signInAction={signInAction}
       signOutAction={signOutAction}
     />
   );

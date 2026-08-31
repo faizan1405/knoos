@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { ProductFilters } from "./ProductFilters";
 
 export function MobileFilters() {
@@ -30,7 +30,9 @@ export function MobileFilters() {
           </div>
           <div className="flex-1 overflow-y-auto p-6">
             <div className="[&>div]:block [&>div]:w-full">
-               <ProductFilters />
+              <Suspense fallback={null}>
+                <ProductFilters />
+              </Suspense>
             </div>
           </div>
           <div className="p-4 border-t border-brand-gray-100">

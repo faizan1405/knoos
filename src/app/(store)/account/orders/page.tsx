@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { loginWithGoogle } from "@/lib/auth-actions";
 
 interface OrderItem {
   id: string;
@@ -52,7 +53,7 @@ export default function CustomerOrdersPage() {
         const res = await fetch("/api/orders");
         if (!res.ok) {
           if (res.status === 401) {
-            window.location.href = "/api/auth/signin";
+            await loginWithGoogle("/account/orders");
             return;
           }
           throw new Error("Failed to fetch orders");

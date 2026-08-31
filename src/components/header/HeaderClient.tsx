@@ -8,10 +8,11 @@ import { MobileMenu } from "./MobileMenu";
 interface HeaderClientProps {
   cartCount: number;
   userName?: string | null;
+  signInAction: () => void;
   signOutAction: () => void;
 }
 
-export function HeaderClient({ cartCount, userName, signOutAction }: HeaderClientProps) {
+export function HeaderClient({ cartCount, userName, signInAction, signOutAction }: HeaderClientProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -110,9 +111,12 @@ export function HeaderClient({ cartCount, userName, signOutAction }: HeaderClien
                 </button>
               </div>
             ) : (
-              <Link href="/" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <button 
+                onClick={() => signInAction()}
+                className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+              >
                 Sign In
-              </Link>
+              </button>
             )}
           </div>
 
@@ -136,6 +140,7 @@ export function HeaderClient({ cartCount, userName, signOutAction }: HeaderClien
         onClose={() => setIsMobileMenuOpen(false)} 
         cartCount={cartCount}
         userName={userName}
+        signInAction={signInAction}
         signOutAction={signOutAction}
       />
     </>

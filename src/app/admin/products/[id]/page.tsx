@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import AdminProductForm from "./ProductForm";
 
@@ -30,9 +31,9 @@ export default async function AdminEditProductPage({
       <div className="p-8">
         <h1 className="font-serif text-3xl mb-4">Product Not Found</h1>
         <p className="text-brand-gray-500 font-mono text-sm">The product you are looking for does not exist.</p>
-        <a href="/admin/products" className="inline-block mt-6 text-sm font-mono uppercase tracking-wide hover:underline">
+        <Link href="/admin/products" className="inline-block mt-6 text-sm font-mono uppercase tracking-wide hover:underline">
           Back to Products
-        </a>
+        </Link>
       </div>
     );
   }

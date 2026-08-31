@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { signIn } from "@/lib/auth";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { CartClient } from "./CartClient";
@@ -17,9 +18,19 @@ export default async function CartPage() {
         <p className="text-brand-gray-500 font-mono text-sm uppercase tracking-widest mb-8">
           Sign in to view your cart
         </p>
-        <a href="/api/auth/signin/google" className="bg-brand-black text-white px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-brand-gray-900 transition-colors">
-          Sign in with Google
-        </a>
+        <form
+          action={async () => {
+            "use server";
+            await signIn("google", { redirectTo: "/cart" });
+          }}
+        >
+          <button
+            type="submit"
+            className="bg-brand-black text-white px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-brand-gray-900 transition-colors"
+          >
+            Sign in with Google
+          </button>
+        </form>
       </div>
     );
   }

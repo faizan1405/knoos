@@ -9,20 +9,20 @@ export const metadata: Metadata = {
 };
 
 interface MenPageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function MenPage({ searchParams }: MenPageProps) {
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = (await searchParams) || {};
   const params = {
     gender: "MEN", // Hardcode gender for this page
-    q: typeof resolvedSearchParams?.q === "string" ? resolvedSearchParams.q : undefined,
-    category: typeof resolvedSearchParams?.category === "string" ? resolvedSearchParams.category : undefined,
-    size: typeof resolvedSearchParams?.size === "string" ? resolvedSearchParams.size : undefined,
-    min: typeof resolvedSearchParams?.min === "string" ? resolvedSearchParams.min : undefined,
-    max: typeof resolvedSearchParams?.max === "string" ? resolvedSearchParams.max : undefined,
-    stock: typeof resolvedSearchParams?.stock === "string" ? resolvedSearchParams.stock : undefined,
-    sort: typeof resolvedSearchParams?.sort === "string" ? resolvedSearchParams.sort : undefined,
+    q: typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : undefined,
+    category: typeof resolvedSearchParams.category === "string" ? resolvedSearchParams.category : undefined,
+    size: typeof resolvedSearchParams.size === "string" ? resolvedSearchParams.size : undefined,
+    min: typeof resolvedSearchParams.min === "string" ? resolvedSearchParams.min : undefined,
+    max: typeof resolvedSearchParams.max === "string" ? resolvedSearchParams.max : undefined,
+    stock: typeof resolvedSearchParams.stock === "string" ? resolvedSearchParams.stock : undefined,
+    sort: typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : undefined,
   };
 
   const products = await getProducts(params);

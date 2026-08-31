@@ -8,20 +8,20 @@ export const metadata: Metadata = {
 };
 
 interface SearchPageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = (await searchParams) || {};
   const params = {
-    q: typeof resolvedSearchParams?.q === "string" ? resolvedSearchParams.q : undefined,
-    gender: typeof resolvedSearchParams?.gender === "string" ? resolvedSearchParams.gender : undefined,
-    category: typeof resolvedSearchParams?.category === "string" ? resolvedSearchParams.category : undefined,
-    size: typeof resolvedSearchParams?.size === "string" ? resolvedSearchParams.size : undefined,
-    min: typeof resolvedSearchParams?.min === "string" ? resolvedSearchParams.min : undefined,
-    max: typeof resolvedSearchParams?.max === "string" ? resolvedSearchParams.max : undefined,
-    stock: typeof resolvedSearchParams?.stock === "string" ? resolvedSearchParams.stock : undefined,
-    sort: typeof resolvedSearchParams?.sort === "string" ? resolvedSearchParams.sort : undefined,
+    q: typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : undefined,
+    gender: typeof resolvedSearchParams.gender === "string" ? resolvedSearchParams.gender : undefined,
+    category: typeof resolvedSearchParams.category === "string" ? resolvedSearchParams.category : undefined,
+    size: typeof resolvedSearchParams.size === "string" ? resolvedSearchParams.size : undefined,
+    min: typeof resolvedSearchParams.min === "string" ? resolvedSearchParams.min : undefined,
+    max: typeof resolvedSearchParams.max === "string" ? resolvedSearchParams.max : undefined,
+    stock: typeof resolvedSearchParams.stock === "string" ? resolvedSearchParams.stock : undefined,
+    sort: typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : undefined,
   };
 
   const products = await getProducts(params);

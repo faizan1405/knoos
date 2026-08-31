@@ -45,11 +45,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center gap-3 text-sm">
           {product.salePrice ? (
             <>
-              <span className="text-brand-black">?{product.salePrice.toLocaleString('en-IN')}</span>
-              <span className="text-brand-gray-400 line-through">?{product.price.toLocaleString('en-IN')}</span>
+              <span className="text-brand-black">₹{product.salePrice.toLocaleString('en-IN')}</span>
+              <span className="text-brand-gray-400 line-through">₹{product.price.toLocaleString('en-IN')}</span>
             </>
           ) : (
-            <span className="text-brand-black">?{product.price.toLocaleString('en-IN')}</span>
+            <span className="text-brand-black">₹{product.price.toLocaleString('en-IN')}</span>
           )}
         </div>
       </div>

@@ -10,10 +10,11 @@ interface MobileMenuProps {
   onClose: () => void;
   cartCount: number;
   userName?: string | null;
+  signInAction: () => void;
   signOutAction: () => void;
 }
 
-export function MobileMenu({ isOpen, onClose, cartCount, userName, signOutAction }: MobileMenuProps) {
+export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction, signOutAction }: MobileMenuProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -106,9 +107,12 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signOutAction
                   </button>
                 </>
               ) : (
-                <Link href="/" onClick={onClose} className="font-mono text-sm uppercase tracking-widest text-brand-gray-600">
+                <button 
+                  onClick={() => { signInAction(); onClose(); }} 
+                  className="font-mono text-sm uppercase tracking-widest text-brand-gray-600"
+                >
                   Sign In
-                </Link>
+                </button>
               )}
             </motion.div>
           </div>

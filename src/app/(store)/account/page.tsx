@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Account — KNOOS",
@@ -10,12 +11,12 @@ export default function AccountPage() {
       <div className="max-w-7xl mx-auto">
         <h1 className="font-serif text-4xl md:text-5xl mb-8">Your Account</h1>
         <p className="text-brand-gray-400 font-mono text-sm mb-12">Account page — Phase 9</p>
-        <a
+        <Link
           href="/account/orders"
           className="block border-b border-brand-gray-200 py-4 font-mono text-sm uppercase tracking-wide hover:text-brand-gray-600 transition-colors"
         >
           Orders
-        </a>
+        </Link>
       </div>
     </main>
   );
