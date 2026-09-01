@@ -18,10 +18,19 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 
+// Ensure AUTH_URL is set from NEXTAUTH_URL or NEXT_PUBLIC_APP_URL if missing
+if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
+  process.env.AUTH_URL = process.env.NEXTAUTH_URL;
+} else if (!process.env.AUTH_URL && process.env.NEXT_PUBLIC_APP_URL) {
+  process.env.AUTH_URL = process.env.NEXT_PUBLIC_APP_URL;
+}
+
 const nextAuth = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   trustHost: true,
+  basePath: "/api/auth",
+  secret: process.env.AUTH_SECRET,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -46,11 +55,15 @@ const nextAuth = NextAuth({
       // On manual session refresh, re-read the role from the database so
       // an admin promotion takes effect without forcing a re-login.
       if (trigger === "update" && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { role: true },
-        });
-        if (dbUser) token.role = dbUser.role;
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true },
+          });
+          if (dbUser) token.role = dbUser.role;
+        } catch (e) {
+          console.error("Error refreshing user role in jwt callback:", e);
+        }
       }
 
       return token;

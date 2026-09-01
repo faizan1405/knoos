@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -7,8 +8,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand Column */}
           <div className="space-y-4">
-            <Link href="/" className="font-serif text-2xl tracking-wide inline-block">
-              KNOOS
+            <Link href="/" className="inline-block">
+              <Image
+                src="/knoos-logo.png"
+                alt="KNOOS"
+                width={150}
+                height={100}
+                className="h-10 w-auto object-contain"
+              />
             </Link>
             <p className="font-serif italic text-brand-gray-600 text-sm">
               Comfort In Every Step

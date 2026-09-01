@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Return & Refund Policy | KNOOS",
@@ -232,7 +233,13 @@ export default function ReturnsRefundsPage() {
             By placing an order on the KNOOS website, the customer acknowledges and agrees to this Return &amp; Refund Policy.
           </p>
           <div className="border-t border-brand-gray-200 pt-6 mt-8">
-            <div className="font-serif text-xl tracking-wide">KNOOS</div>
+            <Image
+              src="/knoos-logo.png"
+              alt="KNOOS"
+              width={120}
+              height={80}
+              className="h-8 w-auto object-contain"
+            />
             <div className="font-serif italic text-brand-gray-500 text-sm mt-1">Comfort In Every Step</div>
           </div>
         </section>

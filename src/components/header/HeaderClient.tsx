@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MobileMenu } from "./MobileMenu";
 
@@ -35,8 +36,15 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 flex items-center justify-between h-12 transition-all duration-500">
-          <Link href="/" className="font-serif text-xl tracking-wide relative z-[60]">
-            KNOOS
+          <Link href="/" className="relative z-[60] flex items-center shrink-0">
+            <Image
+              src="/knoos-logo.png"
+              alt="KNOOS"
+              width={120}
+              height={80}
+              priority
+              className="h-8 md:h-9 w-auto object-contain"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">

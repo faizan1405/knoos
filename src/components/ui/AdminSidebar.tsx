@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
@@ -17,10 +18,17 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 border-r border-brand-gray-200 h-screen sticky top-0 bg-white">
       <div className="p-6">
-        <Link href="/admin" className="font-serif text-xl tracking-wide">
-          KNOOS
+        <Link href="/admin" className="inline-block">
+          <Image
+            src="/knoos-logo.png"
+            alt="KNOOS Admin"
+            width={120}
+            height={80}
+            priority
+            className="h-8 w-auto object-contain"
+          />
         </Link>
-        <p className="font-mono text-xs text-brand-gray-400 mt-1">Admin Panel</p>
+        <p className="font-mono text-xs text-brand-gray-400 mt-2">Admin Panel</p>
       </div>
       <nav className="px-4">
         {links.map((link) => (

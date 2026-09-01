@@ -12,9 +12,14 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  let product = null;
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug: resolvedParams.slug },
+    });
+  } catch (error) {
+    console.error("Error generating metadata for product:", error);
+  }
 
   if (!product) {
     return {
@@ -30,18 +35,23 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const resolvedParams = await params;
-  const product = await prisma.product.findUnique({
-    where: {
-      slug: resolvedParams.slug,
-      status: "ACTIVE", // Only show active products to customers
-    },
-    include: {
-      images: {
-        orderBy: { sortOrder: "asc" },
+  let product = null;
+  try {
+    product = await prisma.product.findUnique({
+      where: {
+        slug: resolvedParams.slug,
+        status: "ACTIVE", // Only show active products to customers
       },
-      variants: true,
-    },
-  });
+      include: {
+        images: {
+          orderBy: { sortOrder: "asc" },
+        },
+        variants: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
+  }
 
   if (!product) {
     notFound();

@@ -25,15 +25,16 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!session?.user?.id;
 
   const { pathname } = request.nextUrl;
+  const baseUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || request.url;
 
   // Admin routes: only allow authenticated ADMIN users
   if (pathname.startsWith("/admin")) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", baseUrl));
     }
     if (!isAdmin) {
       // CUSTOMER attempting admin access — deny silently
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", baseUrl));
     }
     return NextResponse.next();
   }
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/checkout")
   ) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", baseUrl));
     }
   }
 
