@@ -18,11 +18,22 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 
-// Ensure AUTH_URL is set from NEXTAUTH_URL or NEXT_PUBLIC_APP_URL if missing
 if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
   process.env.AUTH_URL = process.env.NEXTAUTH_URL;
 } else if (!process.env.AUTH_URL && process.env.NEXT_PUBLIC_APP_URL) {
   process.env.AUTH_URL = process.env.NEXT_PUBLIC_APP_URL;
+}
+
+// In production, prevent NextAuth from using localhost or 0.0.0.0 if the environment 
+// variables were incorrectly copied from local .env
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.AUTH_URL &&
+  (process.env.AUTH_URL.includes("localhost") ||
+   process.env.AUTH_URL.includes("0.0.0.0") ||
+   process.env.AUTH_URL.includes("127.0.0.1"))
+) {
+  process.env.AUTH_URL = "";
 }
 
 const nextAuth = NextAuth({

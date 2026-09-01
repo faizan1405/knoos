@@ -25,7 +25,16 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!session?.user?.id;
 
   const { pathname } = request.nextUrl;
-  const baseUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || request.url;
+  
+  // Prevent 0.0.0.0 or localhost redirects in production behind a proxy
+  let baseUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || request.url;
+  if (baseUrl.includes("0.0.0.0") || baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    if (forwardedHost && !forwardedHost.includes("0.0.0.0") && !forwardedHost.includes("localhost")) {
+      baseUrl = `${forwardedProto}://${forwardedHost}`;
+    }
+  }
 
   // Admin routes: only allow authenticated ADMIN users
   if (pathname.startsWith("/admin")) {
