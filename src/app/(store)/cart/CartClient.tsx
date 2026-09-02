@@ -23,9 +23,10 @@ interface CartItemData {
 interface CartClientProps {
   initialItems: CartItemData[];
   initialSubtotal: number;
+  recommendationsSlot?: React.ReactNode;
 }
 
-export function CartClient({ initialItems, initialSubtotal }: CartClientProps) {
+export function CartClient({ initialItems, initialSubtotal, recommendationsSlot }: CartClientProps) {
   const [items, setItems] = useState(initialItems);
   const [subtotal, setSubtotal] = useState(initialSubtotal);
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
@@ -219,6 +220,12 @@ export function CartClient({ initialItems, initialSubtotal }: CartClientProps) {
             );
           })}
         </AnimatePresence>
+        
+        {recommendationsSlot && (
+          <div className="mt-8">
+            {recommendationsSlot}
+          </div>
+        )}
       </div>
       
       <div>

@@ -26,6 +26,12 @@ interface Product {
   slug: string;
   description: string | null;
   gender: string;
+  category: string | null;
+  color: string | null;
+  subCategory: string | null;
+  upperMaterial: string | null;
+  innerMaterial: string | null;
+  sole: string | null;
   price: number;
   salePrice: number | null;
   sku: string;
@@ -51,6 +57,12 @@ export default function AdminProductForm({ product }: { product: Product }) {
   const [salePrice, setSalePrice] = useState(product.salePrice?.toString() ?? "");
   const [sku, setSku] = useState(product.sku);
   const [status, setStatus] = useState(product.status);
+  const [category, setCategory] = useState(product.category || "");
+  const [color, setColor] = useState(product.color || "");
+  const [subCategory, setSubCategory] = useState(product.subCategory || "");
+  const [upperMaterial, setUpperMaterial] = useState(product.upperMaterial || "");
+  const [innerMaterial, setInnerMaterial] = useState(product.innerMaterial || "");
+  const [sole, setSole] = useState(product.sole || "");
 
   const [variants, setVariants] = useState<ProductVariant[]>(product.variants);
   const [newVariant, setNewVariant] = useState({ size: "", stock: "0", sku: "" });
@@ -184,6 +196,12 @@ export default function AdminProductForm({ product }: { product: Product }) {
       salePrice: salePriceNum,
       sku,
       status,
+      category: category || null,
+      color: color || null,
+      subCategory: subCategory || null,
+      upperMaterial: upperMaterial || null,
+      innerMaterial: innerMaterial || null,
+      sole: sole || null,
       images: images.map((img, i) => ({ imageUrl: img.imageUrl, sortOrder: img.sortOrder ?? i })),
       variants: variants.map((v) => ({
         id: v.id,
@@ -327,6 +345,46 @@ export default function AdminProductForm({ product }: { product: Product }) {
               placeholder="Product description..."
             />
             {fieldErrors.description && <p className="text-red-600 text-xs mt-1">{fieldErrors.description}</p>}
+          </div>
+
+          {/* New Specifications Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="category" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
+              <input id="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+                className={inputClass(fieldErrors.category)} placeholder="e.g. MEN BOOTS" />
+              {fieldErrors.category && <p className="text-red-600 text-xs mt-1">{fieldErrors.category}</p>}
+            </div>
+            <div>
+              <label htmlFor="color" className="block font-mono text-xs uppercase tracking-wide mb-2">Color</label>
+              <input id="color" type="text" value={color} onChange={(e) => setColor(e.target.value)}
+                className={inputClass(fieldErrors.color)} placeholder="e.g. Black" />
+              {fieldErrors.color && <p className="text-red-600 text-xs mt-1">{fieldErrors.color}</p>}
+            </div>
+            <div>
+              <label htmlFor="subCategory" className="block font-mono text-xs uppercase tracking-wide mb-2">Sub Category</label>
+              <input id="subCategory" type="text" value={subCategory} onChange={(e) => setSubCategory(e.target.value)}
+                className={inputClass(fieldErrors.subCategory)} placeholder="e.g. CHELSEA BOOTS" />
+              {fieldErrors.subCategory && <p className="text-red-600 text-xs mt-1">{fieldErrors.subCategory}</p>}
+            </div>
+            <div>
+              <label htmlFor="upperMaterial" className="block font-mono text-xs uppercase tracking-wide mb-2">Upper Material</label>
+              <input id="upperMaterial" type="text" value={upperMaterial} onChange={(e) => setUpperMaterial(e.target.value)}
+                className={inputClass(fieldErrors.upperMaterial)} placeholder="e.g. Synthetic" />
+              {fieldErrors.upperMaterial && <p className="text-red-600 text-xs mt-1">{fieldErrors.upperMaterial}</p>}
+            </div>
+            <div>
+              <label htmlFor="innerMaterial" className="block font-mono text-xs uppercase tracking-wide mb-2">Inner Material</label>
+              <input id="innerMaterial" type="text" value={innerMaterial} onChange={(e) => setInnerMaterial(e.target.value)}
+                className={inputClass(fieldErrors.innerMaterial)} placeholder="e.g. Synthetic" />
+              {fieldErrors.innerMaterial && <p className="text-red-600 text-xs mt-1">{fieldErrors.innerMaterial}</p>}
+            </div>
+            <div>
+              <label htmlFor="sole" className="block font-mono text-xs uppercase tracking-wide mb-2">Sole</label>
+              <input id="sole" type="text" value={sole} onChange={(e) => setSole(e.target.value)}
+                className={inputClass(fieldErrors.sole)} placeholder="e.g. TPR" />
+              {fieldErrors.sole && <p className="text-red-600 text-xs mt-1">{fieldErrors.sole}</p>}
+            </div>
           </div>
         </div>
 

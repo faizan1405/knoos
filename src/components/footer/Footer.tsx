@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
+import { Camera, Mail, Phone, MessageCircle, Home, User, Users, Info, HelpCircle, Shield, FileText } from "lucide-react";
 
 export function Footer() {
   return (
@@ -32,10 +33,10 @@ export function Footer() {
                 href="https://www.instagram.com/knoosshoes"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-brand-gray-600 hover:text-black transition-colors"
+                className="group inline-flex items-center gap-1.5 text-sm text-brand-gray-600 hover:text-black transition-colors"
               >
-                <span>Instagram:</span>
-                <span className="font-mono font-medium text-black">@KNOOSSHOES</span>
+                <Camera size={14} className="group-hover:scale-110 transition-transform" />
+                <span className="font-mono font-medium text-black group-hover:underline">@KNOOSSHOES</span>
               </a>
             </div>
           </div>
@@ -47,18 +48,21 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Home
+                <Link href="/" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <Home size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Home</span>
                 </Link>
               </li>
               <li>
-                <Link href="/men" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Men
+                <Link href="/men" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <User size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Men</span>
                 </Link>
               </li>
               <li>
-                <Link href="/women" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Women
+                <Link href="/women" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <Users size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Women</span>
                 </Link>
               </li>
             </ul>
@@ -71,28 +75,39 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  About Us
+                <Link href="/about" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <Info size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>About Us</span>
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Contact Us
+                <Link href="/contact" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <Phone size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Contact Us</span>
                 </Link>
               </li>
               <li>
-                <Link href="/returns-refunds" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Return &amp; Refund Policy
+                <Link href="/faq" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <HelpCircle size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>FAQ</span>
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Privacy Policy
+                <Link href="/returns-refunds" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <FileText size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Return &amp; Refund Policy</span>
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  Terms &amp; Conditions
+                <Link href="/privacy" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <Shield size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Privacy Policy</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <FileText size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Terms &amp; Conditions</span>
                 </Link>
               </li>
             </ul>
@@ -111,23 +126,23 @@ export function Footer() {
                 15/5 SORON KTRA SHAHGANJ<br />
                 AGRA - 282010
               </p>
-              <div className="pt-1 space-y-1 text-xs">
-                <p>
-                  <span className="text-brand-gray-400">Phone / WhatsApp: </span>
-                  <a href="tel:7088808882" className="text-black hover:underline font-mono">
-                    7088808882
-                  </a>
-                </p>
-                <p>
-                  <span className="text-brand-gray-400">Email: </span>
-                  <a href="mailto:KKSHOECOMPANY@GMAIL.COM" className="text-black hover:underline font-mono">
-                    KKSHOECOMPANY@GMAIL.COM
-                  </a>
-                </p>
-                <p>
-                  <span className="text-brand-gray-400">Hours: </span>
+              <div className="pt-1 space-y-2 text-xs">
+                <a href="tel:7088808882" className="group flex items-center gap-2 text-brand-gray-600 hover:text-black transition-colors">
+                  <Phone size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span className="font-mono hover:underline text-black">7088808882</span>
+                </a>
+                <a href="https://wa.me/917088808882" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 text-brand-gray-600 hover:text-black transition-colors">
+                  <MessageCircle size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span className="font-mono hover:underline text-black">WhatsApp</span>
+                </a>
+                <a href="mailto:KKSHOECOMPANY@GMAIL.COM" className="group flex items-center gap-2 text-brand-gray-600 hover:text-black transition-colors">
+                  <Mail size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span className="font-mono hover:underline text-black">KKSHOECOMPANY@GMAIL.COM</span>
+                </a>
+                <div className="flex items-center gap-2 pt-1 text-brand-gray-500">
+                  <Info size={14} className="text-brand-gray-400" />
                   <span className="text-black">10 AM – 7 PM</span>
-                </p>
+                </div>
               </div>
             </div>
           </div>

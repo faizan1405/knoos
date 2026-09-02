@@ -1,0 +1,6 @@
+ALTER TABLE `Product` 
+  ADD COLUMN `color` VARCHAR(50) NULL,
+  ADD COLUMN `subCategory` VARCHAR(50) NULL,
+  ADD COLUMN `upperMaterial` VARCHAR(100) NULL,
+  ADD COLUMN `innerMaterial` VARCHAR(100) NULL,
+  ADD COLUMN `sole` VARCHAR(100) NULL;

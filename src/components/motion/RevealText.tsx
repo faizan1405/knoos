@@ -31,10 +31,9 @@ export function RevealText({ text, className = "", delay = 0, as = "span" }: Rev
     );
   }
 
-  // Determine the HTML tag to use for motion
-  const tag = typeof as === "string" ? as : "span";
-  // @ts-ignore
-  const MotionComponent = motion[tag] || motion.span;
+  // The outer component uses the 'as' tag (e.g., h2, p).
+  // The inner animated component MUST be a span to ensure valid HTML nesting.
+  const MotionComponent = motion.span;
 
   return (
     <Component className={`${className} flex flex-col`}>

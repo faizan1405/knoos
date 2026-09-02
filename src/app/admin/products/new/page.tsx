@@ -22,6 +22,12 @@ export default function AdminNewProductPage() {
   const [salePrice, setSalePrice] = useState("");
   const [sku, setSku] = useState("");
   const [status, setStatus] = useState("ACTIVE");
+  const [category, setCategory] = useState("");
+  const [color, setColor] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  const [upperMaterial, setUpperMaterial] = useState("");
+  const [innerMaterial, setInnerMaterial] = useState("");
+  const [sole, setSole] = useState("");
 
   // Variants
   const [variants, setVariants] = useState<Array<{ size: string; stock: string; sku: string }>>([
@@ -83,6 +89,12 @@ export default function AdminNewProductPage() {
       salePrice: salePriceNum,
       sku,
       status,
+      category: category || null,
+      color: color || null,
+      subCategory: subCategory || null,
+      upperMaterial: upperMaterial || null,
+      innerMaterial: innerMaterial || null,
+      sole: sole || null,
       images: images.map((url, i) => ({ imageUrl: url, sortOrder: i })),
       variants: variants
         .filter((v) => v.size.trim())
@@ -228,6 +240,46 @@ export default function AdminNewProductPage() {
               placeholder="Product description..."
             />
             {fieldErrors.description && <p className="text-red-600 text-xs mt-1">{fieldErrors.description}</p>}
+          </div>
+
+          {/* New Specifications Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="category" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
+              <input id="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.category ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. MEN BOOTS" />
+              {fieldErrors.category && <p className="text-red-600 text-xs mt-1">{fieldErrors.category}</p>}
+            </div>
+            <div>
+              <label htmlFor="color" className="block font-mono text-xs uppercase tracking-wide mb-2">Color</label>
+              <input id="color" type="text" value={color} onChange={(e) => setColor(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.color ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. Black" />
+              {fieldErrors.color && <p className="text-red-600 text-xs mt-1">{fieldErrors.color}</p>}
+            </div>
+            <div>
+              <label htmlFor="subCategory" className="block font-mono text-xs uppercase tracking-wide mb-2">Sub Category</label>
+              <input id="subCategory" type="text" value={subCategory} onChange={(e) => setSubCategory(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.subCategory ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. CHELSEA BOOTS" />
+              {fieldErrors.subCategory && <p className="text-red-600 text-xs mt-1">{fieldErrors.subCategory}</p>}
+            </div>
+            <div>
+              <label htmlFor="upperMaterial" className="block font-mono text-xs uppercase tracking-wide mb-2">Upper Material</label>
+              <input id="upperMaterial" type="text" value={upperMaterial} onChange={(e) => setUpperMaterial(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.upperMaterial ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. Synthetic" />
+              {fieldErrors.upperMaterial && <p className="text-red-600 text-xs mt-1">{fieldErrors.upperMaterial}</p>}
+            </div>
+            <div>
+              <label htmlFor="innerMaterial" className="block font-mono text-xs uppercase tracking-wide mb-2">Inner Material</label>
+              <input id="innerMaterial" type="text" value={innerMaterial} onChange={(e) => setInnerMaterial(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.innerMaterial ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. Synthetic" />
+              {fieldErrors.innerMaterial && <p className="text-red-600 text-xs mt-1">{fieldErrors.innerMaterial}</p>}
+            </div>
+            <div>
+              <label htmlFor="sole" className="block font-mono text-xs uppercase tracking-wide mb-2">Sole</label>
+              <input id="sole" type="text" value={sole} onChange={(e) => setSole(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.sole ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. TPR" />
+              {fieldErrors.sole && <p className="text-red-600 text-xs mt-1">{fieldErrors.sole}</p>}
+            </div>
           </div>
         </div>
 

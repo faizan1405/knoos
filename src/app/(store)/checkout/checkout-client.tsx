@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
 import { loginWithGoogle } from "@/lib/auth-actions";
+import { ProductRecommendations } from "@/components/product/ProductRecommendations";
 
 interface Address {
   id: string;
@@ -43,6 +44,7 @@ export function CheckoutClient() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({ name: "", phone: "", address: "", city: "", state: "", pincode: "" });
@@ -69,6 +71,15 @@ export function CheckoutClient() {
         }
 
         setCart(cartData);
+
+        if (cartData?.items?.length > 0) {
+          const cartIds = cartData.items.map((i: any) => i.productId).join(",");
+          const gender = cartData.items[0]?.product?.gender || ""; // Fallback handled by API
+          fetch(`/api/recommendations?cartIds=${cartIds}&limit=3&gender=${gender}`)
+            .then(res => res.json())
+            .then(data => setRecommendations(data))
+            .catch(err => console.error("Failed to load recommendations", err));
+        }
       } catch (err) {
         setError("Failed to load checkout data.");
       } finally {
@@ -348,6 +359,16 @@ export function CheckoutClient() {
             <span>Total</span>
             <span>₹{total.toLocaleString("en-IN")}</span>
           </div>
+
+          {recommendations.length > 0 && (
+            <div className="mb-8">
+              <ProductRecommendations 
+                title="BEFORE YOU GO" 
+                products={recommendations} 
+                mode="checkout" 
+              />
+            </div>
+          )}
 
           <button 
             onClick={handlePayment} 

@@ -3,6 +3,8 @@ import { signIn } from "@/lib/auth";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { CartClient } from "./CartClient";
+import { getRecommendations } from "@/lib/recommendations";
+import { ProductRecommendations } from "@/components/product/ProductRecommendations";
 
 export const metadata: Metadata = {
   title: "Your Cart — KNOOS",
@@ -66,11 +68,30 @@ export default async function CartPage() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
 
+  const cartProductIds = cartItems.map(item => item.productId);
+  const firstItemGender = cart?.items[0]?.product?.gender;
+  
+  const recommendedProducts = await getRecommendations({
+    cartItemIds: cartProductIds,
+    gender: firstItemGender,
+    limit: 4
+  });
+
   return (
     <main className="pt-24 px-6 md:px-12 lg:px-24 min-h-[70vh]">
       <div className="max-w-7xl mx-auto">
         <h1 className="font-serif text-4xl md:text-5xl mb-12">Your Cart</h1>
-        <CartClient initialItems={cartItems} initialSubtotal={subtotal} />
+        <CartClient 
+          initialItems={cartItems} 
+          initialSubtotal={subtotal} 
+          recommendationsSlot={
+            <ProductRecommendations 
+              title="COMPLETE YOUR LOOK" 
+              products={recommendedProducts} 
+              mode="cart" 
+            />
+          }
+        />
       </div>
     </main>
   );

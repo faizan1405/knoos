@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Home, Users, User, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
 
 interface HeaderClientProps {
@@ -17,6 +18,7 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,22 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSearchOpen) {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
 
   return (
     <>
@@ -48,68 +66,45 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              Home
+            <Link href="/" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <Home size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+              <span>Home</span>
             </Link>
-            <Link href="/men" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              Men
+            <Link href="/men" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <User size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+              <span>Men</span>
             </Link>
-            <Link href="/women" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              Women
+            <Link href="/women" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <Users size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+              <span>Women</span>
             </Link>
-            <Link href="/contact" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              Contact
+            <Link href="/contact" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <Phone size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+              <span>Contact</span>
             </Link>
-            
-            <div className="relative flex items-center">
-              <AnimatePresence>
-                {isSearchOpen && (
-                  <motion.form 
-                    action="/search" 
-                    method="GET"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 192, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden absolute right-6"
-                  >
-                    <input
-                      type="text"
-                      name="q"
-                      placeholder="Search..."
-                      autoFocus
-                      className="w-48 px-3 py-1 text-sm font-mono border-b border-black bg-transparent focus:outline-none transition-colors placeholder:text-brand-gray-400"
-                    />
-                  </motion.form>
-                )}
-              </AnimatePresence>
-              <button 
-                type={isSearchOpen ? "submit" : "button"}
-                onClick={() => {
-                  if (!isSearchOpen) setIsSearchOpen(true);
-                  // If it's open and empty, maybe close it? But we leave it simple.
-                }}
-                className="text-brand-gray-500 hover:text-black transition-colors z-10"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                </svg>
-              </button>
-            </div>
           </nav>
 
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/cart" className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              Cart {cartCount > 0 && `(${cartCount})`}
+            <button 
+              type="button"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="group flex items-center gap-2 text-brand-gray-500 hover:text-black transition-colors"
+            >
+              <Search size={16} className="group-hover:scale-110 transition-transform" />
+              <span className="font-mono text-xs uppercase tracking-widest">Search</span>
+            </button>
+            <Link href="/cart" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+              <ShoppingBag size={16} className="group-hover:scale-110 transition-transform" />
+              <span>Cart {cartCount > 0 && `(${cartCount})`}</span>
             </Link>
             {userName ? (
               <div className="flex items-center gap-4">
                 <Link
                   href="/account"
-                  className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                  className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
                 >
-                  {userName}
+                  <User size={16} className="group-hover:scale-110 transition-transform" />
+                  <span>{userName}</span>
                 </Link>
                 <button 
                   onClick={() => signOutAction()}
@@ -121,17 +116,26 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
             ) : (
               <button 
                 onClick={() => signInAction()}
-                className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
               >
-                Sign In
+                <User size={16} className="group-hover:scale-110 transition-transform" />
+                <span>Sign In</span>
               </button>
             )}
           </div>
 
           {/* Mobile menu toggle */}
           <div className="flex md:hidden items-center gap-4 relative z-[60]">
-            <Link href="/cart" className="text-sm font-mono uppercase tracking-widest">
-              Cart {cartCount > 0 && `(${cartCount})`}
+            <button 
+              type="button"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="text-brand-gray-500 hover:text-black transition-colors"
+            >
+              <Search size={20} />
+            </button>
+            <Link href="/cart" className="flex items-center gap-1.5 text-sm font-mono uppercase tracking-widest">
+              <ShoppingBag size={18} />
+              {cartCount > 0 && <span>({cartCount})</span>}
             </Link>
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -141,7 +145,54 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
             </button>
           </div>
         </div>
+
+        {/* Full width Search Dropdown */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute top-full left-0 right-0 bg-white border-b border-brand-gray-200 shadow-lg overflow-hidden"
+            >
+              <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6 md:py-8 flex items-center">
+                <form action="/search" method="GET" className="flex-1 relative flex items-center">
+                  <Search size={24} className="absolute left-0 text-brand-gray-400 pointer-events-none" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    name="q"
+                    placeholder="Search for premium footwear..."
+                    className="w-full pl-10 pr-12 py-3 text-lg md:text-2xl font-serif text-brand-black bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-brand-gray-300"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setIsSearchOpen(false)}
+                    className="absolute right-0 p-2 text-brand-gray-400 hover:text-brand-black transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
+
+      {/* Backdrop for Search */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsSearchOpen(false)}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+          />
+        )}
+      </AnimatePresence>
 
       <MobileMenu 
         isOpen={isMobileMenuOpen} 
@@ -154,4 +205,3 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
     </>
   );
 }
-

@@ -13,6 +13,8 @@ export function AdminSidebar() {
     { href: "/admin/products", label: "Products" },
     { href: "/admin/orders", label: "Orders" },
     { href: "/admin/customers", label: "Customers" },
+    { href: "/admin/faqs", label: "FAQs" },
+    { href: "/admin/reviews", label: "Reviews" },
   ];
 
   return (
