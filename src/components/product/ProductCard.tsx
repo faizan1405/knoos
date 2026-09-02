@@ -23,7 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`object-cover object-center transition-all duration-700 ease-out group-hover:scale-105 ${hoverImage ? "group-hover:opacity-0" : ""}`}
+          className={`object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] ${hoverImage ? "group-hover:opacity-0" : ""}`}
         />
         {hoverImage && (
           <Image
@@ -31,7 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={`${product.name} alternate view`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+            className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-700 ease-out"
           />
         )}
         {product.salePrice && (
@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1 transition-transform duration-300 ease-out group-hover:translate-y-[-2px]">
+      <div className="flex flex-col gap-1 transition-none">
         <h3 className="font-sans font-medium text-sm text-brand-black">{product.name}</h3>
         <div className="flex items-center gap-3 text-sm">
           {product.salePrice ? (

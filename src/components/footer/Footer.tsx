@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Reveal } from "@/components/motion/Reveal";
 
 export function Footer() {
   return (
     <footer className="border-t border-brand-gray-100 bg-brand-gray-50 text-brand-black">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-16">
+      <Reveal className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-16" yOffset={20} duration={0.6}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand Column */}
           <div className="space-y-4">
@@ -140,7 +141,7 @@ export function Footer() {
             Comfort In Every Step
           </p>
         </div>
-      </div>
+      </Reveal>
     </footer>
   );
 }
