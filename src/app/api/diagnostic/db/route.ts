@@ -28,20 +28,31 @@ export async function GET() {
 
   // Parse DATABASE_URL safely — never include the password
   const dbUrl = process.env.DATABASE_URL;
+  report.rawUrlExists = !!dbUrl;
+  
   if (dbUrl) {
     try {
-      // mysql://user:password@host:port/database
-      const match = dbUrl.match(/^mysql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)$/);
-      if (match) {
-        report.dbUser = match[1];
-        report.dbPasswordExists = match[2].length > 0;
-        report.dbPasswordLength = match[2].length;
-        report.dbHost = match[3];
-        report.dbPort = parseInt(match[4], 10);
-        report.dbDatabase = match[5];
-      }
-    } catch {
-      report.connectionError = "Failed to parse DATABASE_URL";
+      const parsedUrl = new URL(dbUrl);
+      report.dbUser = parsedUrl.username;
+      
+      const rawPassword = parsedUrl.password;
+      report.dbPasswordExists = rawPassword.length > 0;
+      report.dbPasswordLength = rawPassword.length;
+      
+      // Check if password has characters that need encoding but weren't
+      // If parsedUrl.password has unencoded # or ?, they might have broken the URL
+      report.needsUrlEncoding = encodeURIComponent(rawPassword) !== rawPassword;
+      report.passwordContainsSpecialChars = /[^a-zA-Z0-9]/.test(rawPassword);
+      
+      report.dbHost = parsedUrl.hostname;
+      report.dbPort = parseInt(parsedUrl.port, 10) || 3306;
+      report.dbDatabase = parsedUrl.pathname.replace(/^\//, '');
+      
+      // Also check if the raw string had unencoded # or ? which breaks new URL()
+      report.rawUrlHasUnencodedHash = dbUrl.includes('#') && !dbUrl.includes('%23');
+      report.rawUrlHasUnencodedQuestionMark = dbUrl.includes('?') && !dbUrl.includes('%3F');
+    } catch (e) {
+      report.connectionError = "Failed to parse DATABASE_URL with new URL()";
     }
   }
 
