@@ -115,6 +115,7 @@ const nextAuth = NextAuth({
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
+      console.log(`[AUTH DIAGNOSTIC] signIn callback ran. email: ${user?.email}`);
       if (account?.provider === "credentials") {
         console.log(`[AUTH DIAGNOSTIC] signIn callback result: true`);
         return true;
@@ -155,6 +156,7 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
+      console.log(`[AUTH DIAGNOSTIC] jwt callback ran. token id present: ${!!token.id}. role: ${token.role || 'missing'}, trigger: ${trigger}`);
       if (user && user.email) {
         // Fetch user from DB since we are not using PrismaAdapter
         try {
@@ -195,6 +197,7 @@ const nextAuth = NextAuth({
      * Hydrate the session.user object from the JWT.
      */
     async session({ session, token }) {
+      console.log(`[AUTH DIAGNOSTIC] session callback ran. user id present: ${!!session?.user?.id}. role: ${session?.user?.role || 'missing'}`);
       if (session.user) {
         session.user.id = (token.id as string) ?? "";
         session.user.role = (token.role as string) ?? "CUSTOMER";
@@ -206,6 +209,7 @@ const nextAuth = NextAuth({
      * Redirect callback to track flow
      */
     async redirect({ url, baseUrl }) {
+      console.log(`[AUTH DIAGNOSTIC] redirect callback input URL: ${url}`);
       let finalUrl = baseUrl;
       if (url.startsWith("/")) {
         finalUrl = new URL(url, baseUrl).toString();

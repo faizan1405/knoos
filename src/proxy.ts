@@ -26,6 +26,10 @@ export default async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   
+  console.log(`[PROXY DIAGNOSTIC] pathname: ${pathname}`);
+  console.log(`[PROXY DIAGNOSTIC] session/token found: ${isAuthenticated}`);
+  console.log(`[PROXY DIAGNOSTIC] token role: ${token?.role || 'missing'}`);
+  
   // Prevent 0.0.0.0 or localhost redirects in production behind a proxy
   let baseUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || request.url;
   if (baseUrl.includes("0.0.0.0") || baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
@@ -40,18 +44,23 @@ export default async function proxy(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     if (pathname === "/admin/login") {
       if (isAuthenticated && isAdmin) {
+        console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/admin)`);
         return NextResponse.redirect(new URL("/admin", baseUrl));
       }
+      console.log(`[PROXY DIAGNOSTIC] decision: ALLOW`);
       return NextResponse.next();
     }
 
     if (!isAuthenticated) {
+      console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_LOGIN`);
       return NextResponse.redirect(new URL("/admin/login", baseUrl));
     }
     if (!isAdmin) {
       // CUSTOMER attempting admin access — deny silently
+      console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/)`);
       return NextResponse.redirect(new URL("/", baseUrl));
     }
+    console.log(`[PROXY DIAGNOSTIC] decision: ALLOW`);
     return NextResponse.next();
   }
 
