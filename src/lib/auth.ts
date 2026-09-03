@@ -78,12 +78,17 @@ const nextAuth = NextAuth({
 
         if (!existingUser) {
           console.log("[AUTH DEBUG] user creation started");
+          
+          // Safely handle Google image URLs that exceed MySQL's default VARCHAR(191) limit
+          const rawImage = user?.image || profile?.picture;
+          const safeImage = rawImage && rawImage.length <= 191 ? rawImage : null;
+
           await prisma.user.create({
             data: {
               email,
               name: user?.name || profile?.name || null,
               googleId: account?.providerAccountId || null,
-              image: user?.image || profile?.picture || null,
+              image: safeImage,
             },
           });
           console.log("[AUTH DEBUG] user creation succeeded: true");
