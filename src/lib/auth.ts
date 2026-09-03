@@ -58,27 +58,47 @@ const nextAuth = NextAuth({
     /**
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
-    async signIn({ user, account }) {
-      if (!user.email) return false;
+    async signIn({ user, account, profile }) {
+      console.log("[AUTH DEBUG] callback started");
+      console.log("[AUTH DEBUG] provider:", account?.provider || "unknown");
+      
+      const email = user?.email || profile?.email;
+      console.log("[AUTH DEBUG] email present:", !!email);
+      
+      if (!email) {
+        return false;
+      }
       
       try {
+        console.log("[AUTH DEBUG] user lookup started");
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
+          where: { email },
         });
+        console.log("[AUTH DEBUG] user found:", !!existingUser);
 
         if (!existingUser) {
+          console.log("[AUTH DEBUG] user creation started");
           await prisma.user.create({
             data: {
-              email: user.email,
-              name: user.name,
-              googleId: account?.providerAccountId,
-              image: user.image,
+              email,
+              name: user?.name || profile?.name || null,
+              googleId: account?.providerAccountId || null,
+              image: user?.image || profile?.picture || null,
             },
           });
+          console.log("[AUTH DEBUG] user creation succeeded: true");
         }
         return true;
       } catch (error) {
-        console.error("Error creating user during sign in:", error);
+        console.log("[AUTH DEBUG] user creation succeeded: false");
+        console.error("[AUTH DEBUG] Exception during signIn:");
+        if (error instanceof Error) {
+          console.error("Error name:", error.name);
+          console.error("Error message:", error.message);
+          console.error("Safe stack trace:", error.stack?.split("\n").slice(0, 3).join("\n"));
+        } else {
+          console.error("Error message:", String(error));
+        }
         return false;
       }
     },
@@ -87,6 +107,7 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
+      console.log("[AUTH DEBUG] jwt callback reached");
       if (user && user.email) {
         // Fetch user from DB since we are not using PrismaAdapter
         try {
@@ -101,8 +122,12 @@ const nextAuth = NextAuth({
             token.role = "CUSTOMER";
             token.id = token.sub ?? "";
           }
-        } catch (e) {
-          console.error("Error fetching user in jwt callback:", e);
+        } catch (error) {
+          console.error("[AUTH DEBUG] Exception during jwt:");
+          if (error instanceof Error) {
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+          }
         }
       }
 
@@ -116,7 +141,7 @@ const nextAuth = NextAuth({
           });
           if (dbUser) token.role = dbUser.role;
         } catch (e) {
-          console.error("Error refreshing user role in jwt callback:", e);
+          // ignore
         }
       }
 
@@ -127,12 +152,21 @@ const nextAuth = NextAuth({
      * Hydrate the session.user object from the JWT.
      */
     async session({ session, token }) {
+      console.log("[AUTH DEBUG] session callback reached");
       if (session.user) {
         session.user.id = (token.id as string) ?? "";
         session.user.role = (token.role as string) ?? "CUSTOMER";
       }
       return session;
     },
+    
+    /**
+     * Redirect callback to track flow
+     */
+    async redirect({ url, baseUrl }) {
+      console.log("[AUTH DEBUG] redirect callback reached");
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    }
   },
 } satisfies NextAuthConfig);
 
