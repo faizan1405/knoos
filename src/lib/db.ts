@@ -7,9 +7,10 @@ if (process.env.DATABASE_URL) {
     const match = rawUrl.match(/^mysql:\/\/[^:]+:([^@]+)@([^:]+):(\d+)\/(.+)$/);
     if (match) {
       const rawPassword = match[1];
-      
-      // URL-encode the password assuming it is provided as raw text
-      const encodedPassword = encodeURIComponent(rawPassword);
+      // Safely handle already-encoded passwords to prevent double-encoding
+      // decodeURIComponent safely decodes it if it was encoded, or leaves it alone if not
+      const decodedPassword = decodeURIComponent(rawPassword);
+      const encodedPassword = encodeURIComponent(decodedPassword);
       const newUrl = rawUrl.replace(':' + rawPassword + '@', ':' + encodedPassword + '@');
       
       process.env.DATABASE_URL = newUrl;

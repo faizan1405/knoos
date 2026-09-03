@@ -39,8 +39,6 @@ export async function GET() {
       report.dbPasswordExists = rawPassword.length > 0;
       report.dbPasswordLength = rawPassword.length;
       
-      // Check if password has characters that need encoding but weren't
-      // If parsedUrl.password has unencoded # or ?, they might have broken the URL
       report.needsUrlEncoding = encodeURIComponent(rawPassword) !== rawPassword;
       report.passwordContainsSpecialChars = /[^a-zA-Z0-9]/.test(rawPassword);
       
@@ -48,47 +46,49 @@ export async function GET() {
       report.dbPort = parseInt(parsedUrl.port, 10) || 3306;
       report.dbDatabase = parsedUrl.pathname.replace(/^\//, '');
       
-      // Also check if the raw string had unencoded # or ? which breaks new URL()
       report.rawUrlHasUnencodedHash = dbUrl.includes('#') && !dbUrl.includes('%23');
       report.rawUrlHasUnencodedQuestionMark = dbUrl.includes('?') && !dbUrl.includes('%3F');
+
+      // TEST 1: MYSQL2
+      try {
+        const mysql = require('mysql2/promise');
+        const decodedPassword = decodeURIComponent(rawPassword);
+        const connection = await mysql.createConnection({
+          host: parsedUrl.hostname,
+          user: parsedUrl.username,
+          password: decodedPassword,
+          database: parsedUrl.pathname.replace(/^\//, ''),
+          port: parseInt(parsedUrl.port, 10) || 3306,
+          connectTimeout: 5000
+        });
+        await connection.query('SELECT 1');
+        await connection.end();
+        report.mysql2Test = "SUCCESS";
+      } catch (err) {
+        report.mysql2Test = "FAILED";
+        report.mysql2Error = String(err);
+      }
+
     } catch (e) {
       report.connectionError = "Failed to parse DATABASE_URL with new URL()";
     }
   }
 
-  // Test actual Prisma connectivity
-  const prisma = new PrismaClient();
+  // TEST 2: PRISMA
+  const prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      }
+    }
+  });
   try {
     await prisma.$connect();
-    report.connectionTest = "SUCCESS";
-
-    // Run a minimal query
-    const result = await prisma.$queryRaw`SELECT 1 AS test`;
-    report.rawQueryResult = result;
-
-    // Check if users table is accessible
-    try {
-      const userCount = await prisma.user.count();
-      report.userCount = userCount;
-    } catch {
-      report.userCount = "error";
-    }
-
-    // Check if products table is accessible
-    try {
-      const productCount = await prisma.product.count();
-      report.productCount = productCount;
-    } catch {
-      report.productCount = "error";
-    }
+    await prisma.$queryRaw`SELECT 1 AS test`;
+    report.prismaTest = "SUCCESS";
   } catch (error) {
-    report.connectionTest = "FAILED";
-    if (error instanceof Error) {
-      report.connectionError = error.message;
-      report.prismaErrorCode = (error as { code?: string }).code ?? null;
-    } else {
-      report.connectionError = String(error);
-    }
+    report.prismaTest = "FAILED";
+    report.prismaError = error instanceof Error ? error.message : String(error);
   } finally {
     await prisma.$disconnect();
   }
