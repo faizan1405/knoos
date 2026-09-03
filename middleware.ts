@@ -38,8 +38,15 @@ export async function middleware(request: NextRequest) {
 
   // Admin routes: only allow authenticated ADMIN users
   if (pathname.startsWith("/admin")) {
+    if (pathname === "/admin/login") {
+      if (isAuthenticated && isAdmin) {
+        return NextResponse.redirect(new URL("/admin", baseUrl));
+      }
+      return NextResponse.next();
+    }
+
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/", baseUrl));
+      return NextResponse.redirect(new URL("/admin/login", baseUrl));
     }
     if (!isAdmin) {
       // CUSTOMER attempting admin access — deny silently

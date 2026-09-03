@@ -17,6 +17,7 @@ model User {
   name      String?
   email     String   @unique
   googleId  String?  @unique
+  password  String?
   image     String?
   role      String   @default("CUSTOMER") @db.VarChar(20)
   createdAt DateTime @default(now()) @db.DateTime(0)

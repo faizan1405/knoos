@@ -47,7 +47,13 @@ export function AdminSidebar() {
           </Link>
         ))}
       </nav>
-      <div className="absolute bottom-0 left-0 right-0 p-4">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-brand-gray-200">
+        <button
+          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          className="w-full mb-4 text-left block font-mono text-xs text-red-500 hover:text-red-700 transition-colors uppercase tracking-wide"
+        >
+          Sign Out
+        </button>
         <Link
           href="/"
           className="block font-mono text-xs text-brand-gray-400 hover:text-brand-black transition-colors"

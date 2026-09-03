@@ -15,6 +15,8 @@
 
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
+import bcryptjs from "bcryptjs";
 import { prisma } from "@/lib/db";
 
 if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
@@ -53,6 +55,43 @@ const nextAuth = NextAuth({
       jwks_endpoint: "https://www.googleapis.com/oauth2/v3/certs",
       issuer: "https://accounts.google.com",
     }),
+    Credentials({
+      name: "Admin Login",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          });
+
+          if (!user || !user.password || user.role !== "ADMIN") {
+            return null;
+          }
+
+          const isPasswordValid = await bcryptjs.compare(
+            credentials.password as string,
+            user.password
+          );
+
+          if (!isPasswordValid) return null;
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("[AUTH DEBUG] Error in Credentials authorize:", error);
+          return null;
+        }
+      }
+    }),
   ],
   callbacks: {
     /**
@@ -61,6 +100,10 @@ const nextAuth = NextAuth({
     async signIn({ user, account, profile }) {
       console.log("[AUTH DEBUG] callback started");
       console.log("[AUTH DEBUG] provider:", account?.provider || "unknown");
+      
+      if (account?.provider === "credentials") {
+        return true;
+      }
       
       const email = user?.email || profile?.email;
       console.log("[AUTH DEBUG] email present:", !!email);

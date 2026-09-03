@@ -13,7 +13,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "create-admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",
@@ -21,6 +22,7 @@
     "@next/swc-wasm-nodejs": "16.3.3",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
+    "bcryptjs": "^3.0.3",
     "date-fns": "^4.4.0",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.39.0",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.3",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
