@@ -15,14 +15,14 @@
  * the NextAuth route handler.
  */
 
-import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export async function middleware(request: NextRequest) {
-  const session = await auth();
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isAuthenticated = !!session?.user?.id;
+export default async function proxy(request: NextRequest) {
+  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+  const isAdmin = token?.role === "ADMIN";
+  const isAuthenticated = !!token;
 
   const { pathname } = request.nextUrl;
   
@@ -69,9 +69,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/account/:path*",
-    "/checkout/:path*",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
