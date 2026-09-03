@@ -64,10 +64,20 @@ const nextAuth = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         
+        const rawEmail = credentials.email as string;
+        const email = rawEmail.trim().toLowerCase();
+        
         try {
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email as string },
+            where: { email },
           });
+
+          console.log(`[AUTH DIAGNOSTIC] Normalized email: ${email}`);
+          console.log(`[AUTH DIAGNOSTIC] User found: ${!!user}`);
+          if (user) {
+            console.log(`[AUTH DIAGNOSTIC] User role: ${user.role}`);
+            console.log(`[AUTH DIAGNOSTIC] Password field exists: ${!!user.password}`);
+          }
 
           if (!user || !user.password || user.role !== "ADMIN") {
             return null;
@@ -77,6 +87,8 @@ const nextAuth = NextAuth({
             credentials.password as string,
             user.password
           );
+          
+          console.log(`[AUTH DIAGNOSTIC] bcrypt.compare returned: ${isPasswordValid}`);
 
           if (!isPasswordValid) return null;
 
@@ -87,7 +99,11 @@ const nextAuth = NextAuth({
             role: user.role,
           };
         } catch (error) {
-          console.error("[AUTH DEBUG] Error in Credentials authorize:", error);
+          if (error instanceof Error) {
+            console.error(`[AUTH DIAGNOSTIC] Exception: ${error.name} - ${error.message}`);
+          } else {
+            console.error(`[AUTH DIAGNOSTIC] Exception: ${String(error)}`);
+          }
           return null;
         }
       }
