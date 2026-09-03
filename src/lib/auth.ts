@@ -46,7 +46,13 @@ const nextAuth = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: { params: { prompt: "select_account" } },
+      authorization: {
+        url: "https://accounts.google.com/o/oauth2/v2/auth",
+        params: { prompt: "select_account", response_type: "code", scope: "openid profile email" }
+      },
+      token: "https://oauth2.googleapis.com/token",
+      userinfo: "https://openidconnect.googleapis.com/v1/userinfo",
+      issuer: "https://accounts.google.com",
     }),
   ],
   callbacks: {
