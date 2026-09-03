@@ -59,51 +59,58 @@ const nextAuth = NextAuth({
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
-      console.log("[AUTH DEBUG] callback started");
-      console.log("[AUTH DEBUG] provider:", account?.provider || "unknown");
+      console.log("[AUTH DIAGNOSTIC] signIn callback started");
+      console.log("[AUTH DIAGNOSTIC] provider:", account?.provider || "unknown");
       
       const email = user?.email || profile?.email;
-      console.log("[AUTH DEBUG] email present:", !!email);
+      console.log("[AUTH DIAGNOSTIC] email present:", !!email);
       
       if (!email) {
+        console.log("[AUTH DIAGNOSTIC] Returning false: no email found");
         return false;
       }
       
       try {
-        console.log("[AUTH DEBUG] user lookup started");
+        console.log("[AUTH DIAGNOSTIC] User lookup started for email:", email);
         const existingUser = await prisma.user.findUnique({
           where: { email },
         });
-        console.log("[AUTH DEBUG] user found:", !!existingUser);
+        console.log("[AUTH DIAGNOSTIC] User lookup succeeded. existingUser found:", !!existingUser);
 
         if (!existingUser) {
-          console.log("[AUTH DEBUG] user creation started");
+          console.log("[AUTH DIAGNOSTIC] User creation started");
           
-          // Safely handle Google image URLs that exceed MySQL's default VARCHAR(191) limit
           const rawImage = user?.image || profile?.picture;
-          const safeImage = rawImage && rawImage.length <= 191 ? rawImage : null;
+          console.log("[AUTH DIAGNOSTIC] image length:", rawImage ? rawImage.length : "null");
+          console.log("[AUTH DIAGNOSTIC] name present:", !!(user?.name || profile?.name));
+          console.log("[AUTH DIAGNOSTIC] googleId present:", !!account?.providerAccountId);
 
           await prisma.user.create({
             data: {
               email,
               name: user?.name || profile?.name || null,
               googleId: account?.providerAccountId || null,
-              image: safeImage,
+              image: rawImage || null,
             },
           });
-          console.log("[AUTH DEBUG] user creation succeeded: true");
+          console.log("[AUTH DIAGNOSTIC] User creation succeeded");
         }
+        
+        console.log("[AUTH DIAGNOSTIC] signIn callback returning true");
         return true;
       } catch (error) {
-        console.log("[AUTH DEBUG] user creation succeeded: false");
-        console.error("[AUTH DEBUG] Exception during signIn:");
+        console.log("[AUTH DIAGNOSTIC] Exception caught in signIn try-catch block");
         if (error instanceof Error) {
-          console.error("Error name:", error.name);
-          console.error("Error message:", error.message);
-          console.error("Safe stack trace:", error.stack?.split("\n").slice(0, 3).join("\n"));
+          console.error("[AUTH DIAGNOSTIC] Error name:", error.name);
+          console.error("[AUTH DIAGNOSTIC] Error message:", error.message);
+          // For Prisma errors, PrismaClientKnownRequestError has a 'code' property
+          if ('code' in error) {
+            console.error("[AUTH DIAGNOSTIC] Prisma Error code:", (error as any).code);
+          }
         } else {
-          console.error("Error message:", String(error));
+          console.error("[AUTH DIAGNOSTIC] Unknown error type:", String(error));
         }
+        console.log("[AUTH DIAGNOSTIC] signIn callback returning false due to exception");
         return false;
       }
     },
