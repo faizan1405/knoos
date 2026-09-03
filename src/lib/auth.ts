@@ -15,7 +15,6 @@
 
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 
 if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
@@ -37,7 +36,6 @@ if (
 }
 
 const nextAuth = NextAuth({
-  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   trustHost: true,
   basePath: "/api/auth",
@@ -58,16 +56,54 @@ const nextAuth = NextAuth({
   ],
   callbacks: {
     /**
+     * Manually sync user to DB on sign-in since PrismaAdapter is removed.
+     */
+    async signIn({ user, account }) {
+      if (!user.email) return false;
+      
+      try {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+        });
+
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              name: user.name,
+              googleId: account?.providerAccountId,
+              image: user.image,
+            },
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error("Error creating user during sign in:", error);
+        return false;
+      }
+    },
+
+    /**
      * Persist role/id into the JWT on first sign-in.
-     * On subsequent requests the role is read back from the token verbatim.
      */
     async jwt({ token, user, trigger }) {
-      if (user) {
-        // First sign-in: user is the row returned by PrismaAdapter.
-        // role is already stored in the DB. We only echo it into the token
-        // — never overwrite it from the client.
-        token.role = (user as { role?: string }).role ?? "CUSTOMER";
-        token.id = (user as { id?: string }).id ?? token.sub ?? "";
+      if (user && user.email) {
+        // Fetch user from DB since we are not using PrismaAdapter
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, role: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.id = dbUser.id;
+          } else {
+            token.role = "CUSTOMER";
+            token.id = token.sub ?? "";
+          }
+        } catch (e) {
+          console.error("Error fetching user in jwt callback:", e);
+        }
       }
 
       // On manual session refresh, re-read the role from the database so
@@ -88,9 +124,7 @@ const nextAuth = NextAuth({
     },
 
     /**
-     * Hydrate the session.user object from the JWT. This is the only place
-     * the application reads role/id from. The role lives in a signed JWT —
-     * it cannot be tampered with by the browser.
+     * Hydrate the session.user object from the JWT.
      */
     async session({ session, token }) {
       if (session.user) {
@@ -104,6 +138,6 @@ const nextAuth = NextAuth({
 
 export const { auth, signIn, signOut, handlers } = nextAuth;
 
-// Route handler exports — named exports help Turbopack statically analyze them
+// Route handler exports
 export const GET = handlers.GET;
 export const POST = handlers.POST;
