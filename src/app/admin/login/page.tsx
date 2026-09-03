@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { loginAdmin } from "./actions";
+import { signIn } from "next-auth/react";
 
 export default function AdminLogin() {
   const [error, setError] = useState<string | null>(null);
@@ -12,14 +12,26 @@ export default function AdminLogin() {
     setIsPending(true);
     setError(null);
     try {
-      const result = await loginAdmin(formData);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      
       if (result?.error) {
-        setError(result.error);
+        setError("Invalid email or password.");
+        setIsPending(false);
+      } else if (result?.ok) {
+        // Successful login, redirect to admin portal
+        window.location.href = "/admin";
+      } else {
         setIsPending(false);
       }
     } catch (e) {
-      // successful login throws a redirect error, so we might not reach here,
-      // but if we do, handle it.
+      setError("An unexpected error occurred.");
       setIsPending(false);
     }
   }
