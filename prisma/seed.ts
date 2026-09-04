@@ -29,10 +29,10 @@ async function main() {
         "/images/products/apex-runner-x1-3.jpg",
       ],
       variants: [
-        { size: "8", stock: 10, sku: "KNOOS-ARX1-M-BLK-08" },
-        { size: "9", stock: 15, sku: "KNOOS-ARX1-M-BLK-09" },
-        { size: "10", stock: 12, sku: "KNOOS-ARX1-M-BLK-10" },
-        { size: "11", stock: 8, sku: "KNOOS-ARX1-M-BLK-11" },
+        { size: "8", stock: 10, sku: "KNOOS-ARX1-M-BLK-08", price: 2999, salePrice: 1999 },
+        { size: "9", stock: 15, sku: "KNOOS-ARX1-M-BLK-09", price: 2999, salePrice: 1999 },
+        { size: "10", stock: 12, sku: "KNOOS-ARX1-M-BLK-10", price: 2999, salePrice: 1999 },
+        { size: "11", stock: 8, sku: "KNOOS-ARX1-M-BLK-11", price: 2999, salePrice: 1999 },
       ],
     },
     {
@@ -49,9 +49,9 @@ async function main() {
         "/images/products/luna-court-classic-2.jpg",
       ],
       variants: [
-        { size: "6", stock: 8, sku: "KNOOS-LCC-W-WHT-06" },
-        { size: "7", stock: 12, sku: "KNOOS-LCC-W-WHT-07" },
-        { size: "8", stock: 10, sku: "KNOOS-LCC-W-WHT-08" },
+        { size: "6", stock: 8, sku: "KNOOS-LCC-W-WHT-06", price: 1999, salePrice: 1499 },
+        { size: "7", stock: 12, sku: "KNOOS-LCC-W-WHT-07", price: 1999, salePrice: 1499 },
+        { size: "8", stock: 10, sku: "KNOOS-LCC-W-WHT-08", price: 1999, salePrice: 1499 },
       ],
     },
     {
@@ -68,9 +68,9 @@ async function main() {
         "/images/products/trail-blazer-pro-2.jpg",
       ],
       variants: [
-        { size: "9", stock: 6, sku: "KNOOS-TBP-M-GRY-09" },
-        { size: "10", stock: 9, sku: "KNOOS-TBP-M-GRY-10" },
-        { size: "11", stock: 5, sku: "KNOOS-TBP-M-GRY-11" },
+        { size: "9", stock: 6, sku: "KNOOS-TBP-M-GRY-09", price: 2499, salePrice: 1799 },
+        { size: "10", stock: 9, sku: "KNOOS-TBP-M-GRY-10", price: 2499, salePrice: 1799 },
+        { size: "11", stock: 5, sku: "KNOOS-TBP-M-GRY-11", price: 2499, salePrice: 1799 },
       ],
     },
   ];
@@ -94,6 +94,8 @@ async function main() {
             size: v.size,
             stock: v.stock,
             sku: v.sku,
+            price: v.price ?? 0,
+            salePrice: v.salePrice ?? null,
           })),
         },
       },

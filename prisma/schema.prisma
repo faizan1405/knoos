@@ -93,6 +93,8 @@ model ProductVariant {
   size      String @db.VarChar(10)
   stock     Int    @default(0)
   sku       String @unique @db.VarChar(100)
+  price     Int
+  salePrice Int?
 
   product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   cartItems CartItem[]

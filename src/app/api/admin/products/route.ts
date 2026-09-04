@@ -98,6 +98,8 @@ export async function POST(request: Request) {
             size: v.size,
             stock: v.stock,
             sku: v.sku,
+            price: v.price ?? 0,
+            salePrice: v.salePrice ?? null,
           })),
         },
       },

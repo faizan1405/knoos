@@ -30,8 +30,8 @@ export default function AdminNewProductPage() {
   const [sole, setSole] = useState("");
 
   // Variants
-  const [variants, setVariants] = useState<Array<{ size: string; stock: string; sku: string }>>([
-    { size: "", stock: "0", sku: "" },
+  const [variants, setVariants] = useState<Array<{ size: string; stock: string; sku: string; price: string; salePrice: string }>>([
+    { size: "", stock: "0", sku: "", price: "0", salePrice: "" },
   ]);
 
   // Images
@@ -49,7 +49,7 @@ export default function AdminNewProductPage() {
   };
 
   const addVariant = () => {
-    setVariants((v) => [...v, { size: "", stock: "0", sku: "" }]);
+    setVariants((v) => [...v, { size: "", stock: "0", sku: "", price: "0", salePrice: "" }]);
   };
 
   const removeVariant = (index: number) => {
@@ -102,6 +102,8 @@ export default function AdminNewProductPage() {
           size: v.size,
           stock: parseInt(v.stock, 10) || 0,
           sku: v.sku || `${slug}-${v.size}`.toLowerCase(),
+          price: v.price ? parseInt(v.price, 10) || 0 : 0,
+          salePrice: v.salePrice ? parseInt(v.salePrice, 10) : null,
         })),
     };
 
@@ -290,7 +292,7 @@ export default function AdminNewProductPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="price" className="block font-mono text-xs uppercase tracking-wide mb-2">
-                Price (INR) <span className="text-red-500">*</span>
+                MRP / Original Price (INR) <span className="text-red-500">*</span>
               </label>
               <input
                 id="price"
@@ -307,7 +309,7 @@ export default function AdminNewProductPage() {
             </div>
             <div>
               <label htmlFor="salePrice" className="block font-mono text-xs uppercase tracking-wide mb-2">
-                Sale Price (INR)
+                Selling Price (INR)
               </label>
               <input
                 id="salePrice"
@@ -321,6 +323,25 @@ export default function AdminNewProductPage() {
               />
               {fieldErrors.salePrice && <p className="text-red-600 text-xs mt-1">{fieldErrors.salePrice}</p>}
             </div>
+          </div>
+
+          {/* Discount display — read-only, calculated from entered values */}
+          <div className="flex items-center gap-6 pt-3 border-t border-brand-gray-100">
+            <span className="font-mono text-xs uppercase tracking-wide text-brand-gray-500">Discount</span>
+            <span className="font-mono text-sm font-medium">
+              {(() => {
+                const mrpVal = parseInt(price, 10);
+                const spVal = salePrice ? parseInt(salePrice, 10) : NaN;
+                if (!isNaN(mrpVal) && !isNaN(spVal) && mrpVal > 0 && spVal <= mrpVal) {
+                  const pct = Math.round(((mrpVal - spVal) / mrpVal) * 100);
+                  return `${pct}% OFF`;
+                }
+                if (!isNaN(mrpVal) && (isNaN(spVal) || spVal >= mrpVal)) {
+                  return '0% OFF';
+                }
+                return '—';
+              })()}
+            </span>
           </div>
         </div>
 
@@ -362,7 +383,7 @@ export default function AdminNewProductPage() {
                   className="w-full border border-brand-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-2">
                 <input
                   type="number"
                   value={variant.stock}
@@ -372,7 +393,7 @@ export default function AdminNewProductPage() {
                   className="w-full border border-brand-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
                 />
               </div>
-              <div className="col-span-4">
+              <div className="col-span-3">
                 <input
                   type="text"
                   value={variant.sku}
@@ -381,15 +402,25 @@ export default function AdminNewProductPage() {
                   className="w-full border border-brand-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:border-brand-black transition-colors"
                 />
               </div>
-              <div className="col-span-2 flex items-end">
-                <button
-                  type="button"
-                  onClick={() => removeVariant(index)}
-                  disabled={variants.length === 1}
-                  className="w-full py-2 text-brand-gray-400 hover:text-red-600 transition-colors disabled:opacity-30"
-                >
-                  Remove
-                </button>
+              <div className="col-span-2">
+                <input
+                  type="number"
+                  value={variant.price}
+                  onChange={(e) => updateVariant(index, "price", e.target.value)}
+                  placeholder="MRP"
+                  min="0"
+                  className="w-full border border-brand-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
+                />
+              </div>
+              <div className="col-span-2">
+                <input
+                  type="number"
+                  value={variant.salePrice}
+                  onChange={(e) => updateVariant(index, "salePrice", e.target.value)}
+                  placeholder="Selling"
+                  min="0"
+                  className="w-full border border-brand-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
+                />
               </div>
             </div>
           ))}

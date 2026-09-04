@@ -75,6 +75,8 @@ export async function PATCH(
                   size: v.size,
                   stock: v.stock,
                   sku: v.sku,
+                  price: v.price ?? 0,
+                  salePrice: v.salePrice ?? null,
                 })),
               },
             }

@@ -16,7 +16,6 @@ export async function POST(
 
   const { id: productId } = await params;
 
-  // Verify product exists
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { id: true },
@@ -41,6 +40,8 @@ export async function POST(
         size: parsed.data.size,
         stock: parsed.data.stock,
         sku: parsed.data.sku,
+        price: parsed.data.price ?? 0,
+        salePrice: parsed.data.salePrice ?? null,
       },
     });
 
@@ -85,7 +86,13 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const variants = body.variants as Array<{ size: string; stock: number; sku: string }>;
+  const variants = body.variants as Array<{
+    size: string;
+    stock: number;
+    sku: string;
+    price?: number;
+    salePrice?: number | null;
+  }>;
 
   if (!Array.isArray(variants)) {
     return NextResponse.json({ error: "variants array is required" }, { status: 400 });
@@ -109,6 +116,8 @@ export async function PUT(
         size: v.size,
         stock: v.stock,
         sku: v.sku,
+        price: v.price ?? 0,
+        salePrice: v.salePrice ?? null,
       })),
     }),
   ]);

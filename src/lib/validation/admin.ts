@@ -56,6 +56,16 @@ export const productVariantSchema = z.object({
     .string()
     .min(1, "Variant SKU is required")
     .max(100, "Variant SKU must be at most 100 characters"),
+  price: z
+    .number()
+    .int("Price must be a whole number")
+    .nonnegative("Price cannot be negative"),
+  salePrice: z
+    .number()
+    .int("Sale price must be a whole number")
+    .nonnegative("Sale price cannot be negative")
+    .optional()
+    .nullable(),
 });
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;

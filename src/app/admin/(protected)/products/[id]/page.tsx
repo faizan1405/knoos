@@ -38,5 +38,5 @@ export default async function AdminEditProductPage({
     );
   }
 
-  return <AdminProductForm product={product} />;
+  return <AdminProductForm productId={product.id} />;
 }
