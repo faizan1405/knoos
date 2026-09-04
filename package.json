@@ -5,7 +5,8 @@
   "description": "KNOOS Premium Shoe E-commerce Website",
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "prebuild": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
