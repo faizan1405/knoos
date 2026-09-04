@@ -62,25 +62,23 @@ const nextAuth = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        
+        if (!credentials?.email || !credentials?.password) {
+          console.log("[AUTH SERVER] authorize: missing credentials");
+          return null;
+        }
+
         const rawEmail = credentials.email as string;
         const email = rawEmail.trim().toLowerCase();
-        
+
         try {
           const user = await prisma.user.findUnique({
             where: { email },
           });
 
-          console.log(`[AUTH DIAGNOSTIC] normalized email: ${email}`);
-          console.log(`[AUTH DIAGNOSTIC] user found: ${!!user}`);
-          if (user) {
-            console.log(`[AUTH DIAGNOSTIC] role: ${user.role}`);
-            console.log(`[AUTH DIAGNOSTIC] password field exists: ${!!user.password}`);
-          }
+          console.log("[AUTH SERVER] authorize: email=" + email + ", userFound=" + !!user + ", role=" + (user?.role ?? "none"));
 
           if (!user || !user.password || user.role !== "ADMIN") {
-            console.log(`[AUTH DIAGNOSTIC] authorize returned user: false`);
+            console.log("[AUTH SERVER] authorize: rejected (no user/no password/not ADMIN)");
             return null;
           }
 
@@ -88,15 +86,15 @@ const nextAuth = NextAuth({
             credentials.password as string,
             user.password
           );
-          
-          console.log(`[AUTH DIAGNOSTIC] bcrypt.compare result: ${isPasswordValid}`);
+
+          console.log("[AUTH SERVER] authorize: passwordValid=" + isPasswordValid);
 
           if (!isPasswordValid) {
-            console.log(`[AUTH DIAGNOSTIC] authorize returned user: false`);
+            console.log("[AUTH SERVER] authorize: rejected (wrong password)");
             return null;
           }
 
-          console.log(`[AUTH DIAGNOSTIC] authorize returned user: true`);
+          console.log("[AUTH SERVER] authorize: success, userId=" + user.id);
           return {
             id: user.id,
             email: user.email,
@@ -104,7 +102,7 @@ const nextAuth = NextAuth({
             role: user.role,
           };
         } catch (error) {
-          console.log(`[AUTH DIAGNOSTIC] authorize returned user: false`);
+          console.log("[AUTH SERVER] authorize: exception");
           return null;
         }
       }
@@ -115,9 +113,9 @@ const nextAuth = NextAuth({
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
-      console.log(`[AUTH DIAGNOSTIC] signIn callback ran. email: ${user?.email}`);
+      console.log("[AUTH SERVER] signIn callback: provider=" + (account?.provider ?? "none") + ", email=" + (user?.email ?? "none"));
       if (account?.provider === "credentials") {
-        console.log(`[AUTH DIAGNOSTIC] signIn callback result: true`);
+        console.log("[AUTH SERVER] signIn callback: credentials=true, returning true");
         return true;
       }
       
@@ -156,7 +154,7 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
-      console.log(`[AUTH DIAGNOSTIC] jwt callback ran. token id present: ${!!token.id}. role: ${token.role || 'missing'}, trigger: ${trigger}`);
+      console.log("[AUTH SERVER] jwt: trigger=" + trigger + ", tokenIdPresent=" + !!token.id + ", role=" + (token.role ?? "missing") + ", userEmail=" + (user?.email ?? "none"));
       if (user && user.email) {
         // Fetch user from DB since we are not using PrismaAdapter
         try {
@@ -197,7 +195,7 @@ const nextAuth = NextAuth({
      * Hydrate the session.user object from the JWT.
      */
     async session({ session, token }) {
-      console.log(`[AUTH DIAGNOSTIC] session callback ran. user id present: ${!!session?.user?.id}. role: ${session?.user?.role || 'missing'}`);
+      console.log("[AUTH SERVER] session: userIdPresent=" + !!session?.user?.id + ", role=" + (session?.user?.role ?? "missing"));
       if (session.user) {
         session.user.id = (token.id as string) ?? "";
         session.user.role = (token.role as string) ?? "CUSTOMER";
@@ -209,14 +207,14 @@ const nextAuth = NextAuth({
      * Redirect callback to track flow
      */
     async redirect({ url, baseUrl }) {
-      console.log(`[AUTH DIAGNOSTIC] redirect callback input URL: ${url}`);
+      console.log("[AUTH SERVER] redirect: input=" + url + ", baseUrl=" + baseUrl);
       let finalUrl = baseUrl;
       if (url.startsWith("/")) {
         finalUrl = new URL(url, baseUrl).toString();
       } else if (new URL(url).origin === baseUrl) {
         finalUrl = url;
       }
-      console.log(`[AUTH DIAGNOSTIC] final redirect URL: ${finalUrl}`);
+      console.log("[AUTH SERVER] redirect: finalUrl=" + finalUrl);
       return finalUrl;
     }
   },
