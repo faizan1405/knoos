@@ -62,10 +62,7 @@ const nextAuth = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.log("[AUTH SERVER] authorize: missing credentials");
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         const rawEmail = credentials.email as string;
         const email = rawEmail.trim().toLowerCase();
@@ -75,10 +72,7 @@ const nextAuth = NextAuth({
             where: { email },
           });
 
-          console.log("[AUTH SERVER] authorize: email=" + email + ", userFound=" + !!user + ", role=" + (user?.role ?? "none"));
-
           if (!user || !user.password || user.role !== "ADMIN") {
-            console.log("[AUTH SERVER] authorize: rejected (no user/no password/not ADMIN)");
             return null;
           }
 
@@ -87,14 +81,10 @@ const nextAuth = NextAuth({
             user.password
           );
 
-          console.log("[AUTH SERVER] authorize: passwordValid=" + isPasswordValid);
-
           if (!isPasswordValid) {
-            console.log("[AUTH SERVER] authorize: rejected (wrong password)");
             return null;
           }
 
-          console.log("[AUTH SERVER] authorize: success, userId=" + user.id);
           return {
             id: user.id,
             email: user.email,
@@ -102,7 +92,6 @@ const nextAuth = NextAuth({
             role: user.role,
           };
         } catch (error) {
-          console.log("[AUTH SERVER] authorize: exception");
           return null;
         }
       }
@@ -113,12 +102,10 @@ const nextAuth = NextAuth({
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
-      console.log("[AUTH SERVER] signIn callback: provider=" + (account?.provider ?? "none") + ", email=" + (user?.email ?? "none"));
       if (account?.provider === "credentials") {
-        console.log("[AUTH SERVER] signIn callback: credentials=true, returning true");
         return true;
       }
-      
+
       const email = user?.email || profile?.email;
       
       if (!email) {
@@ -154,7 +141,6 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
-      console.log("[AUTH SERVER] jwt: trigger=" + trigger + ", tokenIdPresent=" + !!token.id + ", role=" + (token.role ?? "missing") + ", userEmail=" + (user?.email ?? "none"));
       if (user && user.email) {
         // Fetch user from DB since we are not using PrismaAdapter
         try {
@@ -195,26 +181,23 @@ const nextAuth = NextAuth({
      * Hydrate the session.user object from the JWT.
      */
     async session({ session, token }) {
-      console.log("[AUTH SERVER] session: userIdPresent=" + !!session?.user?.id + ", role=" + (session?.user?.role ?? "missing"));
       if (session.user) {
         session.user.id = (token.id as string) ?? "";
         session.user.role = (token.role as string) ?? "CUSTOMER";
       }
       return session;
     },
-    
+
     /**
      * Redirect callback to track flow
      */
     async redirect({ url, baseUrl }) {
-      console.log("[AUTH SERVER] redirect: input=" + url + ", baseUrl=" + baseUrl);
       let finalUrl = baseUrl;
       if (url.startsWith("/")) {
         finalUrl = new URL(url, baseUrl).toString();
       } else if (new URL(url).origin === baseUrl) {
         finalUrl = url;
       }
-      console.log("[AUTH SERVER] redirect: finalUrl=" + finalUrl);
       return finalUrl;
     }
   },
