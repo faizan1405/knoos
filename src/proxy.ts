@@ -19,17 +19,32 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// Auth.js v5 uses "__Secure-authjs.session-token" on HTTPS sites
+// and "authjs.session-token" on HTTP (development). The getToken()
+// default does not include the __Secure- prefix, so we must pass
+// the cookieName and salt explicitly to match the cookie the
+// server sets.
+const cookieName = isProduction
+  ? "__Secure-authjs.session-token"
+  : "authjs.session-token";
+
 export default async function proxy(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+    cookieName,
+    salt: cookieName,
+  });
+
   const isAdmin = token?.role === "ADMIN";
   const isAuthenticated = !!token;
 
   const { pathname } = request.nextUrl;
-  
-  console.log(`[PROXY DIAGNOSTIC] pathname: ${pathname}`);
-  console.log(`[PROXY DIAGNOSTIC] session/token found: ${isAuthenticated}`);
-  console.log(`[PROXY DIAGNOSTIC] token role: ${token?.role || 'missing'}`);
-  
+
+  console.log("[PROXY DIAGNOSTIC] pathname=" + pathname + ", cookieName=" + cookieName + ", tokenFound=" + isAuthenticated + ", role=" + (token?.role ?? "missing") + ", email=" + (token?.email ?? "none") + ", sub=" + (token?.sub ?? "none"));
+
   // Prevent 0.0.0.0 or localhost redirects in production behind a proxy
   let baseUrl = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || request.url;
   if (baseUrl.includes("0.0.0.0") || baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
@@ -44,23 +59,23 @@ export default async function proxy(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     if (pathname === "/admin/login") {
       if (isAuthenticated && isAdmin) {
-        console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/admin)`);
+        console.log("[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/admin)");
         return NextResponse.redirect(new URL("/admin", baseUrl));
       }
-      console.log(`[PROXY DIAGNOSTIC] decision: ALLOW`);
+      console.log("[PROXY DIAGNOSTIC] decision: ALLOW");
       return NextResponse.next();
     }
 
     if (!isAuthenticated) {
-      console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_LOGIN`);
+      console.log("[PROXY DIAGNOSTIC] decision: REDIRECT_LOGIN");
       return NextResponse.redirect(new URL("/admin/login", baseUrl));
     }
     if (!isAdmin) {
       // CUSTOMER attempting admin access — deny silently
-      console.log(`[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/)`);
+      console.log("[PROXY DIAGNOSTIC] decision: REDIRECT_HOME (/)");
       return NextResponse.redirect(new URL("/", baseUrl));
     }
-    console.log(`[PROXY DIAGNOSTIC] decision: ALLOW`);
+    console.log("[PROXY DIAGNOSTIC] decision: ALLOW");
     return NextResponse.next();
   }
 
