@@ -9,28 +9,36 @@ export default function AdminLogin() {
   const [isPending, setIsPending] = useState(false);
 
   async function handleSubmit(formData: FormData) {
+    console.log("[LOGIN DEBUG] handleSubmit fired");
     setIsPending(true);
     setError(null);
     try {
       const email = formData.get("email") as string;
       const password = formData.get("password") as string;
-      
+
+      console.log("[LOGIN DEBUG] calling signIn", {
+        email,
+        hasPassword: Boolean(password),
+      });
+
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
-      
+
+      console.log("[LOGIN DEBUG] signIn result", result);
+
       if (result?.error) {
         setError("Invalid email or password.");
         setIsPending(false);
       } else if (result?.ok) {
-        // Successful login, redirect to admin portal
         window.location.href = "/admin";
       } else {
         setIsPending(false);
       }
     } catch (e) {
+      console.error("[LOGIN DEBUG] signIn threw", e);
       setError("An unexpected error occurred.");
       setIsPending(false);
     }
