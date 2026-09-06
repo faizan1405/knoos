@@ -37,8 +37,7 @@ interface Order {
   address: OrderAddress | null;
 }
 
-function formatINR(paise: number): string {
-  const rupees = paise / 100;
+function formatINR(rupees: number): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",

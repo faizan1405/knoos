@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { loginWithGoogle } from "@/lib/auth-actions";
 import { motion } from "framer-motion";
+import { getVariantPrices, calculateDiscount } from "@/lib/pricing";
 
 interface ProductInfoProps {
   product: Product;
@@ -37,6 +38,11 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
 
   const selectedVariant = variants.find(v => v.id === selectedVariantId);
   const stockAvailable = selectedVariant ? selectedVariant.stock : 0;
+
+  // When a variant is selected, variant pricing is authoritative.
+  // When no variant is selected (or no variant pricing exists), fall back to product pricing.
+  const { mrp, selling } = getVariantPrices(product, selectedVariant ?? null);
+  const discount = calculateDiscount(mrp, selling);
 
   const handleQuantityChange = (delta: number) => {
     if (delta > 0 && quantity < stockAvailable) {
@@ -119,14 +125,14 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       <motion.div variants={itemVariants} className="mb-6">
         <h1 className="font-serif text-3xl lg:text-4xl mb-3 tracking-tight text-brand-black">{product.name}</h1>
         <div className="flex items-center gap-4 text-xl">
-          {product.salePrice ? (
+          <span className="text-brand-black font-medium">₹{selling.toLocaleString('en-IN')}</span>
+          {discount.hasDiscount && (
             <>
-              <span className="text-brand-black font-medium">₹{product.salePrice.toLocaleString('en-IN')}</span>
-              <span className="text-brand-gray-400 line-through">₹{product.price.toLocaleString('en-IN')}</span>
-              <span className="bg-red-50 text-red-600 px-2 py-1 text-xs font-mono tracking-widest uppercase ml-2 rounded-sm">Sale</span>
+              <span className="text-brand-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
+              <span className="bg-red-50 text-red-600 px-2 py-1 text-xs font-mono tracking-widest uppercase ml-2 rounded-sm">
+                {Math.round(discount.discountPercentage)}% OFF
+              </span>
             </>
-          ) : (
-            <span className="text-brand-black font-medium">₹{product.price.toLocaleString('en-IN')}</span>
           )}
         </div>
       </motion.div>

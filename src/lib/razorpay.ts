@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { getDeliveryCharge, DeliveryMethod } from "@/lib/constants";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 /**
  * Razorpay SDK integration helpers.
@@ -102,7 +103,7 @@ export async function calculateOrderTotal(cartId: string, deliveryMethod: Delive
   });
 
   const subtotal = items.reduce((sum, item) => {
-    const price = item.product.salePrice ?? item.product.price;
+    const price = getEffectiveSellingPrice(item.product, item.variant);
     return sum + price * item.quantity;
   }, 0);
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Product, ProductImage } from "@prisma/client";
+import { getProductPrices } from "@/lib/pricing";
 
 type ProductWithImages = Product & {
   images: ProductImage[];
@@ -14,6 +15,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const sortedImages = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder);
   const mainImage = sortedImages[0]?.imageUrl || "/placeholder-shoe.jpg";
   const hoverImage = sortedImages[1]?.imageUrl;
+  const { mrp, selling } = getProductPrices(product);
 
   return (
     <Link href={`/product/${product.slug}`} className="group block">
@@ -45,11 +47,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center gap-3 text-sm">
           {product.salePrice ? (
             <>
-              <span className="text-brand-black">₹{product.salePrice.toLocaleString('en-IN')}</span>
-              <span className="text-brand-gray-400 line-through">₹{product.price.toLocaleString('en-IN')}</span>
+              <span className="text-brand-black">₹{selling.toLocaleString('en-IN')}</span>
+              <span className="text-brand-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
             </>
           ) : (
-            <span className="text-brand-black">₹{product.price.toLocaleString('en-IN')}</span>
+            <span className="text-brand-black">₹{mrp.toLocaleString('en-IN')}</span>
           )}
         </div>
       </div>

@@ -24,12 +24,12 @@ export const productGenderSchema = z.enum(GenderEnum);
 
 export const productPriceSchema = z
   .number()
-  .int("Price must be a whole number (paise)")
+  .int("Price must be a whole number (rupees)")
   .positive("Price must be greater than zero");
 
 export const productSalePriceSchema = z
   .number()
-  .int("Sale price must be a whole number (paise)")
+  .int("Sale price must be a whole number (rupees)")
   .nonnegative("Sale price cannot be negative")
   .optional()
   .nullable();

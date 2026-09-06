@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -24,25 +25,28 @@ export async function GET() {
   }
 
   const subtotal = cart.items.reduce((sum, item) => {
-    const price = item.product.salePrice ?? item.product.price;
+    const price = getEffectiveSellingPrice(item.product, item.variant);
     return sum + price * item.quantity;
   }, 0);
 
   return NextResponse.json({
     id: cart.id,
-    items: cart.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity,
-      variantId: item.variant.id,
-      size: item.variant.size,
-      productId: item.product.id,
-      productName: item.product.name,
-      productStatus: item.product.status,
-      stock: item.variant.stock,
-      imageUrl: item.product.images[0]?.imageUrl ?? null,
-      price: item.product.salePrice ?? item.product.price,
-      total: (item.product.salePrice ?? item.product.price) * item.quantity,
-    })),
+    items: cart.items.map((item) => {
+      const price = getEffectiveSellingPrice(item.product, item.variant);
+      return {
+        id: item.id,
+        quantity: item.quantity,
+        variantId: item.variant.id,
+        size: item.variant.size,
+        productId: item.product.id,
+        productName: item.product.name,
+        productStatus: item.product.status,
+        stock: item.variant.stock,
+        imageUrl: item.product.images[0]?.imageUrl ?? null,
+        price,
+        total: price * item.quantity,
+      };
+    }),
     subtotal,
   });
 }

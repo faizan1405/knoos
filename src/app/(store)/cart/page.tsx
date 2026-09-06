@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { signIn } from "@/lib/auth";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 import { CartClient } from "./CartClient";
 import { getRecommendations } from "@/lib/recommendations";
 import { ProductRecommendations } from "@/components/product/ProductRecommendations";
@@ -61,8 +62,8 @@ export default async function CartPage() {
     productStatus: item.product.status,
     stock: item.variant.stock,
     imageUrl: item.product.images[0]?.imageUrl ?? null,
-    price: item.product.salePrice ?? item.product.price,
-    total: (item.product.salePrice ?? item.product.price) * item.quantity,
+    price: getEffectiveSellingPrice(item.product, item.variant),
+    total: getEffectiveSellingPrice(item.product, item.variant) * item.quantity,
     slug: item.product.slug,
   })) || [];
 

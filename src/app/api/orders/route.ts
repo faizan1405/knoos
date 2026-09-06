@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { OrderStatus, PaymentStatus } from "@/lib/constants";
 import { createRazorpayOrder } from "@/lib/razorpay";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 export async function GET() {
   const session = await auth();
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
   }
 
   const subtotal = cart.items.reduce((sum, item) => {
-    const price = item.product.salePrice ?? item.product.price;
+    const price = getEffectiveSellingPrice(item.product, item.variant);
     return sum + price * item.quantity;
   }, 0);
 
@@ -94,8 +95,8 @@ export async function POST(request: Request) {
           productName: item.product.name,
           size: item.variant.size,
           quantity: item.quantity,
-          price: item.product.salePrice ?? item.product.price,
-          total: (item.product.salePrice ?? item.product.price) * item.quantity,
+          price: getEffectiveSellingPrice(item.product, item.variant),
+          total: getEffectiveSellingPrice(item.product, item.variant) * item.quantity,
         })),
       },
       address: {
