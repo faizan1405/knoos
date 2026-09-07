@@ -1,4 +1,6 @@
 -- Create Category table
+-- Uses the same charset/collation as all other tables in the database (utf8mb4_unicode_ci)
+-- to ensure the foreign key to Product.id and Product.categoryId is valid.
 CREATE TABLE Category (
   id VARCHAR(36) NOT NULL,
   name VARCHAR(50) NOT NULL,
@@ -10,7 +12,7 @@ CREATE TABLE Category (
   PRIMARY KEY (id),
   UNIQUE KEY Category_name_key (name),
   UNIQUE KEY Category_slug_key (slug)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Add categoryId column to Product
 ALTER TABLE Product
