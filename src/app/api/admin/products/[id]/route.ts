@@ -4,7 +4,6 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { updateProductSchema, mapZodErrors } from "@/lib/validation/admin";
-import { normalizeCategory } from "@/lib/constants";
 
 // @ts-ignore - Next.js 16 type compatibility
 export async function GET(
@@ -21,6 +20,7 @@ export async function GET(
     include: {
       images: { orderBy: { sortOrder: "asc" } },
       variants: { orderBy: { size: "asc" } },
+      categoryRel: { select: { id: true, name: true } },
     },
   });
 
@@ -51,11 +51,6 @@ export async function PATCH(
   }
 
   const { images, variants, ...productFields } = parsed.data;
-
-  // Normalize category to a canonical lowercase form for consistent filtering
-  if (productFields.category) {
-    productFields.category = normalizeCategory(productFields.category as string);
-  }
 
   try {
     const updated = await prisma.product.update({
@@ -91,6 +86,7 @@ export async function PATCH(
       include: {
         images: { orderBy: { sortOrder: "asc" } },
         variants: { orderBy: { size: "asc" } },
+        categoryRel: { select: { id: true, name: true } },
       },
     });
 

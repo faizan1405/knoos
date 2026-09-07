@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { Product, ProductImage } from "@prisma/client";
-import { normalizeCategory } from "@/lib/constants";
 
 export type ProductWithImages = Product & {
   images: ProductImage[];
@@ -14,8 +13,8 @@ export interface ProductSearchParams {
   size?: string;
   min?: string;
   max?: string;
-  stock?: string; // "In Stock" | "Out of Stock"
-  sort?: string;  // "Featured" | "Newest" | "price-low" | "price-high"
+  stock?: string;
+  sort?: string;
   page?: string;
 }
 
@@ -43,11 +42,14 @@ export async function getProducts(params: ProductSearchParams): Promise<ProductW
       where.gender = gender;
     }
 
-    // 3. Category — match against normalized stored value
+    // 3. Category — resolve slug to categoryId via the Category model
     if (category) {
-      const normalizedCat = normalizeCategory(category);
-      if (normalizedCat) {
-        where.category = { equals: normalizedCat };
+      const categoryRecord = await prisma.category.findFirst({
+        where: { slug: category.toLowerCase().trim(), isActive: true },
+        select: { id: true },
+      });
+      if (categoryRecord) {
+        where.categoryId = categoryRecord.id;
       }
     }
 
@@ -101,6 +103,9 @@ export async function getProducts(params: ProductSearchParams): Promise<ProductW
       include: {
         images: {
           orderBy: { sortOrder: "asc" },
+        },
+        categoryRel: {
+          select: { id: true, name: true, slug: true },
         },
       },
       // Preliminary sorting

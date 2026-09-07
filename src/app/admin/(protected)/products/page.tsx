@@ -7,6 +7,11 @@ import Image from "next/image";
 const GENDERS = ["MEN", "WOMEN"] as const;
 const STATUSES = ["ACTIVE", "INACTIVE"] as const;
 
+interface CategoryOption {
+  id: string;
+  name: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -18,6 +23,8 @@ interface Product {
   updatedAt: string;
   images: { imageUrl: string }[];
   variants: { size: string; stock: number }[];
+  categoryId?: string | null;
+  categoryRel?: { id: string; name: string } | null;
 }
 
 interface ProductsResponse {
@@ -49,8 +56,22 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [genderFilter, setGenderFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Load categories for filter dropdown
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/categories")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!cancelled && data?.categories) setCategories(data.categories);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -62,6 +83,7 @@ export default function AdminProductsPage() {
         q: searchQuery,
         ...(genderFilter ? { gender: genderFilter } : {}),
         ...(statusFilter ? { status: statusFilter } : {}),
+        ...(categoryFilter ? { categoryId: categoryFilter } : {}),
       });
 
       const res = await fetch(`/api/admin/products?${params}`);
@@ -80,7 +102,7 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, genderFilter, statusFilter]);
+  }, [page, searchQuery, genderFilter, statusFilter, categoryFilter]);
 
   useEffect(() => {
     fetchProducts();
@@ -89,7 +111,7 @@ export default function AdminProductsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, genderFilter, statusFilter]);
+  }, [searchQuery, genderFilter, statusFilter, categoryFilter]);
 
   const handleStatusToggle = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
@@ -176,6 +198,16 @@ export default function AdminProductsPage() {
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="border border-brand-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -215,6 +247,7 @@ export default function AdminProductsPage() {
                 <tr className="border-b border-brand-gray-100 text-left">
                   <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500 w-12"></th>
                   <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500">Product</th>
+                  <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500">Category</th>
                   <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500">Gender</th>
                   <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500">SKU</th>
                   <th className="px-4 py-3 font-mono text-xs uppercase text-brand-gray-500 text-right">Price</th>
@@ -245,6 +278,13 @@ export default function AdminProductsPage() {
                         <Link href={`/admin/products/${product.id}`} className="text-brand-black hover:underline font-medium">
                           {product.name}
                         </Link>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        {product.categoryRel?.name ?? product.categoryId ? (
+                          <span className="text-brand-gray-600">{product.categoryRel?.name ?? "—"}</span>
+                        ) : (
+                          <span className="text-brand-gray-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs">{product.gender}</td>
                       <td className="px-4 py-3 font-mono text-xs text-brand-gray-500">{product.sku}</td>

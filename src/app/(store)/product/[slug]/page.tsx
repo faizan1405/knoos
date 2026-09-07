@@ -49,6 +49,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           orderBy: { sortOrder: "asc" },
         },
         variants: true,
+        categoryRel: {
+          select: { id: true, name: true, slug: true },
+        },
         reviews: {
           where: { isActive: true },
           orderBy: { createdAt: "desc" },
@@ -78,7 +81,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const recommendedProducts = await getRecommendations({
     currentProductId: product.id,
-    category: product.category || undefined,
+    category: product.categoryRel?.name || undefined,
     subCategory: product.subCategory || undefined,
     gender: product.gender,
     limit: 4

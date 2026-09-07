@@ -9,7 +9,7 @@ import {
   productStatusSchema,
   mapZodErrors,
 } from "@/lib/validation/admin";
-import { Gender, ProductStatus, normalizeCategory } from "@/lib/constants";
+import { Gender, ProductStatus } from "@/lib/constants";
 
 // ─── GET: List products ──────────────────────────────────────────────────────
 
@@ -23,6 +23,7 @@ export async function GET(request: Request) {
   const gender = searchParams.get("gender");
   const status = searchParams.get("status");
   const q = searchParams.get("q");
+  const categoryId = searchParams.get("categoryId");
 
   const where: Record<string, unknown> = {};
 
@@ -32,6 +33,10 @@ export async function GET(request: Request) {
 
   if (status && Object.values(ProductStatus).includes(status as ProductStatus)) {
     where.status = status;
+  }
+
+  if (categoryId) {
+    where.categoryId = categoryId;
   }
 
   if (q) {
@@ -51,6 +56,7 @@ export async function GET(request: Request) {
       include: {
         images: { orderBy: { sortOrder: "asc" } },
         variants: { orderBy: { size: "asc" } },
+        categoryRel: { select: { id: true, name: true } },
       },
     }),
     prisma.product.count({ where }),
@@ -83,11 +89,6 @@ export async function POST(request: Request) {
 
   const { images, variants, ...productData } = parsed.data;
 
-  // Normalize category to a canonical lowercase form for consistent filtering
-  if (productData.category) {
-    productData.category = normalizeCategory(productData.category as string);
-  }
-
   try {
     const product = await prisma.product.create({
       data: {
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
       include: {
         images: { orderBy: { sortOrder: "asc" } },
         variants: { orderBy: { size: "asc" } },
+        categoryRel: { select: { id: true, name: true } },
       },
     });
 

@@ -1,9 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-const CATEGORIES = ["Sneakers", "Loafers", "Casual", "Sports", "Sandals", "Heels", "Slippers"];
+interface CategoryOption {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 const SIZES = ["6", "7", "8", "9", "10", "11", "12"];
 const SORTS = [
   { value: "Featured", label: "Featured" },
@@ -15,6 +20,25 @@ const SORTS = [
 export function ProductFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // Fetch active categories from the database
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/categories")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!cancelled) {
+          setCategories(data?.categories ?? []);
+          setCategoriesLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCategoriesLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // Helper to create a new query string
   const createQueryString = useCallback(
@@ -81,7 +105,7 @@ export function ProductFilters() {
           <div className="flex flex-wrap gap-2">
             {activeCategory && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-brand-gray-50 text-xs uppercase font-mono rounded-full">
-                {activeCategory}
+                {categories.find((c) => c.slug === activeCategory)?.name ?? activeCategory}
                 <button onClick={() => handleFilterChange("category", "")} className="hover:text-red-500">&times;</button>
               </span>
             )}
@@ -144,21 +168,27 @@ export function ProductFilters() {
       {/* Category */}
       <div>
         <h3 className="font-serif text-lg mb-4">Category</h3>
-        <div className="space-y-2">
-          {CATEGORIES.map((cat) => (
-            <label key={cat} className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="radio"
-                name="category"
-                value={cat}
-                checked={activeCategory === cat}
-                onChange={() => handleFilterChange("category", cat)}
-                className="w-4 h-4 accent-black border-brand-gray-200"
-              />
-              <span className="text-sm font-mono text-brand-gray-600 group-hover:text-black transition-colors">{cat}</span>
-            </label>
-          ))}
-        </div>
+        {categoriesLoading ? (
+          <p className="text-sm text-brand-gray-400 font-mono">Loading...</p>
+        ) : categories.length === 0 ? (
+          <p className="text-sm text-brand-gray-400 font-mono">No categories available</p>
+        ) : (
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="category"
+                  value={cat.slug}
+                  checked={activeCategory === cat.slug}
+                  onChange={() => handleFilterChange("category", cat.slug)}
+                  className="w-4 h-4 accent-black border-brand-gray-200"
+                />
+                <span className="text-sm font-mono text-brand-gray-600 group-hover:text-black transition-colors">{cat.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Size */}

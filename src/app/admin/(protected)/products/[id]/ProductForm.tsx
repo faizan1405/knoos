@@ -28,7 +28,8 @@ interface Product {
   salePrice: number | null;
   status: string;
   description: string | null;
-  category: string | null;
+  categoryId: string | null;
+  category?: { id: string; name: string } | null;
   color: string | null;
   subCategory: string | null;
   upperMaterial: string | null;
@@ -38,12 +39,18 @@ interface Product {
   variants: Variant[];
 }
 
+interface CategoryOption {
+  id: string;
+  name: string;
+}
+
 export default function AdminProductForm({ productId }: { productId?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(!!productId);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -53,7 +60,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
   const [salePrice, setSalePrice] = useState("");
   const [sku, setSku] = useState("");
   const [status, setStatus] = useState("ACTIVE");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [color, setColor] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [upperMaterial, setUpperMaterial] = useState("");
@@ -71,6 +78,28 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Load product for edit mode
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/admin/categories");
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setCategories(data.categories ?? []);
+        }
+      } catch {
+        // Silently fail — categories list will be empty but form still works
+      }
+    }
+
+    loadCategories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!productId) return;
 
@@ -92,7 +121,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
         setSalePrice(data.salePrice?.toString() ?? "");
         setSku(data.sku);
         setStatus(data.status);
-        setCategory(data.category ?? "");
+        setCategoryId(data.categoryId ?? "");
         setColor(data.color ?? "");
         setSubCategory(data.subCategory ?? "");
         setUpperMaterial(data.upperMaterial ?? "");
@@ -241,7 +270,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
       salePrice: salePriceNum,
       sku,
       status,
-      category: category || null,
+      categoryId: categoryId || null,
       color: color || null,
       subCategory: subCategory || null,
       upperMaterial: upperMaterial || null,
@@ -413,10 +442,22 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
           {/* Specifications Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="category" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
-              <input id="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)}
-                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.category ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. MEN BOOTS" />
-              {fieldErrors.category && <p className="text-red-600 text-xs mt-1">{fieldErrors.category}</p>}
+              <label htmlFor="categoryId" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
+              <select
+                id="categoryId"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.categoryId ? "border-red-300" : "border-brand-gray-200"}`}
+              >
+                <option value="">Select Category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              {fieldErrors.categoryId && <p className="text-red-600 text-xs mt-1">{fieldErrors.categoryId}</p>}
+              <Link href="/admin/categories" className="inline-block mt-2 text-xs text-brand-gray-500 hover:text-brand-black underline">
+                Manage Categories
+              </Link>
             </div>
             <div>
               <label htmlFor="color" className="block font-mono text-xs uppercase tracking-wide mb-2">Color</label>

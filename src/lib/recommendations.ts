@@ -29,6 +29,9 @@ export async function getRecommendations(options: RecommendationOptions) {
       images: {
         orderBy: { sortOrder: "asc" },
       },
+      categoryRel: {
+        select: { name: true },
+      },
     },
     take: 50,
     orderBy: { createdAt: "desc" },
@@ -44,13 +47,13 @@ export async function getRecommendations(options: RecommendationOptions) {
   // Score the pool
   const scoredProducts = pool.map((product) => {
     let score = 0;
-    
+
     // Priority 1: Same subCategory (highest)
     if (subCategory && product.subCategory === subCategory) score += 3;
-    
-    // Priority 2: Same category
-    if (category && product.category === category) score += 2;
-    
+
+    // Priority 2: Same category name
+    if (category && product.categoryRel?.name === category) score += 2;
+
     // Priority 3: Same gender
     if (gender && product.gender === gender) score += 1;
 

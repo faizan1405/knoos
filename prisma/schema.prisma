@@ -41,7 +41,13 @@ model Product {
   slug             String  @unique @db.VarChar(255)
   description      String? @db.Text
   gender           String  @db.VarChar(10)
+  /**
+   * @deprecated Legacy display cache. Use categoryRel -> Category instead.
+   * This field is retained for migration backfill only.
+   * New code must NOT read or write this field.
+   */
   category         String? @db.VarChar(50)
+  categoryId       String? @db.VarChar(36)
   color            String? @db.VarChar(50)
   subCategory      String? @db.VarChar(50)
   upperMaterial    String? @db.VarChar(100)
@@ -68,9 +74,10 @@ model Product {
   cartItems  CartItem[]
   orderItems OrderItem[]
   reviews    Review[]
+  categoryRel Category? @relation("ProductCategory", fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([gender, status])
-  @@index([category])
+  @@index([categoryId])
   @@index([slug])
   @@index([status, createdAt])
 }
@@ -243,4 +250,24 @@ model Review {
 
   @@index([productId])
   @@index([userId])
+}
+
+/**
+ * Product category managed by admin.
+ * Products reference a Category via categoryId.
+ * The legacy Product.category string field is kept as a denormalized display cache
+ * during migration and will be removed once fully migrated.
+ */
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique @db.VarChar(50)
+  slug      String   @unique @db.VarChar(50)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @updatedAt @db.DateTime(0)
+
+  products Product[] @relation("ProductCategory")
+
+  @@index([sortOrder])
 }

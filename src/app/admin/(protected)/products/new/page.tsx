@@ -22,7 +22,7 @@ export default function AdminNewProductPage() {
   const [salePrice, setSalePrice] = useState("");
   const [sku, setSku] = useState("");
   const [status, setStatus] = useState("ACTIVE");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [color, setColor] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [upperMaterial, setUpperMaterial] = useState("");
@@ -34,10 +34,21 @@ export default function AdminNewProductPage() {
     { size: "", stock: "0", sku: "", price: "0", salePrice: "" },
   ]);
 
-  // Images
   const [images, setImages] = useState<string[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/categories")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!cancelled && data?.categories) setCategories(data.categories);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const generateSlug = () => {
     const s = name
@@ -134,7 +145,7 @@ export default function AdminNewProductPage() {
       salePrice: salePriceNum,
       sku,
       status,
-      category: category || null,
+      categoryId: categoryId || null,
       color: color || null,
       subCategory: subCategory || null,
       upperMaterial: upperMaterial || null,
@@ -289,13 +300,25 @@ export default function AdminNewProductPage() {
             {fieldErrors.description && <p className="text-red-600 text-xs mt-1">{fieldErrors.description}</p>}
           </div>
 
-          {/* New Specifications Grid */}
+          {/* Specifications Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="category" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
-              <input id="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)}
-                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.category ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. MEN BOOTS" />
-              {fieldErrors.category && <p className="text-red-600 text-xs mt-1">{fieldErrors.category}</p>}
+              <label htmlFor="categoryId" className="block font-mono text-xs uppercase tracking-wide mb-2">Category</label>
+              <select
+                id="categoryId"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.categoryId ? "border-red-300" : "border-brand-gray-200"}`}
+              >
+                <option value="">Select Category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              {fieldErrors.categoryId && <p className="text-red-600 text-xs mt-1">{fieldErrors.categoryId}</p>}
+              <Link href="/admin/categories" className="inline-block mt-2 text-xs text-brand-gray-500 hover:text-brand-black underline">
+                Manage Categories
+              </Link>
             </div>
             <div>
               <label htmlFor="color" className="block font-mono text-xs uppercase tracking-wide mb-2">Color</label>

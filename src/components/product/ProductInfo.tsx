@@ -8,8 +8,12 @@ import { loginWithGoogle } from "@/lib/auth-actions";
 import { motion } from "framer-motion";
 import { getVariantPrices, calculateDiscount } from "@/lib/pricing";
 
+type ProductWithCategory = Product & {
+  categoryRel?: { id: string; name: string; slug: string } | null;
+};
+
 interface ProductInfoProps {
-  product: Product;
+  product: ProductWithCategory;
   variants: ProductVariant[];
 }
 
@@ -226,12 +230,14 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       <motion.div variants={itemVariants} className="mt-12 pt-8 border-t border-brand-gray-100">
         <h3 className="font-serif text-xl mb-6 text-brand-black">Specifications</h3>
         <ul className="space-y-4 font-mono text-[11px] sm:text-xs text-brand-gray-500 uppercase tracking-widest">
-          {product.category && (
+          {(product as any).categoryRel?.name ? (
             <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
               <span>Category</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.category)}</span>
+              <span className="text-brand-black text-right">
+                {(product as any).categoryRel?.name}
+              </span>
             </li>
-          )}
+          ) : null}
           {product.subCategory && (
             <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
               <span>Sub Category</span>
