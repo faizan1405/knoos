@@ -61,9 +61,10 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
     await writeFile(filepath, buffer);
 
-    // Return the public URL path
+    // Return the public URL path (absolute URL so it passes Zod's .url() validation)
+    const baseUrl = `${request.headers.get("x-forwarded-proto") === "https" ? "https" : "http"}://${request.headers.get("host")}`;
     return NextResponse.json({
-      url: `/uploads/products/${filename}`,
+      url: `${baseUrl}/uploads/products/${filename}`,
       filename,
     });
   } catch (err) {
