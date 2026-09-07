@@ -9,6 +9,23 @@ const GENDERS = ["MEN", "WOMEN"] as const;
 
 type FieldErrors = Record<string, string>;
 
+function formatFieldLabel(path: string): string {
+  const parts = path.split(".");
+  const first = parts[0];
+  const idx = parts[1] ? parseInt(parts[1], 10) + 1 : null;
+  const field = parts[2] || parts[1] || "";
+
+  if (first === "images" && idx !== null && field) {
+    return `Image ${idx}: ${field}`;
+  }
+  if (first === "variants" && idx !== null && field) {
+    return `Variant ${idx}: ${field}`;
+  }
+  if (first === "variants") return "Variants";
+  if (field) return `${first}.${field}`;
+  return first;
+}
+
 interface Variant {
   id: string;
   size: string;
