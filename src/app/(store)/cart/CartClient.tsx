@@ -166,7 +166,7 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
                       <Link href={`/product/${item.slug}`} className="font-serif text-xl hover:text-brand-gray-500 transition-colors">
                         {item.productName}
                       </Link>
-                      <span className="font-mono text-sm">?{item.price.toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-sm">₹{item.price.toLocaleString('en-IN')}</span>
                     </div>
                     <p className="font-mono text-xs text-brand-gray-500 uppercase tracking-widest mb-4">
                       Size: {item.size}
@@ -238,7 +238,7 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
               initial={{ opacity: 0.5, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              ?{subtotal.toLocaleString('en-IN')}
+              ₹{subtotal.toLocaleString('en-IN')}
             </motion.span>
           </div>
           

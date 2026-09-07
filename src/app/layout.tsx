@@ -4,21 +4,21 @@ import "./globals.css";
 import { PageTransitionLoader } from "@/components/PageTransitionLoader";
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
   display: "swap",
   weight: ["300", "400", "500", "600"],
 });
 
 const playfair = Playfair_Display({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-serif",
   display: "swap",
   weight: ["400", "500", "600", "700"],
 });
 
 const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-mono",
   display: "swap",
 });

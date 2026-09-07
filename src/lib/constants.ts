@@ -109,3 +109,36 @@ export type CartItemWithRelations = Prisma.CartItemGetPayload<{
 export type OrderWithItems = Prisma.OrderGetPayload<{
   include: { items: true; user: { select: { name: true; email: true; image: true } } };
 }>;
+
+/**
+ * Normalizes a category string for consistent storage and comparison.
+ *
+ * Rules:
+ * - Trim leading/trailing whitespace
+ * - Lowercase
+ * - Collapse multiple spaces to a single space
+ *
+ * Then applies an explicit alias map for known variations.
+ * No English pluralization rules are applied.
+ */
+const CATEGORY_ALIASES: Record<string, string> = {
+  "casual": "casuals",
+};
+
+export function normalizeCategory(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const normalized = input.trim().toLowerCase().replace(/\s+/g, " ");
+  if (!normalized) return null;
+  return CATEGORY_ALIASES[normalized] ?? normalized;
+}
+
+/**
+ * Renders a display label from a stored normalized category value.
+ */
+export function displayCategory(stored: string | null | undefined): string {
+  if (!stored) return "";
+  return stored
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
-import { Prisma, Product, ProductImage } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { Product, ProductImage } from "@prisma/client";
+import { normalizeCategory } from "@/lib/constants";
 
 export type ProductWithImages = Product & {
   images: ProductImage[];
@@ -41,9 +43,12 @@ export async function getProducts(params: ProductSearchParams): Promise<ProductW
       where.gender = gender;
     }
 
-    // 3. Category
+    // 3. Category — match against normalized stored value
     if (category) {
-      where.category = category;
+      const normalizedCat = normalizeCategory(category);
+      if (normalizedCat) {
+        where.category = { equals: normalizedCat };
+      }
     }
 
     // 4. Size & Stock availability combined

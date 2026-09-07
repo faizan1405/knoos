@@ -9,7 +9,7 @@ import {
   productStatusSchema,
   mapZodErrors,
 } from "@/lib/validation/admin";
-import { Gender, ProductStatus } from "@/lib/constants";
+import { Gender, ProductStatus, normalizeCategory } from "@/lib/constants";
 
 // ─── GET: List products ──────────────────────────────────────────────────────
 
@@ -82,6 +82,11 @@ export async function POST(request: Request) {
   }
 
   const { images, variants, ...productData } = parsed.data;
+
+  // Normalize category to a canonical lowercase form for consistent filtering
+  if (productData.category) {
+    productData.category = normalizeCategory(productData.category as string);
+  }
 
   try {
     const product = await prisma.product.create({

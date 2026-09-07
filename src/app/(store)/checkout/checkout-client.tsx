@@ -141,6 +141,10 @@ export function CheckoutClient() {
         throw new Error(orderData.error || "Failed to create order");
       }
 
+      if (!(window as any).Razorpay) {
+        throw new Error("Payment gateway is not ready yet. Please try again in a moment.");
+      }
+
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
@@ -187,13 +191,13 @@ export function CheckoutClient() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (response: any) {
-        setError(`Payment failed: ${response.error.description}`);
+        setError(`Payment failed: ${response.error.description || "Unknown error"}`);
         setPaying(false);
       });
       rzp.open();
 
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An unexpected error occurred during payment.");
       setPaying(false);
     }
   };
@@ -230,7 +234,10 @@ export function CheckoutClient() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12 mb-24"
     >
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+      />
       
       <div className="lg:col-span-7 space-y-12">
         {error && (

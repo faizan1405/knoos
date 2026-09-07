@@ -68,6 +68,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
     Array<{ id?: string; imageUrl: string; sortOrder: number }>
   >([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Load product for edit mode
   useEffect(() => {
@@ -156,6 +157,53 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
     if (imageUrlInput.trim()) {
       setImages((imgs) => [...imgs, { imageUrl: imageUrlInput.trim(), sortOrder: imgs.length }]);
       setImageUrlInput("");
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File too large. Maximum 5MB allowed.");
+      return;
+    }
+
+    setUploadingImage(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      setImages((imgs) => [
+        ...imgs,
+        { imageUrl: data.url, sortOrder: imgs.length },
+      ]);
+    } catch (err: any) {
+      setError(err.message || "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -583,7 +631,6 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
         <div className="bg-white border border-brand-gray-200 p-6 mb-6">
           <h2 className="font-serif text-lg pb-4 border-b border-brand-gray-100 mb-5">
             Images
-            <span className="text-brand-gray-400 text-sm font-mono normal-case tracking-normal ml-2">Paste image URLs</span>
           </h2>
 
           {images.length > 0 && (
@@ -613,21 +660,52 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
             </div>
           )}
 
-          <div className="flex gap-2">
-            <input
-              type="url"
-              value={imageUrlInput}
-              onChange={(e) => setImageUrlInput(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="flex-1 border border-brand-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
-            />
-            <button
-              type="button"
-              onClick={addImage}
-              className="px-4 border border-brand-gray-200 text-xs font-mono uppercase hover:border-brand-black transition-colors"
-            >
-              Add
-            </button>
+          {/* File Upload */}
+          <div className="mb-4">
+            <label className="block font-mono text-xs uppercase tracking-wide text-brand-gray-500 mb-2">
+              Upload Image
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:border-0 file:text-sm file:font-mono file:uppercase tracking-wide
+                  file:bg-brand-black file:text-white
+                  hover:file:bg-brand-gray-800
+                  disabled:opacity-50"
+              />
+              {uploadingImage && (
+                <span className="text-xs text-brand-gray-500 font-mono uppercase">Uploading...</span>
+              )}
+            </div>
+            <p className="text-xs text-brand-gray-400 mt-1">JPG, PNG, WEBP up to 5MB</p>
+          </div>
+
+          {/* URL Input */}
+          <div>
+            <label className="block font-mono text-xs uppercase tracking-wide text-brand-gray-500 mb-2">
+              Or paste image URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={imageUrlInput}
+                onChange={(e) => setImageUrlInput(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="flex-1 border border-brand-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-brand-black transition-colors"
+              />
+              <button
+                type="button"
+                onClick={addImage}
+                className="px-4 border border-brand-gray-200 text-xs font-mono uppercase hover:border-brand-black transition-colors"
+              >
+                Add
+              </button>
+            </div>
           </div>
         </div>
 
