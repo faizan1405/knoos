@@ -13,10 +13,12 @@ interface Category {
 
 interface CategoryFormData {
   name: string;
+  slug: string;
+  isActive: boolean;
   sortOrder: number;
 }
 
-const emptyForm: CategoryFormData = { name: "", sortOrder: 0 };
+const emptyForm: CategoryFormData = { name: "", slug: "", isActive: true, sortOrder: 0 };
 
 export function CategoriesClient() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,15 +52,19 @@ export function CategoriesClient() {
   }, [fetchCategories]);
 
   const handleAdd = () => {
-    setEditingId(null);
+    setEditingId("__new__");
     setFormData(emptyForm);
     setFormError(null);
   };
 
   const handleEdit = (cat: Category) => {
     setEditingId(cat.id);
-    setFormData({ name: cat.name, sortOrder: cat.sortOrder });
+    setFormData({ name: cat.name, slug: cat.slug, isActive: cat.isActive, sortOrder: cat.sortOrder });
     setFormError(null);
+  };
+
+  const handleNameChange = (name: string) => {
+    setFormData((f) => ({ ...f, name, slug: name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/^-+|-+$/g, "") }));
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -66,8 +72,10 @@ export function CategoriesClient() {
     setSaving(true);
     setFormError(null);
 
+    const isNew = editingId === "__new__";
+
     try {
-      if (editingId) {
+      if (!isNew) {
         const res = await fetch(`/api/admin/categories/${editingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -191,10 +199,10 @@ export function CategoriesClient() {
       )}
 
       {/* Add/Edit Form */}
-      {(editingId !== null || formData.name !== "" || saving) && (
+      {editingId !== null && (
         <form onSubmit={handleSave} className="mb-6 p-4 border border-gray-200 bg-white">
           <h2 className="font-mono text-xs uppercase tracking-wide text-gray-500 mb-3">
-            {editingId ? "Edit Category" : "New Category"}
+            {editingId === "__new__" ? "New Category" : "Edit Category"}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -206,13 +214,30 @@ export function CategoriesClient() {
                 id="name"
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData((f) => ({ ...f, name: e.target.value }))}
+                onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g. Casuals"
                 className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
                 required
                 maxLength={50}
               />
             </div>
+            <div>
+              <label htmlFor="slug" className="block font-mono text-xs uppercase tracking-wide mb-1">
+                Slug
+              </label>
+              <input
+                id="slug"
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData((f) => ({ ...f, slug: e.target.value.toLowerCase().trim().replace(/[^\w-]/g, "").replace(/--+/g, "-").replace(/^-+|-+$/g, "") }))}
+                placeholder="auto-generated from name"
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors font-mono"
+                maxLength={50}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label htmlFor="sortOrder" className="block font-mono text-xs uppercase tracking-wide mb-1">
                 Sort Order
@@ -226,6 +251,33 @@ export function CategoriesClient() {
                 min={0}
               />
             </div>
+            <div>
+              <label className="block font-mono text-xs uppercase tracking-wide mb-1">Status</label>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData((f) => ({ ...f, isActive: true }))}
+                  className={`px-3 py-2 text-xs font-mono uppercase tracking-wide border transition-colors ${
+                    formData.isActive
+                      ? "bg-green-50 border-green-600 text-green-700"
+                      : "border-gray-200 text-gray-500 hover:border-black"
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData((f) => ({ ...f, isActive: false }))}
+                  className={`px-3 py-2 text-xs font-mono uppercase tracking-wide border transition-colors ${
+                    !formData.isActive
+                      ? "bg-gray-100 border-gray-600 text-gray-700"
+                      : "border-gray-200 text-gray-500 hover:border-black"
+                  }`}
+                >
+                  Inactive
+                </button>
+              </div>
+            </div>
           </div>
 
           {formError && (
@@ -238,7 +290,7 @@ export function CategoriesClient() {
               disabled={saving}
               className="px-4 py-2 bg-black text-white text-xs font-mono uppercase tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-              {saving ? "Saving..." : editingId ? "Update" : "Create"}
+              {saving ? "Saving..." : editingId === "__new__" ? "Create" : "Update"}
             </button>
             <button
               type="button"
