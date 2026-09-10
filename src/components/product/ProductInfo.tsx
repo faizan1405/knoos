@@ -221,8 +221,8 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       >
         {authLoading ? "Loading..." :
          loading ? "Adding..." :
-         variants.length > 0 && !selectedVariantId ? "Select a Size" : 
-         selectedVariantId && stockAvailable <= 0 ? "Out of Stock" :
+         variants.length > 0 && !selectedVariantId ? "Select a Size" :
+         selectedVariantId && stockAvailable <= 0 ? "Unavailable" :
          !user ? "Sign in to Add" :
          "Add to Cart"}
       </motion.button>

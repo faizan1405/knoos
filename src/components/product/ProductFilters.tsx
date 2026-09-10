@@ -85,11 +85,10 @@ export function ProductFilters() {
 
   const activeCategory = searchParams.get("category");
   const activeSize = searchParams.get("size");
-  const activeStock = searchParams.get("stock");
   const activeSort = searchParams.get("sort") || "Featured";
 
   const hasFilters =
-    activeCategory || activeSize || activeStock || searchParams.get("min") || searchParams.get("max") || searchParams.get("sort");
+    activeCategory || activeSize || searchParams.get("min") || searchParams.get("max") || searchParams.get("sort");
 
   return (
     <div className="hidden lg:block w-64 flex-shrink-0 space-y-10 pr-8">
@@ -113,12 +112,6 @@ export function ProductFilters() {
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-brand-gray-50 text-xs uppercase font-mono rounded-full">
                 Size {activeSize}
                 <button onClick={() => handleFilterChange("size", "")} className="hover:text-red-500">&times;</button>
-              </span>
-            )}
-            {activeStock && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-brand-gray-50 text-xs uppercase font-mono rounded-full">
-                {activeStock}
-                <button onClick={() => handleFilterChange("stock", "")} className="hover:text-red-500">&times;</button>
               </span>
             )}
             {(searchParams.get("min") || searchParams.get("max")) && (
@@ -238,24 +231,7 @@ export function ProductFilters() {
       </div>
 
       {/* Stock */}
-      <div>
-        <h3 className="font-serif text-lg mb-4">Availability</h3>
-        <div className="space-y-2">
-          {["In Stock", "Out of Stock"].map((status) => (
-            <label key={status} className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="radio"
-                name="stock"
-                value={status}
-                checked={activeStock === status}
-                onChange={() => handleFilterChange("stock", status)}
-                className="w-4 h-4 accent-black border-brand-gray-200"
-              />
-              <span className="text-sm font-mono text-brand-gray-600 group-hover:text-black transition-colors">{status}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      {/* Stock filter removed — inventory validation still enforced server-side */}
     </div>
   );
 }

@@ -173,7 +173,7 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
                     </p>
                     
                     {isUnavailable && <p className="text-red-500 text-sm mb-2 font-medium">This product is no longer available.</p>}
-                    {!isUnavailable && isOutOfStock && <p className="text-red-500 text-sm mb-2 font-medium">This size is currently out of stock.</p>}
+                    {!isUnavailable && isOutOfStock && <p className="text-red-500 text-sm mb-2 font-medium">Selected size is unavailable.</p>}
                     {!isUnavailable && !isOutOfStock && exceedsStock && (
                       <p className="text-orange-500 text-sm mb-2 font-medium">
                         Only {item.stock} available. Please reduce your quantity.

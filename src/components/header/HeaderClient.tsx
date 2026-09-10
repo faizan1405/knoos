@@ -4,21 +4,30 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Users, User, Phone, Search, ShoppingBag, X } from "lucide-react";
+import { User, Phone, Search, ShoppingBag, X, ChevronDown } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface HeaderClientProps {
   cartCount: number;
   userName?: string | null;
   signInAction: () => void;
   signOutAction: () => void;
+  categories: Category[];
 }
 
-export function HeaderClient({ cartCount, userName, signInAction, signOutAction }: HeaderClientProps) {
+export function HeaderClient({ cartCount, userName, signInAction, signOutAction, categories }: HeaderClientProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isShopByOpen, setIsShopByOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const shopByRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,13 +45,26 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isSearchOpen) {
-        setIsSearchOpen(false);
+      if (e.key === "Escape") {
+        if (isSearchOpen) setIsSearchOpen(false);
+        if (isShopByOpen) setIsShopByOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen]);
+  }, [isSearchOpen, isShopByOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (shopByRef.current && !shopByRef.current.contains(e.target as Node)) {
+        setIsShopByOpen(false);
+      }
+    }
+    if (isShopByOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isShopByOpen]);
 
   return (
     <>
@@ -58,27 +80,82 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
             <Image
               src="/knoos-logo.png"
               alt="KNOOS"
-              width={120}
-              height={80}
+              width={140}
+              height={90}
               priority
-              className="h-8 md:h-9 w-auto object-contain"
+              className="h-10 md:h-11 w-auto object-contain"
             />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              <Home size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              <span>Home</span>
-            </Link>
-            <Link href="/men" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              <User size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              <span>Men</span>
-            </Link>
-            <Link href="/women" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              <Users size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              <span>Women</span>
-            </Link>
-            <Link href="/contact" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
+            {/* Shop By dropdown */}
+            <div ref={shopByRef} className="relative">
+              <button
+                onClick={() => setIsShopByOpen(!isShopByOpen)}
+                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+              >
+                <span>Shop By</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${isShopByOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isShopByOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="absolute top-full left-0 mt-2 w-48 bg-white border border-brand-gray-200 shadow-lg rounded-sm py-2 z-50"
+                  >
+                    <Link
+                      href="/men"
+                      onClick={() => setIsShopByOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                    >
+                      Men
+                    </Link>
+                    <Link
+                      href="/women"
+                      onClick={() => setIsShopByOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                    >
+                      Women
+                    </Link>
+                    {categories.length > 0 && (
+                      <>
+                        <div className="border-t border-brand-gray-100 my-1" />
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            href={`/search?category=${cat.slug}`}
+                            onClick={() => setIsShopByOpen(false)}
+                            className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </>
+                    )}
+                    <div className="border-t border-brand-gray-100 my-1" />
+                    <Link
+                      href="/search?sort=Newest"
+                      onClick={() => setIsShopByOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                    >
+                      New Arrivals
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <Link
+              href="/contact"
+              className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+            >
               <Phone size={14} className="group-hover:-translate-y-0.5 transition-transform" />
               <span>Contact</span>
             </Link>
@@ -194,13 +271,14 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction 
         )}
       </AnimatePresence>
 
-      <MobileMenu 
-        isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
         cartCount={cartCount}
         userName={userName}
         signInAction={signInAction}
         signOutAction={signOutAction}
+        categories={categories}
       />
     </>
   );

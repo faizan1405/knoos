@@ -16,25 +16,25 @@ export const metadata = {
 
 export default async function HomePage() {
   const allProducts = await getProducts({});
-  
+
   // Since we don't have actual sales data, we'll use a curated selection (first 4 products) as a fallback for Best Sellers.
   const bestSellers = allProducts.slice(0, 4);
 
   return (
     <main>
       <Hero />
-      
+
       <section className="py-24 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto">
           <RevealText as="h2" text="Shop by Category" className="font-serif text-3xl md:text-4xl mb-12" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <RevealImage delay={0} scaleFrom={1.04} className="h-full">
               <Link href="/men" className="group block relative h-full aspect-[4/5] bg-brand-gray-100 overflow-hidden">
-                <Image 
-                  src="/images/men-category.jpg" 
-                  alt="Men's Footwear" 
-                  fill 
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" 
+                <Image
+                  src="/images/men-category.jpg"
+                  alt="Men's Footwear"
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
@@ -49,11 +49,11 @@ export default async function HomePage() {
             </RevealImage>
             <RevealImage delay={0.1} scaleFrom={1.04} className="h-full">
               <Link href="/women" className="group block relative h-full aspect-[4/5] bg-brand-gray-100 overflow-hidden">
-                <Image 
-                  src="/images/women-category.jpg" 
-                  alt="Women's Footwear" 
-                  fill 
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" 
+                <Image
+                  src="/images/women-category.jpg"
+                  alt="Women's Footwear"
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
@@ -105,7 +105,7 @@ export default async function HomePage() {
             <p className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4">WHY KNOOS</p>
           </Reveal>
           <RevealText as="h2" text="MADE WITH INTENT" delay={0.1} className="font-serif text-3xl md:text-4xl mb-16 uppercase" />
-          
+
           <StaggerContainer staggerDelay={0.08} delayChildren={0.2} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             <StaggerItem yOffset={25} className="flex flex-col items-start">
               <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
@@ -128,7 +128,7 @@ export default async function HomePage() {
             <StaggerItem yOffset={25} className="flex flex-col items-start">
               <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3">Everyday Style</h3>
@@ -154,6 +154,23 @@ export default async function HomePage() {
               <p className="text-brand-gray-600 text-sm leading-relaxed">Flexible construction designed around natural movement.</p>
             </StaggerItem>
           </StaggerContainer>
+        </div>
+      </section>
+
+      {/* VIDEO — above "Finished with care." */}
+      <section className="relative bg-brand-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative aspect-video w-full overflow-hidden">
+            <video
+              className="absolute inset-0 h-full w-full object-cover"
+              controls
+              preload="metadata"
+              poster="/images/process-footwear.jpg"
+            >
+              <source src="/videos/knoos-process.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       </section>
 
@@ -197,7 +214,7 @@ export default async function HomePage() {
               <p className="text-brand-gray-600">Two ways to receive your pair. Charges are shown at checkout and kept up to date by our team.</p>
             </Reveal>
           </div>
-          
+
           <StaggerContainer staggerDelay={0.1} className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <StaggerItem yOffset={30} className="bg-white rounded-3xl p-8 md:p-12 border-2 border-black relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="absolute top-0 right-0 bg-black text-white text-xs font-mono px-4 py-1 tracking-widest uppercase rounded-bl-xl">
@@ -210,7 +227,7 @@ export default async function HomePage() {
                 Priority dispatch with express courier handling and live tracking.
               </p>
             </StaggerItem>
-            
+
             <StaggerItem yOffset={30} className="bg-white rounded-3xl p-8 md:p-12 border border-brand-gray-200 hover:border-brand-gray-300 transition-colors">
               <h3 className="font-mono text-sm tracking-widest uppercase mb-4 text-brand-gray-500">NORMAL DELIVERY</h3>
               <p className="font-serif text-4xl mb-2">₹49</p>
@@ -225,4 +242,3 @@ export default async function HomePage() {
     </main>
   );
 }
-

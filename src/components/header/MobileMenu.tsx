@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { easings } from "../motion/constants";
+import { ChevronDown } from "lucide-react";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -12,9 +19,20 @@ interface MobileMenuProps {
   userName?: string | null;
   signInAction: () => void;
   signOutAction: () => void;
+  categories: Category[];
 }
 
-export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction, signOutAction }: MobileMenuProps) {
+export function MobileMenu({
+  isOpen,
+  onClose,
+  cartCount,
+  userName,
+  signInAction,
+  signOutAction,
+  categories,
+}: MobileMenuProps) {
+  const [isShopByOpen, setIsShopByOpen] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -50,15 +68,6 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction,
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.5, ease: easings.premium }}
             >
-              <Link href="/" onClick={onClose} className="font-serif text-4xl">
-                Home
-              </Link>
-            </motion.div>
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: easings.premium }}
-            >
               <Link href="/men" onClick={onClose} className="font-serif text-4xl">
                 Men
               </Link>
@@ -66,12 +75,61 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction,
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.15, duration: 0.5, ease: easings.premium }}
+              transition={{ delay: 0.1, duration: 0.5, ease: easings.premium }}
             >
               <Link href="/women" onClick={onClose} className="font-serif text-4xl">
                 Women
               </Link>
             </motion.div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.5, ease: easings.premium }}
+              className="flex flex-col items-center gap-1"
+            >
+              <button
+                onClick={() => setIsShopByOpen(!isShopByOpen)}
+                className="font-serif text-4xl flex items-center gap-2"
+              >
+                Shop By
+                <ChevronDown
+                  size={20}
+                  className={`transition-transform duration-200 ${isShopByOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <AnimatePresence>
+                {isShopByOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden flex flex-col items-center gap-2 mt-2"
+                  >
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/search?category=${cat.slug}`}
+                        onClick={onClose}
+                        className="font-serif text-xl text-brand-gray-500 hover:text-black transition-colors"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                    <div className="border-t border-brand-gray-200 w-16 my-1" />
+                    <Link
+                      href="/search?sort=Newest"
+                      onClick={onClose}
+                      className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 hover:text-black transition-colors"
+                    >
+                      New Arrivals
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -81,7 +139,7 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction,
                 Contact
               </Link>
             </motion.div>
-            
+
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -107,8 +165,8 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction,
                   </button>
                 </>
               ) : (
-                <button 
-                  onClick={() => { signInAction(); onClose(); }} 
+                <button
+                  onClick={() => { signInAction(); onClose(); }}
                   className="font-mono text-sm uppercase tracking-widest text-brand-gray-600"
                 >
                   Sign In
@@ -121,4 +179,3 @@ export function MobileMenu({ isOpen, onClose, cartCount, userName, signInAction,
     </AnimatePresence>
   );
 }
-

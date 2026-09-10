@@ -4,7 +4,7 @@ import { HeaderClient } from "./HeaderClient";
 
 export async function Header() {
   const session = await auth();
-  
+
   let cartCount = 0;
   if (session?.user?.id) {
     const cart = await prisma.cart.findUnique({
@@ -15,6 +15,12 @@ export async function Header() {
       cartCount = cart.items.reduce((acc, item) => acc + item.quantity, 0);
     }
   }
+
+  const categories = await prisma.category.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, name: true, slug: true },
+  });
 
   const signInAction = async () => {
     "use server";
@@ -27,11 +33,12 @@ export async function Header() {
   };
 
   return (
-    <HeaderClient 
+    <HeaderClient
       cartCount={cartCount}
       userName={session?.user?.name}
       signInAction={signInAction}
       signOutAction={signOutAction}
+      categories={categories}
     />
   );
 }
