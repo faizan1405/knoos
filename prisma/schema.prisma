@@ -167,6 +167,9 @@ model Order {
   id                String   @id @default(cuid())
   userId            String   @db.VarChar(36)
   subtotal          Int
+  couponCode        String?  @db.VarChar(50)
+  discountAmount    Int      @default(0)
+  couponReservationActive Boolean @default(false)
   deliveryCharge    Int
   total             Int
   deliveryMethod    String   @db.VarChar(20)
@@ -288,6 +291,7 @@ model Coupon {
   endDate        DateTime? @db.DateTime(0)
   usageLimit     Int?
   usageCount     Int       @default(0)
+  reservedCount  Int       @default(0)
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now()) @db.DateTime(0)
   updatedAt      DateTime  @updatedAt @db.DateTime(0)
