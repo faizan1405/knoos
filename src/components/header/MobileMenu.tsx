@@ -130,15 +130,6 @@ export function MobileMenu({
               </AnimatePresence>
             </motion.div>
 
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5, ease: easings.premium }}
-            >
-              <Link href="/contact" onClick={onClose} className="font-serif text-4xl">
-                Contact
-              </Link>
-            </motion.div>
 
             <motion.div
               initial={{ y: 20, opacity: 0 }}

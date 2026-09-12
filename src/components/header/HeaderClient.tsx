@@ -152,13 +152,6 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
               </AnimatePresence>
             </div>
 
-            <Link
-              href="/contact"
-              className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
-            >
-              <Phone size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              <span>Contact</span>
-            </Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-6">
