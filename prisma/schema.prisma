@@ -271,3 +271,27 @@ model Category {
 
   @@index([sortOrder])
 }
+
+/**
+ * Admin-managed coupon definition.
+ * Monetary values are stored as whole INR rupees.
+ * Redemption tracking and order snapshots are added when checkout integration is introduced.
+ */
+model Coupon {
+  id             String    @id @default(cuid())
+  code           String    @unique @db.VarChar(50)
+  type           String    @db.VarChar(20)
+  discountValue  Int
+  minOrderAmount Int?
+  maxDiscount    Int?
+  startDate      DateTime? @db.DateTime(0)
+  endDate        DateTime? @db.DateTime(0)
+  usageLimit     Int?
+  usageCount     Int       @default(0)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now()) @db.DateTime(0)
+  updatedAt      DateTime  @updatedAt @db.DateTime(0)
+
+  @@index([isActive])
+  @@index([startDate, endDate])
+}
