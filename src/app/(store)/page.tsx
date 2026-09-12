@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/db";
 import { Hero } from "@/components/hero/Hero";
 import { Reveal } from "@/components/motion/Reveal";
 import { RevealText } from "@/components/motion/RevealText";
@@ -19,6 +20,21 @@ export default async function HomePage() {
 
   // Since we don't have actual sales data, we'll use a curated selection (first 4 products) as a fallback for Best Sellers.
   const bestSellers = allProducts.slice(0, 4);
+
+  // Exact Prisma query for New Arrivals
+  const newArrivals = await prisma.product.findMany({
+    where: { status: "ACTIVE" },
+    orderBy: { createdAt: "desc" },
+    take: 6,
+    include: {
+      images: {
+        orderBy: { sortOrder: "asc" },
+      },
+      categoryRel: {
+        select: { id: true, name: true, slug: true },
+      },
+    },
+  });
 
   return (
     <main>
@@ -89,6 +105,32 @@ export default async function HomePage() {
             </div>
             <StaggerContainer staggerDelay={0.1} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
               {bestSellers.map((product) => (
+                <StaggerItem key={product.id} yOffset={30}>
+                  <ProductCard product={product} />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </section>
+      )}
+
+      {/* NEW ARRIVALS */}
+      {newArrivals.length > 0 && (
+        <section className="py-24 px-6 md:px-12 lg:px-24 bg-white border-t border-brand-gray-100">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+              <div>
+                <RevealText as="p" text="JUST IN" className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4" />
+                <RevealText as="h2" text="New Arrivals" className="font-serif text-3xl md:text-4xl" />
+              </div>
+              <Reveal delay={0.25}>
+                <Link href="/search?sort=Newest" className="font-mono text-xs uppercase tracking-widest text-brand-gray-500 hover:text-brand-black transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-black">
+                  View All <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+                </Link>
+              </Reveal>
+            </div>
+            <StaggerContainer staggerDelay={0.1} className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              {newArrivals.map((product) => (
                 <StaggerItem key={product.id} yOffset={30}>
                   <ProductCard product={product} />
                 </StaggerItem>
