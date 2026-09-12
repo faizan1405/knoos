@@ -204,41 +204,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 3 — DELIVERY */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <RevealText as="p" text="DELIVERY" className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4" />
-            <RevealText as="h2" text="CHOOSE YOUR PACE" delay={0.1} className="font-serif text-3xl md:text-4xl mb-6 uppercase" />
-            <Reveal delay={0.2}>
-              <p className="text-brand-gray-600">Two ways to receive your pair. Charges are shown at checkout and kept up to date by our team.</p>
-            </Reveal>
-          </div>
-
-          <StaggerContainer staggerDelay={0.1} className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <StaggerItem yOffset={30} className="bg-white rounded-3xl p-8 md:p-12 border-2 border-black relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div className="absolute top-0 right-0 bg-black text-white text-xs font-mono px-4 py-1 tracking-widest uppercase rounded-bl-xl">
-                Primary
-              </div>
-              <h3 className="font-mono text-sm tracking-widest uppercase mb-4 text-brand-gray-500">FAST DELIVERY</h3>
-              <p className="font-serif text-4xl mb-2">₹199</p>
-              <p className="text-blue-600 font-medium mb-6">1–2 business days</p>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">
-                Priority dispatch with express courier handling and live tracking.
-              </p>
-            </StaggerItem>
-
-            <StaggerItem yOffset={30} className="bg-white rounded-3xl p-8 md:p-12 border border-brand-gray-200 hover:border-brand-gray-300 transition-colors">
-              <h3 className="font-mono text-sm tracking-widest uppercase mb-4 text-brand-gray-500">NORMAL DELIVERY</h3>
-              <p className="font-serif text-4xl mb-2">₹49</p>
-              <p className="text-black font-medium mb-6">4–6 business days</p>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">
-                Standard dispatch with tracked delivery across India.
-              </p>
-            </StaggerItem>
-          </StaggerContainer>
-        </div>
-      </section>
     </main>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
-import { Camera, Mail, Phone, MessageCircle, Home, User, Users, Info, HelpCircle, Shield, FileText } from "lucide-react";
+import { Camera, Mail, Phone, MessageCircle, Home, User, Users, Info, HelpCircle, Shield, FileText, ShoppingBag } from "lucide-react";
 
 export function Footer() {
   return (
@@ -48,9 +48,9 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
-                  <Home size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
-                  <span>Home</span>
+                <Link href="/search" className="group flex items-center gap-2 text-sm text-brand-gray-600 hover:text-black transition-colors">
+                  <ShoppingBag size={14} className="group-hover:scale-110 transition-transform text-brand-gray-400" />
+                  <span>Shop By</span>
                 </Link>
               </li>
               <li>

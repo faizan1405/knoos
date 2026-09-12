@@ -88,10 +88,13 @@ export default function CustomerOrdersPage() {
             {error}
           </div>
         ) : orders.length === 0 ? (
-          <div className="py-12 text-center text-brand-gray-500">
-            <p className="mb-4">You have not placed any orders yet.</p>
-            <Link href="/" className="bg-black text-white px-6 py-2 hover:bg-gray-800 transition-colors">
-              Continue Shopping
+          <div className="py-24 text-center">
+            <h2 className="font-serif text-3xl mb-4">No orders yet</h2>
+            <p className="text-brand-gray-500 mb-8 max-w-md mx-auto">
+              Your orders will appear here once you make a purchase.
+            </p>
+            <Link href="/search" className="inline-block bg-black text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors">
+              START SHOPPING
             </Link>
           </div>
         ) : (
