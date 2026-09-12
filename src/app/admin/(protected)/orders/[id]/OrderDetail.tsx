@@ -19,6 +19,8 @@ interface Order {
   id: string;
   userId: string;
   subtotal: number;
+  couponCode: string | null;
+  discountAmount: number;
   deliveryCharge: number;
   total: number;
   deliveryMethod: string;
@@ -147,6 +149,12 @@ export default function AdminOrderDetail({ order }: OrderDetailProps) {
                 <span className="text-brand-gray-500 font-mono">Subtotal</span>
                 <span className="font-mono">{formatINR(order.subtotal)}</span>
               </div>
+              {order.discountAmount > 0 && (
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-brand-gray-500 font-mono">Coupon ({order.couponCode})</span>
+                  <span className="font-mono">-{formatINR(order.discountAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-brand-gray-500 font-mono">Delivery ({order.deliveryMethod})</span>
                 <span className="font-mono">{formatINR(order.deliveryCharge)}</span>

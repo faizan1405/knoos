@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
 import { loginWithGoogle } from "@/lib/auth-actions";
 import { ProductRecommendations } from "@/components/product/ProductRecommendations";
+import { CouponEntry } from "@/components/cart/CouponEntry";
+import { APPLIED_COUPON_STORAGE_KEY, type CouponApplication } from "@/lib/coupon";
 
 interface Address {
   id: string;
@@ -45,9 +47,46 @@ export function CheckoutClient() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [coupon, setCoupon] = useState<CouponApplication | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({ name: "", phone: "", address: "", city: "", state: "", pincode: "" });
+
+  const validateCoupon = useCallback(async (code: string) => {
+    setApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to apply coupon");
+
+      setCoupon(data);
+      setCouponCode(data.code);
+      localStorage.setItem(APPLIED_COUPON_STORAGE_KEY, data.code);
+      return data as CouponApplication;
+    } catch (validationError) {
+      setCoupon(null);
+      localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
+      setCouponError(validationError instanceof Error ? validationError.message : "Unable to apply coupon");
+      return null;
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }, []);
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
+    localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -80,6 +119,12 @@ export function CheckoutClient() {
             .then(data => setRecommendations(data))
             .catch(err => console.error("Failed to load recommendations", err));
         }
+
+        const storedCouponCode = localStorage.getItem(APPLIED_COUPON_STORAGE_KEY);
+        if (storedCouponCode && cartData?.items?.length > 0) {
+          setCouponCode(storedCouponCode);
+          await validateCoupon(storedCouponCode);
+        }
       } catch (err) {
         setError("Failed to load checkout data.");
       } finally {
@@ -87,10 +132,16 @@ export function CheckoutClient() {
       }
     }
     loadData();
-  }, [router]);
+  }, [router, validateCoupon]);
 
   const deliveryCharge = deliveryMethod === "FAST" ? 149 : 100;
-  const total = (cart?.subtotal || 0) + deliveryCharge;
+  const discountAmount = coupon?.discountAmount ?? 0;
+  const total = (cart?.subtotal || 0) - discountAmount + deliveryCharge;
+
+  const applyCoupon = (event: React.FormEvent) => {
+    event.preventDefault();
+    void validateCoupon(couponCode);
+  };
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,12 +183,21 @@ export function CheckoutClient() {
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deliveryMethod, addressId: selectedAddressId }),
+        body: JSON.stringify({
+          deliveryMethod,
+          addressId: selectedAddressId,
+          couponCode: coupon?.code,
+        }),
       });
 
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
+        if (orderData.code && coupon) {
+          setCoupon(null);
+          localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
+          setCouponError(orderData.error);
+        }
         throw new Error(orderData.error || "Failed to create order");
       }
 
@@ -165,6 +225,7 @@ export function CheckoutClient() {
             });
             const verifyData = await verifyRes.json();
             if (verifyRes.ok && verifyData.success) {
+              localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
               router.push(`/account/orders/${orderData.orderId}`);
             } else {
               setError(verifyData.error || "Payment verification failed.");
@@ -351,11 +412,30 @@ export function CheckoutClient() {
             ))}
           </div>
 
+          <CouponEntry
+            code={couponCode}
+            application={coupon}
+            error={couponError}
+            applying={applyingCoupon}
+            onCodeChange={(code) => {
+              setCouponCode(code);
+              setCouponError(null);
+            }}
+            onApply={applyCoupon}
+            onRemove={removeCoupon}
+          />
+
           <div className="border-t pt-4 space-y-2 mb-6">
             <div className="flex justify-between">
               <span className="text-gray-600">Subtotal</span>
               <span>₹{cart.subtotal.toLocaleString("en-IN")}</span>
             </div>
+            {coupon && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Coupon discount</span>
+                <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-600">Delivery</span>
               <span>₹{deliveryCharge.toLocaleString("en-IN")}</span>

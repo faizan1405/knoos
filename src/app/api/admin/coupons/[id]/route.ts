@@ -100,11 +100,17 @@ export async function DELETE(
     return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
   }
 
-  if (coupon.usageCount > 0) {
+  const orderSnapshotCount = await prisma.order.count({
+    where: { couponCode: coupon.code },
+  });
+
+  if (coupon.usageCount > 0 || coupon.reservedCount > 0 || orderSnapshotCount > 0) {
     return NextResponse.json(
       {
-        error: `Coupon '${coupon.code}' has recorded usage and cannot be deleted. Deactivate it instead.`,
+        error: `Coupon '${coupon.code}' has order history or active reservations and cannot be deleted. Deactivate it instead.`,
         usageCount: coupon.usageCount,
+        reservedCount: coupon.reservedCount,
+        orderSnapshotCount,
       },
       { status: 409 }
     );

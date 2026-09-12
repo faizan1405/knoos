@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import { prisma } from "@/lib/db";
+import { finalizePaidOrder } from "@/lib/finalize-paid-order";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -21,38 +22,15 @@ export async function POST(request: Request) {
 
       const order = await prisma.order.findFirst({
         where: { razorpayOrderId },
-        include: { items: true },
       });
 
       if (!order) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
 
-      await prisma.$transaction(async (tx) => {
-        const currentOrder = await tx.order.findUnique({ where: { id: order.id } });
-        if (currentOrder?.paymentStatus === "PAID") return;
-
-        await tx.order.update({
-          where: { id: order.id },
-          data: { paymentStatus: "PAID", orderStatus: "PROCESSING", razorpayPaymentId },
-        });
-
-        for (const item of order.items) {
-          if (item.productId) {
-            const variant = await tx.productVariant.findFirst({
-              where: { productId: item.productId, size: item.size }
-            });
-            if (variant) {
-              await tx.productVariant.update({
-                where: { id: variant.id },
-                data: { stock: { decrement: item.quantity } }
-              });
-            }
-          }
-        }
-        
-        // Also clear cart just in case
-        await tx.cart.deleteMany({ where: { userId: order.userId } });
+      await finalizePaidOrder({
+        orderId: order.id,
+        razorpayPaymentId,
       });
 
       return NextResponse.json({ received: true });

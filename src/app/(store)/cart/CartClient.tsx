@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { CouponEntry } from "@/components/cart/CouponEntry";
+import { APPLIED_COUPON_STORAGE_KEY, type CouponApplication } from "@/lib/coupon";
 
 interface CartItemData {
   id: string;
@@ -30,7 +32,57 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
   const [items, setItems] = useState(initialItems);
   const [subtotal, setSubtotal] = useState(initialSubtotal);
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+  const [couponCode, setCouponCode] = useState("");
+  const [coupon, setCoupon] = useState<CouponApplication | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const router = useRouter();
+
+  const validateCoupon = useCallback(async (code: string) => {
+    setApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to apply coupon");
+
+      setCoupon(data);
+      setCouponCode(data.code);
+      localStorage.setItem(APPLIED_COUPON_STORAGE_KEY, data.code);
+      return data as CouponApplication;
+    } catch (validationError) {
+      setCoupon(null);
+      localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
+      setCouponError(validationError instanceof Error ? validationError.message : "Unable to apply coupon");
+      return null;
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedCode = localStorage.getItem(APPLIED_COUPON_STORAGE_KEY);
+    if (storedCode) {
+      setCouponCode(storedCode);
+      void validateCoupon(storedCode);
+    }
+  }, [validateCoupon]);
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
+    localStorage.removeItem(APPLIED_COUPON_STORAGE_KEY);
+  };
+
+  const applyCoupon = (event: React.FormEvent) => {
+    event.preventDefault();
+    void validateCoupon(couponCode);
+  };
 
   const handleQuantityUpdate = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -57,16 +109,14 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
         throw new Error(data.error || "Failed to update quantity");
       }
 
-      setItems(prev => {
-        const next = prev.map(i => {
-          if (i.id === itemId) {
-            return { ...i, quantity: newQuantity, total: i.price * newQuantity };
-          }
-          return i;
-        });
-        setSubtotal(next.reduce((sum, i) => sum + i.total, 0));
-        return next;
-      });
+      const nextItems = items.map((currentItem) =>
+        currentItem.id === itemId
+          ? { ...currentItem, quantity: newQuantity, total: currentItem.price * newQuantity }
+          : currentItem
+      );
+      setItems(nextItems);
+      setSubtotal(nextItems.reduce((sum, currentItem) => sum + currentItem.total, 0));
+      if (coupon) await validateCoupon(coupon.code);
       router.refresh();
     } catch (error: any) {
       alert(error.message);
@@ -94,11 +144,14 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
         throw new Error(data.error || "Failed to remove item");
       }
 
-      setItems(prev => {
-        const next = prev.filter(i => i.id !== itemId);
-        setSubtotal(next.reduce((sum, i) => sum + i.total, 0));
-        return next;
-      });
+      const nextItems = items.filter((currentItem) => currentItem.id !== itemId);
+      setItems(nextItems);
+      setSubtotal(nextItems.reduce((sum, currentItem) => sum + currentItem.total, 0));
+      if (coupon && nextItems.length > 0) {
+        await validateCoupon(coupon.code);
+      } else if (coupon) {
+        removeCoupon();
+      }
       router.refresh();
     } catch (error: any) {
       alert(error.message);
@@ -132,6 +185,8 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
       </motion.div>
     );
   }
+
+  const estimatedSubtotal = subtotal - (coupon?.discountAmount ?? 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -241,6 +296,34 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
               ₹{subtotal.toLocaleString('en-IN')}
             </motion.span>
           </div>
+
+          <CouponEntry
+            code={couponCode}
+            application={coupon}
+            error={couponError}
+            applying={applyingCoupon}
+            onCodeChange={(code) => {
+              setCouponCode(code);
+              setCouponError(null);
+            }}
+            onApply={applyCoupon}
+            onRemove={removeCoupon}
+          />
+
+          {coupon && (
+            <div className="mb-6 space-y-3 border-t border-brand-gray-200 pt-5 font-mono text-sm">
+              <div className="flex justify-between">
+                <span className="text-brand-gray-500">Coupon discount</span>
+                <span>-₹{coupon.discountAmount.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="uppercase tracking-widest">Estimated subtotal</span>
+                <motion.span key={estimatedSubtotal} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }}>
+                  ₹{estimatedSubtotal.toLocaleString("en-IN")}
+                </motion.span>
+              </div>
+            </div>
+          )}
           
           <Link href="/checkout" className="block w-full bg-brand-black text-white py-4 font-mono text-sm uppercase tracking-widest text-center hover:bg-brand-gray-900 transition-colors mb-4">
             Checkout

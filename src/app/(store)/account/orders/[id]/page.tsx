@@ -27,6 +27,8 @@ interface OrderItem {
 interface Order {
   id: string;
   subtotal: number;
+  couponCode: string | null;
+  discountAmount: number;
   deliveryCharge: number;
   total: number;
   orderStatus: string;
@@ -237,6 +239,12 @@ export default function OrderDetailsPage() {
                   <span className="text-gray-600">Subtotal</span>
                   <span>{formatINR(order.subtotal)}</span>
                 </div>
+                {order.discountAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Coupon ({order.couponCode})</span>
+                    <span>-{formatINR(order.discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-600">
                     Delivery ({order.deliveryMethod === "FAST" ? "Fast" : "Standard"})

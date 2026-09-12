@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { verifyRazorpaySignature } from "@/lib/razorpay";
+import { finalizePaidOrder } from "@/lib/finalize-paid-order";
 
 export async function POST(
   request: Request,
@@ -47,40 +48,11 @@ export async function POST(
     return NextResponse.json({ error: "Invalid payment signature" }, { status: 401 });
   }
 
-  // We should do a transaction to ensure idempotency and stock decrement
   try {
-    await prisma.$transaction(async (tx) => {
-      const currentOrder = await tx.order.findUnique({ where: { id: order.id } });
-      if (currentOrder?.paymentStatus === "PAID") return; // already paid
-
-      // Mark order as paid
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: "PAID",
-          orderStatus: "PROCESSING",
-          razorpayPaymentId: razorpay_payment_id,
-          razorpaySignature: razorpay_signature,
-        },
-      });
-
-      // Decrement stock
-      for (const item of order.items) {
-        if (item.productId) {
-          const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: item.size }
-          });
-          if (variant) {
-            await tx.productVariant.update({
-              where: { id: variant.id },
-              data: { stock: { decrement: item.quantity } }
-            });
-          }
-        }
-      }
-
-      // Clear the user's cart
-      await tx.cart.deleteMany({ where: { userId: session.user.id } });
+    await finalizePaidOrder({
+      orderId: order.id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
     });
 
     return NextResponse.json({ success: true, orderId: order.id });
