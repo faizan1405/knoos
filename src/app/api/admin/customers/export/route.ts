@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
             phone: true,
             city: true,
             state: true,
-            pincode: true,
+            postalCode: true,
           }
         }
       }
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
         aov,
         address?.city || "",
         address?.state || "",
-        address?.pincode || ""
+        address?.postalCode || ""
       ];
 
       csvContent += row.map(escapeCSV).join(",") + "\n";

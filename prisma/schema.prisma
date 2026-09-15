@@ -19,6 +19,7 @@ model User {
   googleId  String?  @unique
   password  String?
   image     String?
+  phone     String?  @db.VarChar(20)
   role      String   @default("CUSTOMER") @db.VarChar(20)
   createdAt DateTime @default(now()) @db.DateTime(0)
   updatedAt DateTime @updatedAt @db.DateTime(0)
@@ -114,20 +115,26 @@ model ProductVariant {
  * Delivery address linked to a user.
  */
 model Address {
-  id        String   @id @default(cuid())
-  userId    String   @db.VarChar(36)
-  name      String   @db.VarChar(100)
-  phone     String   @db.VarChar(20)
-  address   String   @db.VarChar(500)
-  city      String   @db.VarChar(100)
-  state     String   @db.VarChar(100)
-  pincode   String   @db.VarChar(10)
-  createdAt DateTime @default(now()) @db.DateTime(0)
-  updatedAt DateTime @updatedAt @db.DateTime(0)
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(36)
+  label        String   @db.VarChar(20) @default("HOME")
+  fullName     String   @db.VarChar(100)
+  phone        String   @db.VarChar(20)
+  addressLine1 String   @db.VarChar(500)
+  addressLine2 String?  @db.VarChar(500)
+  landmark     String?  @db.VarChar(200)
+  city         String   @db.VarChar(100)
+  state        String   @db.VarChar(100)
+  postalCode   String   @db.VarChar(10)
+  country      String   @db.VarChar(100) @default("India")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.DateTime(0)
+  updatedAt    DateTime @updatedAt @db.DateTime(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, isDefault])
 }
 
 /**

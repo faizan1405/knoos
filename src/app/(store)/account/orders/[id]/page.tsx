@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { loginWithGoogle } from "@/lib/auth-actions";
+import { XCircle, PackageX, CheckCircle, AlertCircle } from "lucide-react";
+import AccountShell from "../../AccountShell";
 
 interface OrderAddress {
   name: string;
@@ -49,12 +50,32 @@ function formatINR(rupees: number): string {
 
 const ALL_STATUSES = ["PENDING", "PAID", "PROCESSING", "PACKED", "SHIPPED", "DELIVERED"];
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Order Confirmed",
+  PAID: "Payment Confirmed",
+  PROCESSING: "Processing",
+  PACKED: "Packed",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  PAID: "bg-green-50 text-green-700 border-green-200",
+  PROCESSING: "bg-blue-50 text-blue-700 border-blue-200",
+  PACKED: "bg-purple-50 text-purple-700 border-purple-200",
+  SHIPPED: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+};
+
 function OrderTimeline({ currentStatus }: { currentStatus: string }) {
   if (currentStatus === "CANCELLED") {
     return (
       <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-200">
         <h3 className="font-bold text-lg mb-1">Order Cancelled</h3>
-        <p>This order is no longer being processed.</p>
+        <p className="text-sm">This order is no longer being processed.</p>
       </div>
     );
   }
@@ -72,222 +93,323 @@ function OrderTimeline({ currentStatus }: { currentStatus: string }) {
   ];
 
   return (
-    <div className="py-6 overflow-x-auto">
-      <div className="flex items-center justify-between min-w-[600px]">
+    <div className="py-4">
+      <div className="flex items-center">
         {steps.map((step, index) => (
-          <motion.div 
-            key={step.label} 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            className="flex-1 relative text-center"
-          >
+          <div key={step.label} className="flex-1 relative">
             {index < steps.length - 1 && (
-              <div className={`absolute top-4 left-1/2 w-full h-[2px] transition-colors duration-700 ${step.isCompleted && steps[index + 1].isCompleted ? 'bg-black' : 'bg-gray-200'}`} />
+              <div className={`absolute top-4 left-1/2 w-full h-[2px] transition-colors duration-500 ${step.isCompleted && steps[index + 1].isCompleted ? 'bg-black' : 'bg-gray-200'}`} />
             )}
-            <motion.div 
-              initial={false}
-              animate={{
-                borderColor: step.isCompleted ? "#000" : "#d1d5db",
-                color: step.isCompleted ? "#000" : "transparent"
-              }}
-              transition={{ duration: 0.3 }}
-              className="relative z-10 w-8 h-8 mx-auto rounded-full flex items-center justify-center border-2 bg-white"
-            >
+            <div className="relative z-10 w-8 h-8 mx-auto rounded-full flex items-center justify-center border-2 bg-white"
+              style={{ borderColor: step.isCompleted ? "#000" : "#d1d5db" }}>
               {step.isCompleted && (
-                <motion.svg 
-                  initial={{ scale: 0 }} 
-                  animate={{ scale: 1 }} 
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </motion.svg>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               )}
-            </motion.div>
-            <p className={`mt-3 text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step.isCompleted ? 'text-black' : 'text-gray-400'}`}>
+            </div>
+            <p className={`mt-2 text-xs text-center font-medium uppercase tracking-wider transition-colors ${step.isCompleted ? 'text-black' : 'text-gray-400'}`}>
               {step.label}
             </p>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-export default function OrderDetailsPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const router = useRouter();
+export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchOrder() {
       try {
-        const res = await fetch(`/api/orders/${id}`);
+        const res = await fetch(`/api/orders/${id}`, { cache: "no-store" });
         if (!res.ok) {
           if (res.status === 401) {
             await loginWithGoogle(`/account/orders/${id}`);
             return;
           }
           if (res.status === 404) {
-            throw new Error("Order not found");
+            setError("Order not found.");
+            return;
           }
           throw new Error("Failed to load order details");
         }
         const data = await res.json();
-        setOrder(data);
+        if (!cancelled) setOrder(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     if (id) fetchOrder();
-  }, [id, router]);
+    return () => { cancelled = true; };
+  }, [id]);
+
+  const handleCancel = async () => {
+    if (!order) return;
+    setActionLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/account/orders/${order.id}/cancel`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage({ type: "error", text: data.error || "Failed to cancel order." });
+        return;
+      }
+      setOrder({ ...order, orderStatus: "CANCELLED" });
+      setMessage({ type: "success", text: "Order has been cancelled." });
+    } catch {
+      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReorder = async () => {
+    if (!order) return;
+    setActionLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/account/orders/${order.id}/reorder`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage({ type: "error", text: data.error || "Failed to reorder." });
+        return;
+      }
+      if (data.allAdded) {
+        setMessage({ type: "success", text: "All items added to cart." });
+      } else {
+        const unavailable = data.items.filter((i: { added: boolean }) => !i.added);
+        const reasons = unavailable.map((i: { productName: string; reason?: string }) => `${i.productName}: ${i.reason}`).join("; ");
+        setMessage({ type: "error", text: `Some items unavailable: ${reasons}` });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleWhatsApp = () => {
+    const baseMsg = encodeURIComponent("Hi KNOOS, I need help regarding my order.");
+    const orderMsg = encodeURIComponent(` Order #${order?.id.slice(0, 12)}`);
+    window.open(`https://wa.me/917088808882?text=${baseMsg}${order ? orderMsg : ""}`, "_blank");
+  };
+
+  const isCancellable = order && !["PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"].includes(order.orderStatus);
 
   if (loading) {
     return (
-      <main className="pt-24 px-6 md:px-12 lg:px-24 min-h-screen">
-        <div className="max-w-5xl mx-auto animate-pulse">
-          <div className="h-12 bg-gray-200 rounded w-1/3 mb-8"></div>
-          <div className="h-64 bg-gray-100 rounded mb-8"></div>
+      <AccountShell title="Order Details" subtitle="" active="orders" backHref="/account/orders">
+        <div className="animate-pulse space-y-6">
+          <div className="h-48 bg-brand-gray-100 rounded-lg" />
+          <div className="h-64 bg-brand-gray-100 rounded-lg" />
         </div>
-      </main>
+      </AccountShell>
     );
   }
 
   if (error || !order) {
     return (
-      <main className="pt-24 px-6 md:px-12 lg:px-24 min-h-screen">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-red-50 text-red-700 p-4 rounded border border-red-200">
-            {error || "Order not found"}
-          </div>
-          <Link href="/account/orders" className="mt-4 inline-block underline">
-            Back to Orders
-          </Link>
+      <AccountShell title="Order Details" active="orders" backHref="/account/orders">
+        <div className="bg-red-50 text-red-700 p-4 rounded border border-red-200 text-sm">
+          {error || "Order not found"}
         </div>
-      </main>
+        <Link href="/account/orders" className="inline-block mt-4 text-sm font-mono underline">
+          Back to Orders
+        </Link>
+      </AccountShell>
     );
   }
 
   return (
-    <main className="pt-24 px-6 md:px-12 lg:px-24 min-h-screen pb-24">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8 border-b border-brand-gray-200 pb-4">
+    <AccountShell title={`Order #${order.id.slice(0, 12)}`} active="orders" backHref="/account/orders">
+      {message && (
+        <div
+          className={`flex items-center gap-2 px-4 py-3 rounded-md border mb-6 text-sm ${
+            message.type === "success"
+              ? "bg-green-50 border-green-200 text-green-700"
+              : "bg-red-50 border-red-200 text-red-700"
+          }`}
+        >
+          {message.type === "success" ? <CheckIcon /> : <AlertIcon />}
+          {message.text}
+        </div>
+      )}
+
+      {order.paymentStatus === "FAILED" && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 mb-6">
+          <h3 className="font-bold mb-1">Payment Failed</h3>
+          <p className="text-sm">Your payment could not be completed. Please try again or contact support.</p>
+        </div>
+      )}
+
+      {/* Status Badge */}
+      <div className="flex items-center gap-3 mb-8">
+        <span className={`px-3 py-1 rounded text-sm font-medium border ${STATUS_COLORS[order.orderStatus] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
+          {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+        </span>
+        <span className="text-sm text-brand-gray-500">
+          {order.deliveryMethod === "FAST" ? "Fast Delivery" : "Standard Delivery"} &bull;{" "}
+          {order.paymentStatus === "PAID" ? "Prepaid" : order.paymentStatus}
+        </span>
+      </div>
+
+      {/* Timeline */}
+      <div className="bg-brand-gray-50 p-5 sm:p-8 rounded-lg border border-brand-gray-200 mb-8">
+        <OrderTimeline currentStatus={order.orderStatus} />
+      </div>
+
+      {/* Actions */}
+      {isCancellable && (
+        <div className="mb-8">
+          <button
+            onClick={handleCancel}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-2 border border-red-200 text-red-600 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            <XCircle size={16} />
+            {actionLoading ? "Cancelling..." : "Cancel Order"}
+          </button>
+        </div>
+      )}
+
+      {order.orderStatus === "DELIVERED" && (
+        <div className="mb-8">
+          <button
+            onClick={handleReorder}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors disabled:opacity-50"
+          >
+            <PackageX size={16} />
+            {actionLoading ? "Adding to Cart..." : "Buy Again"}
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        {/* Items + Address */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Items */}
           <div>
-            <h1 className="font-serif text-3xl md:text-4xl mb-2">Order #{order.id}</h1>
-            <p className="text-brand-gray-500 font-mono text-sm">
-              Placed on {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-            </p>
-          </div>
-          <Link href="/account/orders" className="text-sm font-mono hover:text-brand-gray-500 underline hidden md:block">
-            Back to Orders
-          </Link>
-        </div>
-
-        {order.paymentStatus === "FAILED" && (
-          <div className="mb-8 bg-red-50 text-red-700 p-4 rounded-md border border-red-200">
-            <h3 className="font-bold text-lg mb-1">Payment Failed</h3>
-            <p>Your payment could not be completed. Please try again or contact support.</p>
-          </div>
-        )}
-
-        {/* Timeline */}
-        <div className="mb-12 bg-gray-50 p-6 md:p-8 rounded-lg border border-gray-200">
-          <OrderTimeline currentStatus={order.orderStatus} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Order Items */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-medium border-b border-gray-200 pb-2">Items Ordered</h2>
-            <div className="divide-y divide-gray-200">
+            <h2 className="text-lg font-medium mb-4 pb-2 border-b border-brand-gray-200">
+              Items ({order.items.length})
+            </h2>
+            <div className="divide-y divide-brand-gray-100">
               {order.items.map((item) => (
-                <div key={item.id} className="py-4 flex items-center justify-between">
+                <div key={item.id} className="py-4 flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-medium text-lg">{item.productName}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Size: {item.size} &bull; Qty: {item.quantity}</p>
-                    <p className="text-sm text-gray-500">{formatINR(item.price)} each</p>
+                    <h3 className="font-medium text-sm sm:text-base">{item.productName}</h3>
+                    <p className="text-xs text-brand-gray-500 mt-1">
+                      Size: {item.size} &bull; Qty: {item.quantity}
+                    </p>
+                    <p className="text-xs text-brand-gray-400">{formatINR(item.price)} each</p>
                   </div>
-                  <div className="font-medium text-lg text-right">
+                  <div className="font-medium text-sm sm:text-base text-right shrink-0">
                     {formatINR(item.total)}
                   </div>
                 </div>
               ))}
             </div>
-            
-            {order.orderStatus === "SHIPPED" && (
-              <div className="mt-8 bg-blue-50 border border-blue-200 p-4 rounded text-blue-800">
-                <h4 className="font-bold mb-1">Shipping</h4>
-                <p className="text-sm">Your order has been shipped. Tracking information will appear here once available.</p>
-              </div>
-            )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Summary */}
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <h2 className="text-lg font-medium mb-4">Order Summary</h2>
-              <div className="space-y-3 text-sm mb-4 border-b border-gray-200 pb-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>{formatINR(order.subtotal)}</span>
-                </div>
-                {order.discountAmount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Coupon ({order.couponCode})</span>
-                    <span>-{formatINR(order.discountAmount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    Delivery ({order.deliveryMethod === "FAST" ? "Fast" : "Standard"})
-                  </span>
-                  <span>{formatINR(order.deliveryCharge)}</span>
-                </div>
+          {/* Delivery Address */}
+          <div>
+            <h2 className="text-lg font-medium mb-4 pb-2 border-b border-brand-gray-200">
+              Delivery Address
+            </h2>
+            {order.address ? (
+              <div className="text-sm text-brand-gray-700 leading-relaxed">
+                <p className="font-medium">{order.address.name}</p>
+                <p>{order.address.address}</p>
+                <p>
+                  {order.address.city}, {order.address.state} {order.address.pincode}
+                </p>
+                <p>+91 {order.address.phone}</p>
               </div>
-              <div className="flex justify-between font-medium text-lg">
-                <span>Total</span>
-                <span>{formatINR(order.total)}</span>
-              </div>
-            </div>
+            ) : (
+              <p className="text-sm text-brand-gray-400">Address details unavailable.</p>
+            )}
+          </div>
+        </div>
 
-            {/* Address */}
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <h2 className="text-lg font-medium mb-4">Shipping Address</h2>
-              {order.address ? (
-                <address className="not-italic text-sm text-gray-600 leading-relaxed">
-                  <p className="font-medium text-black mb-1">{order.address.name}</p>
-                  <p>{order.address.address}</p>
-                  <p>{order.address.city}, {order.address.state} {order.address.pincode}</p>
-                  <p className="mt-2">Phone: {order.address.phone}</p>
-                </address>
-              ) : (
-                <p className="text-sm text-gray-500">Address details unavailable.</p>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Order Summary */}
+          <div className="bg-brand-gray-50 p-5 sm:p-6 rounded-lg border border-brand-gray-200">
+            <h2 className="text-lg font-medium mb-4">Order Summary</h2>
+            <div className="space-y-2 text-sm mb-4 pb-4 border-b border-brand-gray-200">
+              <div className="flex justify-between">
+                <span className="text-brand-gray-600">Subtotal</span>
+                <span>{formatINR(order.subtotal)}</span>
+              </div>
+              {order.discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-brand-gray-600">Coupon ({order.couponCode})</span>
+                  <span>-{formatINR(order.discountAmount)}</span>
+                </div>
               )}
-            </div>
-
-            {/* Support Info */}
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <h2 className="text-lg font-medium mb-2">Need Help?</h2>
-              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-                Returns are accepted within 3 days of delivery for wrong or damaged products (requires continuous unboxing video).
-              </p>
-              <div className="text-sm text-gray-700 space-y-1">
-                <p><strong>WhatsApp:</strong> 7088808882</p>
-                <p><strong>Email:</strong> KKSHOECOMPANY@GMAIL.COM</p>
-                <p className="text-xs mt-2 text-gray-500">Hours: 10 AM – 7 PM</p>
+              <div className="flex justify-between">
+                <span className="text-brand-gray-600">
+                  Delivery ({order.deliveryMethod === "FAST" ? "Fast" : "Standard"})
+                </span>
+                <span>{formatINR(order.deliveryCharge)}</span>
               </div>
+            </div>
+            <div className="flex justify-between font-medium text-base">
+              <span>Total</span>
+              <span>{formatINR(order.total)}</span>
+            </div>
+          </div>
+
+          {/* Support */}
+          <div className="bg-brand-gray-50 p-5 sm:p-6 rounded-lg border border-brand-gray-200">
+            <h2 className="text-lg font-medium mb-3">Need Help?</h2>
+            <p className="text-xs text-brand-gray-500 mb-4 leading-relaxed">
+              Returns accepted within 3 days of delivery for wrong or damaged products (requires continuous unboxing video).
+            </p>
+            <button
+              onClick={handleWhatsApp}
+              className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-green-700 transition-colors rounded"
+            >
+              WhatsApp Us
+            </button>
+            <div className="mt-4 text-sm text-brand-gray-700 space-y-1">
+              <p><strong>Email:</strong> KKSHOECOMPANY@GMAIL.COM</p>
+              <p className="text-xs text-brand-gray-500">Hours: 10 AM – 7 PM</p>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </AccountShell>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
   );
 }

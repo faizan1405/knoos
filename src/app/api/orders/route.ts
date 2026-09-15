@@ -144,12 +144,12 @@ export async function POST(request: Request) {
           },
           address: {
             create: {
-              name: address.name,
+              name: address.fullName,
               phone: address.phone,
-              address: address.address,
+              address: address.addressLine1,
               city: address.city,
               state: address.state,
-              pincode: address.pincode,
+              pincode: address.postalCode,
             },
           },
         },

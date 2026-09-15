@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ProductImportPanel from "./ProductImportPanel";
 
 const GENDERS = ["MEN", "WOMEN"] as const;
 const STATUSES = ["ACTIVE", "INACTIVE"] as const;
@@ -165,6 +166,8 @@ export default function AdminProductsPage() {
           + Add Product
         </Link>
       </div>
+
+      <ProductImportPanel />
 
       {/* Filters */}
       <div className="bg-white border border-brand-gray-200 p-4 mb-6">

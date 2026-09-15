@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { loginWithGoogle } from "@/lib/auth-actions";
+import AccountShell from "../AccountShell";
 
 interface OrderItem {
   id: string;
@@ -15,6 +15,10 @@ interface OrderItem {
 
 interface Order {
   id: string;
+  subtotal: number;
+  couponCode: string | null;
+  discountAmount: number;
+  deliveryCharge: number;
   total: number;
   orderStatus: string;
   paymentStatus: string;
@@ -41,109 +45,133 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: "bg-red-50 text-red-700 border-red-200",
 };
 
-export default function CustomerOrdersPage() {
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Order Confirmed",
+  PAID: "Payment Confirmed",
+  PROCESSING: "Processing",
+  PACKED: "Packed",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchOrders() {
       try {
-        const res = await fetch("/api/orders");
+        const res = await fetch("/api/orders", { cache: "no-store" });
         if (!res.ok) {
           if (res.status === 401) {
-            await loginWithGoogle("/account/orders");
+            // Middleware should catch this, but handle gracefully
+            setError("Please sign in to view your orders.");
             return;
           }
           throw new Error("Failed to fetch orders");
         }
         const data = await res.json();
-        setOrders(data);
+        if (!cancelled) setOrders(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     fetchOrders();
+    return () => { cancelled = true; };
   }, []);
 
   return (
-    <main className="pt-24 px-6 md:px-12 lg:px-24 min-h-screen pb-24">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8 border-b border-brand-gray-200 pb-4">
-          <h1 className="font-serif text-4xl">Order History</h1>
-          <Link href="/account" className="text-sm font-mono hover:text-brand-gray-500 underline">
-            Back to Account
+    <AccountShell title="My Orders" subtitle="View and track your orders" active="orders">
+      {loading ? (
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map((i) => <div key={i} className="h-36 bg-brand-gray-100 rounded-lg" />)}
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 text-sm">
+          {error}
+        </div>
+      ) : orders.length === 0 ? (
+        <EmptyOrders />
+      ) : (
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </div>
+      )}
+    </AccountShell>
+  );
+}
+
+function OrderCard({ order }: { order: Order }) {
+  return (
+    <div className="border border-brand-gray-200 rounded-lg bg-white overflow-hidden">
+      <div className="bg-brand-gray-50 p-4 sm:p-5 border-b border-brand-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <div>
+              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Order Placed</p>
+              <p className="text-sm font-medium">
+                {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                  day: "2-digit", month: "short", year: "numeric",
+                })}
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Total</p>
+              <p className="text-sm font-medium">{formatINR(order.total)}</p>
+            </div>
+            <div>
+              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Order #</p>
+              <p className="text-sm font-mono text-xs">{order.id.slice(0, 12)}</p>
+            </div>
+          </div>
+          <Link
+            href={`/account/orders/${order.id}`}
+            className="shrink-0 inline-flex items-center justify-center border border-brand-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-brand-gray-50 transition-colors rounded"
+          >
+            View Details
           </Link>
         </div>
-
-        {loading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-32 bg-brand-gray-100 rounded"></div>
-            <div className="h-32 bg-brand-gray-100 rounded"></div>
-          </div>
-        ) : error ? (
-          <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-200">
-            {error}
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="py-24 text-center">
-            <h2 className="font-serif text-3xl mb-4">No orders yet</h2>
-            <p className="text-brand-gray-500 mb-8 max-w-md mx-auto">
-              Your orders will appear here once you make a purchase.
-            </p>
-            <Link href="/search" className="inline-block bg-black text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors">
-              START SHOPPING
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {orders.map((order) => (
-              <div key={order.id} className="border border-brand-gray-200 rounded-lg overflow-hidden bg-white hover:border-brand-gray-400 transition-colors">
-                <div className="bg-brand-gray-50 p-4 border-b border-brand-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-                    <div>
-                      <p className="text-brand-gray-500 font-mono text-xs uppercase mb-1">Order Placed</p>
-                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                    </div>
-                    <div>
-                      <p className="text-brand-gray-500 font-mono text-xs uppercase mb-1">Total</p>
-                      <p className="font-medium">{formatINR(order.total)}</p>
-                    </div>
-                    <div>
-                      <p className="text-brand-gray-500 font-mono text-xs uppercase mb-1">Order #</p>
-                      <p className="font-medium text-xs font-mono">{order.id}</p>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/account/orders/${order.id}`}
-                    className="shrink-0 bg-white border border-brand-gray-200 px-4 py-2 text-sm font-medium hover:bg-brand-gray-50 transition-colors rounded text-center"
-                  >
-                    View Details
-                  </Link>
-                </div>
-                
-                <div className="p-4 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-                  <div className="flex-1">
-                    <p className="font-medium mb-2">
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[order.orderStatus] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
-                        {order.orderStatus}
-                      </span>
-                    </p>
-                    <p className="text-sm text-brand-gray-600">
-                      {order.items.length} item{order.items.length !== 1 && "s"} &bull; {order.deliveryMethod === "FAST" ? "Fast Delivery" : "Standard Delivery"}
-                    </p>
-                    <div className="mt-2 text-xs text-brand-gray-500 line-clamp-1">
-                      {order.items.map(i => `${i.productName} (x${i.quantity})`).join(", ")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-    </main>
+
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <div className="flex-1">
+            <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-medium border ${STATUS_COLORS[order.orderStatus] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
+              {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+            </span>
+            <p className="text-sm text-brand-gray-600 mt-2">
+              {order.items.length} item{order.items.length !== 1 ? "s" : ""} &bull; {order.deliveryMethod === "FAST" ? "Fast Delivery" : "Standard Delivery"}
+            </p>
+            <p className="text-xs text-brand-gray-400 mt-1 line-clamp-1">
+              {order.items.map((i) => `${i.productName} (x${i.quantity})`).join(", ")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyOrders() {
+  return (
+    <div className="border border-brand-gray-200 rounded-lg bg-white py-16 px-6 text-center">
+      <h3 className="font-serif text-2xl mb-2">No orders yet</h3>
+      <p className="text-brand-gray-500 text-sm mb-6 max-w-sm mx-auto">
+        Your orders will appear here once you make a purchase.
+      </p>
+      <Link
+        href="/search"
+        className="inline-block bg-black text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors"
+      >
+        Start Shopping
+      </Link>
+    </div>
   );
 }
