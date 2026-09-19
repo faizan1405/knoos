@@ -41,16 +41,16 @@ export default function AccountShell({ children, active, title, subtitle, backHr
         {backHref && (
           <Link
             href={backHref}
-            className="inline-flex items-center gap-1 mb-3 text-sm font-mono text-brand-gray-600 hover:text-black transition-colors"
+            className="inline-flex items-center gap-1 mb-3 text-sm font-mono text-brand-gray-600 hover:text-brand-navy transition-colors"
           >
             <ChevronRight size={16} className="rotate-180" />
             Back
           </Link>
         )}
-        <h1 className="font-serif text-2xl sm:text-3xl">{title}</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl text-brand-dark">{title}</h1>
         {subtitle && <p className="text-brand-gray-500 text-xs mt-0.5">{subtitle}</p>}
 
-        <div className="border-b border-brand-gray-200 mt-4 overflow-x-auto -mx-4 px-4">
+        <div className="border-b border-brand-sky-border/80 mt-4 overflow-x-auto -mx-4 px-4">
           <div className="flex gap-0 min-w-max">
             {NAV_ITEMS.map((item) => {
               const isActive = currentTab === item.id;
@@ -60,8 +60,8 @@ export default function AccountShell({ children, active, title, subtitle, backHr
                   href={item.href}
                   className={`flex items-center gap-1.5 px-3 py-2.5 text-sm border-b-2 transition-colors whitespace-nowrap ${
                     isActive
-                      ? "border-black text-black"
-                      : "border-transparent text-brand-gray-500 hover:text-brand-gray-700"
+                      ? "border-brand-navy text-brand-navy font-semibold"
+                      : "border-transparent text-brand-gray-500 hover:text-brand-navy"
                   }`}
                 >
                   <item.icon size={14} strokeWidth={1.5} />
@@ -77,7 +77,7 @@ export default function AccountShell({ children, active, title, subtitle, backHr
         {/* Desktop Sidebar */}
         <aside className="hidden lg:block w-60 shrink-0">
           <div className="sticky top-24">
-            <p className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 mb-4 px-1">
+            <p className="font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-4 px-1">
               Account
             </p>
             <nav className="space-y-1">
@@ -87,10 +87,10 @@ export default function AccountShell({ children, active, title, subtitle, backHr
                   <Link
                     key={item.id}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 text-sm ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
                       isActive
-                        ? "bg-black text-white"
-                        : "text-brand-gray-600 hover:bg-brand-gray-100 hover:text-black"
+                        ? "bg-brand-navy text-white shadow-sm"
+                        : "text-brand-gray-600 hover:bg-brand-sky/80 hover:text-brand-navy"
                     }`}
                   >
                     <item.icon size={16} strokeWidth={1.5} />
@@ -100,11 +100,11 @@ export default function AccountShell({ children, active, title, subtitle, backHr
               })}
             </nav>
 
-            <div className="mt-6 pt-6 border-t border-brand-gray-200">
+            <div className="mt-6 pt-6 border-t border-brand-sky-border/80">
               <form action="/api/auth/signout" method="POST">
                 <button
                   type="submit"
-                  className="flex items-center gap-3 px-4 py-3 text-brand-gray-500 hover:text-red-600 transition-colors w-full"
+                  className="flex items-center gap-3 px-4 py-3 text-brand-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors w-full"
                 >
                   <LogOut size={16} strokeWidth={1.5} />
                   <span className="text-sm font-medium">Sign Out</span>
@@ -118,7 +118,7 @@ export default function AccountShell({ children, active, title, subtitle, backHr
         <section className="flex-1 min-w-0">
           {/* Desktop heading */}
           <div className="hidden lg:block mb-8">
-            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl">{title}</h1>
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-dark">{title}</h1>
             {subtitle && <p className="text-brand-gray-500 text-sm mt-1">{subtitle}</p>}
           </div>
           {children}

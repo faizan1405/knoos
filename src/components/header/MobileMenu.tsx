@@ -68,7 +68,7 @@ export function MobileMenu({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.5, ease: easings.premium }}
             >
-              <Link href="/men" onClick={onClose} className="font-serif text-4xl">
+              <Link href="/men" onClick={onClose} className="font-serif text-4xl text-brand-dark hover:text-brand-blue transition-colors">
                 Men
               </Link>
             </motion.div>
@@ -77,7 +77,7 @@ export function MobileMenu({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5, ease: easings.premium }}
             >
-              <Link href="/women" onClick={onClose} className="font-serif text-4xl">
+              <Link href="/women" onClick={onClose} className="font-serif text-4xl text-brand-dark hover:text-brand-blue transition-colors">
                 Women
               </Link>
             </motion.div>
@@ -90,12 +90,12 @@ export function MobileMenu({
             >
               <button
                 onClick={() => setIsShopByOpen(!isShopByOpen)}
-                className="font-serif text-4xl flex items-center gap-2"
+                className="font-serif text-4xl flex items-center gap-2 text-brand-dark hover:text-brand-blue transition-colors"
               >
                 Shop By
                 <ChevronDown
                   size={20}
-                  className={`transition-transform duration-200 ${isShopByOpen ? "rotate-180" : ""}`}
+                  className={`transition-transform duration-200 ${isShopByOpen ? "rotate-180 text-brand-blue" : ""}`}
                 />
               </button>
               <AnimatePresence>
@@ -112,16 +112,16 @@ export function MobileMenu({
                         key={cat.id}
                         href={`/search?category=${cat.slug}`}
                         onClick={onClose}
-                        className="font-serif text-xl text-brand-gray-500 hover:text-black transition-colors"
+                        className="font-serif text-xl text-brand-gray-600 hover:text-brand-blue transition-colors"
                       >
                         {cat.name}
                       </Link>
                     ))}
-                    <div className="border-t border-brand-gray-200 w-16 my-1" />
+                    <div className="border-t border-brand-sky-border/40 w-16 my-1" />
                     <Link
                       href="/search?sort=Newest"
                       onClick={onClose}
-                      className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 hover:text-black transition-colors"
+                      className="font-mono text-xs uppercase tracking-widest text-brand-gray-500 hover:text-brand-blue transition-colors"
                     >
                       New Arrivals
                     </Link>
@@ -142,23 +142,23 @@ export function MobileMenu({
                   type="text"
                   name="q"
                   placeholder="Search..."
-                  className="w-64 px-3 py-2 text-center text-sm font-mono border-b border-black focus:outline-none placeholder:text-brand-gray-400"
+                  className="w-64 px-3 py-2 text-center text-sm font-mono border-b border-brand-gray-300 focus:border-brand-blue focus:outline-none placeholder:text-brand-gray-400 text-brand-dark transition-colors"
                 />
               </form>
 
               {userName ? (
                 <>
-                  <Link href="/account" onClick={onClose} className="font-mono text-sm uppercase tracking-widest text-brand-gray-600">
+                  <Link href="/account" onClick={onClose} className="font-mono text-sm uppercase tracking-widest text-brand-gray-600 hover:text-brand-blue transition-colors">
                     {userName}
                   </Link>
-                  <button onClick={() => { signOutAction(); onClose(); }} className="font-mono text-sm uppercase tracking-widest text-brand-gray-600">
+                  <button onClick={() => { signOutAction(); onClose(); }} className="font-mono text-sm uppercase tracking-widest text-brand-gray-600 hover:text-brand-navy transition-colors">
                     Sign Out
                   </button>
                 </>
               ) : (
                 <button
                   onClick={() => { signInAction(); onClose(); }}
-                  className="font-mono text-sm uppercase tracking-widest text-brand-gray-600"
+                  className="font-mono text-sm uppercase tracking-widest text-brand-gray-600 hover:text-brand-blue transition-colors"
                 >
                   Sign In
                 </button>

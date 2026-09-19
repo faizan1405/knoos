@@ -97,13 +97,13 @@ function SecurityForm() {
         </div>
       )}
 
-      <div className="border border-brand-gray-200 rounded-lg bg-white p-5 sm:p-8">
+      <div className="border border-brand-sky-border/60 rounded-xl bg-white p-5 sm:p-8 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-brand-gray-100 flex items-center justify-center">
-            <Lock size={18} className="text-brand-gray-600" />
+          <div className="w-10 h-10 rounded-full bg-brand-sky text-brand-navy flex items-center justify-center">
+            <Lock size={18} />
           </div>
           <div>
-            <h2 className="font-medium text-base">Change Password</h2>
+            <h2 className="font-medium text-base text-brand-navy">Change Password</h2>
             <p className="text-xs text-brand-gray-500">Update your account password</p>
           </div>
         </div>
@@ -140,7 +140,7 @@ function SecurityForm() {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors disabled:opacity-50 mt-2"
+            className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm disabled:opacity-50 mt-2"
           >
             <Save size={16} />
             {loading ? "Updating..." : "Update Password"}
@@ -170,7 +170,7 @@ function PasswordField({
 }) {
   return (
     <div>
-      <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+      <label className="block font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-2">
         {label}
       </label>
       <div className="relative">
@@ -178,12 +178,12 @@ function PasswordField({
           type={show ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full border ${error ? "border-red-300" : "border-brand-gray-200"} rounded-md px-4 py-3 pr-12 text-sm bg-white focus:outline-none focus:border-black transition-colors`}
+          className={`w-full border ${error ? "border-red-300" : "border-brand-sky-border/60"} rounded-xl px-4 py-3 pr-12 text-sm bg-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/30 transition-colors`}
         />
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-gray-400 hover:text-brand-gray-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-gray-400 hover:text-brand-navy"
           aria-label={show ? "Hide password" : "Show password"}
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}

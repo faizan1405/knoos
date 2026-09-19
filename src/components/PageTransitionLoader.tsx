@@ -115,13 +115,13 @@ function LoaderContent() {
       <div className="relative flex items-center justify-center">
         {/* Animated outer ring */}
         <div 
-          className="absolute w-32 h-32 rounded-full border border-brand-gray-200 dark:border-brand-gray-800 border-t-brand-black dark:border-t-white animate-spin motion-reduce:hidden" 
+          className="absolute w-32 h-32 rounded-full border border-brand-sky-border/40 border-t-brand-blue animate-spin motion-reduce:hidden" 
           style={{ animationDuration: '1s' }} 
         />
         
         {/* Soft pulsing glow */}
         <div 
-          className="absolute w-24 h-24 rounded-full bg-brand-black/5 dark:bg-white/5 animate-pulse motion-reduce:hidden blur-2xl" 
+          className="absolute w-24 h-24 rounded-full bg-brand-blue/10 animate-pulse motion-reduce:hidden blur-2xl" 
           style={{ animationDuration: '2s' }} 
         />
         

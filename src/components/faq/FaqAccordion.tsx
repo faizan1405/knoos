@@ -36,24 +36,28 @@ export function FaqAccordion({ faqs }: { faqs: FAQ[] }) {
         return (
           <div 
             key={faq.id} 
-            className={`border-b border-brand-gray-200 transition-colors duration-300 ${isOpen ? "bg-brand-gray-50/50" : ""}`}
+            className={`border-b border-brand-sky-border/60 transition-colors duration-300 rounded-lg ${
+              isOpen ? "bg-brand-sky/20 border-l-2 border-l-brand-blue" : ""
+            }`}
           >
             <button
               id={triggerId}
               type="button"
               onClick={() => toggleOpen(faq.id)}
-              className="w-full text-left py-6 px-4 md:px-6 flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-brand-black/5"
+              className="w-full text-left py-6 px-4 md:px-6 flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-brand-blue/20 rounded-lg"
               aria-expanded={isOpen}
               aria-controls={panelId}
             >
-              <span className="font-serif text-lg md:text-xl text-brand-black group-hover:text-brand-gray-600 transition-colors pr-8">
+              <span className="font-serif text-lg md:text-xl text-brand-dark group-hover:text-brand-blue transition-colors pr-8">
                 {faq.question}
               </span>
               <motion.span
                 aria-hidden="true"
                 animate={{ rotate: isOpen ? 45 : 0 }}
                 transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
-                className="text-brand-gray-400 flex-shrink-0"
+                className={`flex-shrink-0 transition-colors ${
+                  isOpen ? "text-brand-blue" : "text-brand-navy/60 group-hover:text-brand-blue"
+                }`}
               >
                 <Plus size={20} />
               </motion.span>
@@ -73,7 +77,7 @@ export function FaqAccordion({ faqs }: { faqs: FAQ[] }) {
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 md:px-6 pb-6 text-brand-gray-500 text-sm md:text-base leading-relaxed">
+                  <div className="px-4 md:px-6 pb-6 text-brand-gray-600 text-sm md:text-base leading-relaxed">
                     {faq.answer}
                   </div>
                 </motion.div>

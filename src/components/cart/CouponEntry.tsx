@@ -26,15 +26,15 @@ export function CouponEntry({
       <p className="mb-2 font-mono text-xs uppercase tracking-widest">Coupon Code</p>
 
       {application ? (
-        <div>
+        <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
           <div className="flex items-center justify-between gap-3 font-mono text-sm">
-            <span className="font-medium">{application.code}</span>
-            <span className="text-green-700 text-xs uppercase tracking-widest">Applied</span>
+            <span className="font-medium text-brand-dark">{application.code}</span>
+            <span className="text-green-700 text-xs font-semibold uppercase tracking-widest bg-green-100/70 px-2 py-0.5 rounded">Applied</span>
           </div>
           <button
             type="button"
             onClick={onRemove}
-            className="mt-3 font-mono text-xs uppercase tracking-widest text-brand-gray-500 underline underline-offset-4 hover:text-brand-black"
+            className="mt-2 font-mono text-xs uppercase tracking-widest text-brand-gray-500 underline underline-offset-4 hover:text-red-600 transition-colors"
           >
             Remove
           </button>
@@ -49,19 +49,19 @@ export function CouponEntry({
             placeholder="ENTER CODE"
             autoComplete="off"
             maxLength={50}
-            className="min-w-0 flex-1 border border-brand-gray-300 bg-white px-3 py-2.5 font-mono text-xs uppercase tracking-wider outline-none focus:border-brand-black"
+            className="min-w-0 flex-1 border border-brand-gray-300 bg-white px-3 py-2.5 font-mono text-xs uppercase tracking-wider outline-none focus:border-brand-blue rounded-l-lg"
           />
           <button
             type="submit"
             disabled={applying || !code.trim()}
-            className="bg-brand-black px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-white hover:bg-brand-gray-900 disabled:opacity-50"
+            className="bg-brand-navy px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-white hover:bg-brand-blue disabled:opacity-50 rounded-r-lg transition-colors shadow-sm"
           >
             {applying ? "..." : "Apply"}
           </button>
         </form>
       )}
 
-      {error && <p className="mt-2 text-xs text-red-600" role="alert">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-600 font-medium" role="alert">{error}</p>}
     </div>
   );
 }

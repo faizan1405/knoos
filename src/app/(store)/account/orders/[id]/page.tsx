@@ -98,17 +98,18 @@ function OrderTimeline({ currentStatus }: { currentStatus: string }) {
         {steps.map((step, index) => (
           <div key={step.label} className="flex-1 relative">
             {index < steps.length - 1 && (
-              <div className={`absolute top-4 left-1/2 w-full h-[2px] transition-colors duration-500 ${step.isCompleted && steps[index + 1].isCompleted ? 'bg-black' : 'bg-gray-200'}`} />
+              <div className={`absolute top-4 left-1/2 w-full h-[2px] transition-colors duration-500 ${step.isCompleted && steps[index + 1].isCompleted ? 'bg-brand-navy' : 'bg-gray-200'}`} />
             )}
-            <div className="relative z-10 w-8 h-8 mx-auto rounded-full flex items-center justify-center border-2 bg-white"
-              style={{ borderColor: step.isCompleted ? "#000" : "#d1d5db" }}>
+            <div className={`relative z-10 w-8 h-8 mx-auto rounded-full flex items-center justify-center border-2 transition-colors ${
+              step.isCompleted ? "border-brand-navy bg-brand-navy text-white" : "border-gray-300 bg-white"
+            }`}>
               {step.isCompleted && (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               )}
             </div>
-            <p className={`mt-2 text-xs text-center font-medium uppercase tracking-wider transition-colors ${step.isCompleted ? 'text-black' : 'text-gray-400'}`}>
+            <p className={`mt-2 text-xs text-center font-medium uppercase tracking-wider transition-colors ${step.isCompleted ? 'text-brand-navy font-semibold' : 'text-gray-400'}`}>
               {step.label}
             </p>
           </div>
@@ -267,7 +268,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Timeline */}
-      <div className="bg-brand-gray-50 p-5 sm:p-8 rounded-lg border border-brand-gray-200 mb-8">
+      <div className="bg-brand-sky/20 p-5 sm:p-8 rounded-xl border border-brand-sky-border/50 mb-8">
         <OrderTimeline currentStatus={order.orderStatus} />
       </div>
 
@@ -277,7 +278,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <button
             onClick={handleCancel}
             disabled={actionLoading}
-            className="inline-flex items-center gap-2 border border-red-200 text-red-600 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 border border-red-200 text-red-600 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
           >
             <XCircle size={16} />
             {actionLoading ? "Cancelling..." : "Cancel Order"}
@@ -290,7 +291,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <button
             onClick={handleReorder}
             disabled={actionLoading}
-            className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm disabled:opacity-50"
           >
             <PackageX size={16} />
             {actionLoading ? "Adding to Cart..." : "Buy Again"}
@@ -303,20 +304,20 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         <div className="lg:col-span-2 space-y-8">
           {/* Items */}
           <div>
-            <h2 className="text-lg font-medium mb-4 pb-2 border-b border-brand-gray-200">
+            <h2 className="text-lg font-serif text-brand-navy mb-4 pb-2 border-b border-brand-sky-border/60">
               Items ({order.items.length})
             </h2>
-            <div className="divide-y divide-brand-gray-100">
+            <div className="divide-y divide-brand-sky-border/40">
               {order.items.map((item) => (
                 <div key={item.id} className="py-4 flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-medium text-sm sm:text-base">{item.productName}</h3>
+                    <h3 className="font-medium text-sm sm:text-base text-brand-dark">{item.productName}</h3>
                     <p className="text-xs text-brand-gray-500 mt-1">
                       Size: {item.size} &bull; Qty: {item.quantity}
                     </p>
                     <p className="text-xs text-brand-gray-400">{formatINR(item.price)} each</p>
                   </div>
-                  <div className="font-medium text-sm sm:text-base text-right shrink-0">
+                  <div className="font-semibold text-sm sm:text-base text-right text-brand-navy shrink-0">
                     {formatINR(item.total)}
                   </div>
                 </div>
@@ -326,12 +327,12 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
           {/* Delivery Address */}
           <div>
-            <h2 className="text-lg font-medium mb-4 pb-2 border-b border-brand-gray-200">
+            <h2 className="text-lg font-serif text-brand-navy mb-4 pb-2 border-b border-brand-sky-border/60">
               Delivery Address
             </h2>
             {order.address ? (
               <div className="text-sm text-brand-gray-700 leading-relaxed">
-                <p className="font-medium">{order.address.name}</p>
+                <p className="font-medium text-brand-dark">{order.address.name}</p>
                 <p>{order.address.address}</p>
                 <p>
                   {order.address.city}, {order.address.state} {order.address.pincode}
@@ -347,46 +348,46 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Order Summary */}
-          <div className="bg-brand-gray-50 p-5 sm:p-6 rounded-lg border border-brand-gray-200">
-            <h2 className="text-lg font-medium mb-4">Order Summary</h2>
-            <div className="space-y-2 text-sm mb-4 pb-4 border-b border-brand-gray-200">
+          <div className="bg-brand-sky/20 p-5 sm:p-6 rounded-xl border border-brand-sky-border/50">
+            <h2 className="text-lg font-serif text-brand-navy mb-4">Order Summary</h2>
+            <div className="space-y-2 text-sm mb-4 pb-4 border-b border-brand-sky-border/60">
               <div className="flex justify-between">
                 <span className="text-brand-gray-600">Subtotal</span>
-                <span>{formatINR(order.subtotal)}</span>
+                <span className="font-medium">{formatINR(order.subtotal)}</span>
               </div>
               {order.discountAmount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-brand-gray-600">Coupon ({order.couponCode})</span>
-                  <span>-{formatINR(order.discountAmount)}</span>
+                  <span className="text-green-600 font-medium">-{formatINR(order.discountAmount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-brand-gray-600">
                   Delivery ({order.deliveryMethod === "FAST" ? "Fast" : "Standard"})
                 </span>
-                <span>{formatINR(order.deliveryCharge)}</span>
+                <span className="font-medium">{formatINR(order.deliveryCharge)}</span>
               </div>
             </div>
-            <div className="flex justify-between font-medium text-base">
+            <div className="flex justify-between font-serif text-lg text-brand-navy">
               <span>Total</span>
-              <span>{formatINR(order.total)}</span>
+              <span className="font-semibold">{formatINR(order.total)}</span>
             </div>
           </div>
 
           {/* Support */}
-          <div className="bg-brand-gray-50 p-5 sm:p-6 rounded-lg border border-brand-gray-200">
-            <h2 className="text-lg font-medium mb-3">Need Help?</h2>
-            <p className="text-xs text-brand-gray-500 mb-4 leading-relaxed">
+          <div className="bg-brand-cream/70 p-5 sm:p-6 rounded-xl border border-brand-cream-border/60">
+            <h2 className="text-lg font-serif text-brand-navy mb-3">Need Help?</h2>
+            <p className="text-xs text-brand-gray-600 mb-4 leading-relaxed">
               Returns accepted within 3 days of delivery for wrong or damaged products (requires continuous unboxing video).
             </p>
             <button
               onClick={handleWhatsApp}
-              className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-green-700 transition-colors rounded"
+              className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 text-xs font-mono tracking-widest uppercase hover:bg-green-700 transition-colors rounded-xl shadow-sm"
             >
               WhatsApp Us
             </button>
             <div className="mt-4 text-sm text-brand-gray-700 space-y-1">
-              <p><strong>Email:</strong> KKSHOECOMPANY@GMAIL.COM</p>
+              <p><strong className="text-brand-navy">Email:</strong> KKSHOECOMPANY@GMAIL.COM</p>
               <p className="text-xs text-brand-gray-500">Hours: 10 AM – 7 PM</p>
             </div>
           </div>

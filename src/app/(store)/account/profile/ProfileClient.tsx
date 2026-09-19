@@ -109,13 +109,13 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     <div className="max-w-2xl">
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-16 h-16 rounded-full bg-brand-gray-100 border border-brand-gray-200 flex items-center justify-center">
-          <span className="font-serif text-2xl text-brand-gray-400">
+        <div className="w-16 h-16 rounded-full bg-brand-sky border border-brand-sky-border/80 flex items-center justify-center">
+          <span className="font-serif text-2xl text-brand-navy font-medium">
             {displayName.charAt(0).toUpperCase()}
           </span>
         </div>
         <div>
-          <h2 className="font-serif text-xl">{displayName}</h2>
+          <h2 className="font-serif text-xl text-brand-navy">{displayName}</h2>
           <p className="text-sm text-brand-gray-500">{displayEmail}</p>
         </div>
       </div>
@@ -161,7 +161,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm disabled:opacity-50"
             >
               <Save size={16} />
               {loading ? "Saving..." : "Save Changes"}
@@ -169,7 +169,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
             <button
               onClick={handleCancel}
               disabled={loading}
-              className="inline-flex items-center gap-2 border border-brand-gray-200 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-50 transition-colors"
+              className="inline-flex items-center gap-2 border border-brand-navy/30 text-brand-navy px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-sky/20 rounded-xl transition-colors"
             >
               <X size={16} />
               Cancel
@@ -186,7 +186,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           <div className="pt-6">
             <button
               onClick={handleEdit}
-              className="inline-flex items-center gap-2 border border-brand-gray-200 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-50 transition-colors"
+              className="inline-flex items-center gap-2 border border-brand-navy/30 text-brand-navy px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-navy hover:text-white rounded-xl transition-colors shadow-sm"
             >
               Edit Profile
             </button>
@@ -212,7 +212,7 @@ function FieldGroup({
 }) {
   return (
     <div>
-      <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+      <label className="block font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-2">
         {label}
       </label>
       <input
@@ -220,7 +220,7 @@ function FieldGroup({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-brand-gray-200 rounded-md px-4 py-3 text-sm bg-white focus:outline-none focus:border-black transition-colors placeholder:text-brand-gray-300"
+        className="w-full border border-brand-sky-border/60 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/30 transition-colors placeholder:text-brand-gray-300"
       />
     </div>
   );

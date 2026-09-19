@@ -66,10 +66,10 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
   return (
     <div className="mt-24 pt-16 border-t border-brand-gray-100 max-w-4xl mx-auto">
       <div className="text-center mb-16">
-        <h2 className="font-serif text-3xl md:text-4xl text-brand-black mb-4">Customer Reviews</h2>
+        <h2 className="font-serif text-3xl md:text-4xl text-brand-dark mb-4">Customer Reviews</h2>
         {reviews.length > 0 ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="text-2xl text-black">
+            <div className="text-2xl text-brand-gold">
               {"★".repeat(Math.round(Number(averageRating)))}{"☆".repeat(5 - Math.round(Number(averageRating)))}
             </div>
             <div className="font-mono text-sm text-brand-gray-500">
@@ -89,7 +89,7 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
           {reviews.length > 0 ? (
             reviews.map((review) => (
               <div key={review.id} className="border-b border-brand-gray-100 pb-8 last:border-0">
-                <div className="flex items-center gap-1 text-black mb-2 text-lg">
+                <div className="flex items-center gap-1 text-brand-gold mb-2 text-lg">
                   {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
                 </div>
                 <p className="text-brand-gray-600 mb-4 leading-relaxed">{review.reviewText}</p>
@@ -100,7 +100,7 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
               </div>
             ))
           ) : (
-            <div className="text-center p-8 bg-brand-gray-50 rounded-sm">
+            <div className="text-center p-8 bg-brand-sky/20 border border-brand-sky-border/30 rounded-xl">
               <p className="text-brand-gray-500 font-mono text-sm">No reviews yet.</p>
             </div>
           )}
@@ -108,17 +108,17 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
 
         {/* Review Form */}
         <div className="md:col-span-5">
-          <div className="bg-brand-gray-50 p-6 md:p-8 rounded-sm">
-            <h3 className="font-serif text-2xl mb-6">Write a Review</h3>
+          <div className="bg-brand-sky/20 border border-brand-sky-border/40 p-6 md:p-8 rounded-2xl shadow-sm">
+            <h3 className="font-serif text-2xl mb-6 text-brand-dark">Write a Review</h3>
             
             {submitSuccess ? (
-              <div className="bg-green-50 text-green-700 p-4 rounded-sm text-sm border border-green-200">
+              <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm border border-green-200">
                 Thank you for your review! It has been submitted and is pending approval.
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+                  <label className="block font-mono text-xs uppercase tracking-widest text-brand-dark font-medium mb-2">
                     Rating
                   </label>
                   <div className="flex items-center gap-2">
@@ -128,7 +128,7 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
                         type="button"
                         onClick={() => setRating(star)}
                         className={`text-2xl transition-colors ${
-                          rating >= star ? "text-black" : "text-brand-gray-300 hover:text-brand-gray-400"
+                          rating >= star ? "text-brand-gold" : "text-brand-gray-300 hover:text-brand-gold/60"
                         }`}
                       >
                         ★
@@ -138,20 +138,20 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
                 </div>
 
                 <div>
-                  <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+                  <label className="block font-mono text-xs uppercase tracking-widest text-brand-dark font-medium mb-2">
                     Your Review
                   </label>
                   <textarea
                     required
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="w-full border border-brand-gray-200 p-3 text-sm focus:outline-none focus:border-brand-black transition-colors min-h-[120px]"
+                    className="w-full border border-brand-gray-200 bg-white p-3 text-sm focus:outline-none focus:border-brand-blue rounded-lg transition-colors min-h-[120px]"
                     placeholder="What do you think about this product?"
                   />
                 </div>
 
                 {submitError && (
-                  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-sm">
+                  <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
                     {submitError}
                   </div>
                 )}
@@ -159,7 +159,7 @@ export function ProductReviews({ productId, reviews }: ProductReviewsProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting || authLoading}
-                  className="w-full bg-brand-black text-white font-mono text-xs uppercase tracking-widest py-4 hover:bg-brand-gray-900 transition-colors disabled:opacity-50"
+                  className="w-full bg-brand-navy hover:bg-brand-blue text-white font-mono text-xs uppercase tracking-widest py-4 transition-colors rounded-lg shadow-md disabled:opacity-50"
                 >
                   {authLoading ? "Loading..." :
                    isSubmitting ? "Submitting..." : 

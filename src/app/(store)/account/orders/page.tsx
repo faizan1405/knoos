@@ -110,30 +110,30 @@ export default function OrdersPage() {
 
 function OrderCard({ order }: { order: Order }) {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white overflow-hidden">
-      <div className="bg-brand-gray-50 p-4 sm:p-5 border-b border-brand-gray-100">
+    <div className="border border-brand-sky-border/60 rounded-xl bg-white overflow-hidden shadow-sm">
+      <div className="bg-brand-sky/20 p-4 sm:p-5 border-b border-brand-sky-border/40">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <div>
-              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Order Placed</p>
-              <p className="text-sm font-medium">
+              <p className="font-mono text-xs uppercase text-brand-blue font-medium mb-0.5">Order Placed</p>
+              <p className="text-sm font-medium text-brand-navy">
                 {new Date(order.createdAt).toLocaleDateString("en-IN", {
                   day: "2-digit", month: "short", year: "numeric",
                 })}
               </p>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Total</p>
-              <p className="text-sm font-medium">{formatINR(order.total)}</p>
+              <p className="font-mono text-xs uppercase text-brand-blue font-medium mb-0.5">Total</p>
+              <p className="text-sm font-semibold text-brand-navy">{formatINR(order.total)}</p>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase text-brand-gray-400 mb-0.5">Order #</p>
-              <p className="text-sm font-mono text-xs">{order.id.slice(0, 12)}</p>
+              <p className="font-mono text-xs uppercase text-brand-blue font-medium mb-0.5">Order #</p>
+              <p className="text-sm font-mono text-xs text-brand-gray-700">{order.id.slice(0, 12)}</p>
             </div>
           </div>
           <Link
             href={`/account/orders/${order.id}`}
-            className="shrink-0 inline-flex items-center justify-center border border-brand-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-brand-gray-50 transition-colors rounded"
+            className="shrink-0 inline-flex items-center justify-center border border-brand-navy/30 bg-white text-brand-navy px-4 py-2 text-xs font-mono uppercase tracking-wider hover:bg-brand-navy hover:text-white transition-colors rounded-lg"
           >
             View Details
           </Link>
@@ -161,14 +161,14 @@ function OrderCard({ order }: { order: Order }) {
 
 function EmptyOrders() {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white py-16 px-6 text-center">
-      <h3 className="font-serif text-2xl mb-2">No orders yet</h3>
+    <div className="border border-brand-sky-border/60 rounded-xl bg-white py-16 px-6 text-center shadow-sm">
+      <h3 className="font-serif text-2xl mb-2 text-brand-navy">No orders yet</h3>
       <p className="text-brand-gray-500 text-sm mb-6 max-w-sm mx-auto">
         Your orders will appear here once you make a purchase.
       </p>
       <Link
         href="/search"
-        className="inline-block bg-black text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors"
+        className="inline-block bg-brand-navy text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm"
       >
         Start Shopping
       </Link>

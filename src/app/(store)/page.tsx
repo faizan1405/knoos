@@ -45,39 +45,39 @@ export default async function HomePage() {
           <RevealText as="h2" text="Shop by Category" className="font-serif text-3xl md:text-4xl mb-12" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <RevealImage delay={0} scaleFrom={1.04} className="h-full">
-              <Link href="/men" className="group block relative h-full aspect-[4/5] bg-brand-gray-100 overflow-hidden">
+              <Link href="/men" className="group block relative h-full aspect-[4/5] bg-brand-sky/20 border border-brand-sky-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
                 <Image
                   src="/images/men-category.jpg"
                   alt="Men's Footwear"
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
                 <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
                   <span className="font-serif text-3xl md:text-4xl text-white mb-3 tracking-wide">
                     Men
                   </span>
-                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-white/90 flex items-center gap-2">
-                    Shop Men <span className="transition-transform duration-500 group-hover:translate-x-1">&rarr;</span>
+                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-sky flex items-center gap-2 group-hover:text-white transition-colors">
+                    Shop Men <span className="transition-transform duration-500 group-hover:translate-x-1 text-brand-blue group-hover:text-white">&rarr;</span>
                   </span>
                 </div>
               </Link>
             </RevealImage>
             <RevealImage delay={0.1} scaleFrom={1.04} className="h-full">
-              <Link href="/women" className="group block relative h-full aspect-[4/5] bg-brand-gray-100 overflow-hidden">
+              <Link href="/women" className="group block relative h-full aspect-[4/5] bg-brand-sky/20 border border-brand-sky-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
                 <Image
                   src="/images/women-category.jpg"
                   alt="Women's Footwear"
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
                 <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
                   <span className="font-serif text-3xl md:text-4xl text-white mb-3 tracking-wide">
                     Women
                   </span>
-                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-white/90 flex items-center gap-2">
-                    Shop Women <span className="transition-transform duration-500 group-hover:translate-x-1">&rarr;</span>
+                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-sky flex items-center gap-2 group-hover:text-white transition-colors">
+                    Shop Women <span className="transition-transform duration-500 group-hover:translate-x-1 text-brand-blue group-hover:text-white">&rarr;</span>
                   </span>
                 </div>
               </Link>
@@ -88,17 +88,17 @@ export default async function HomePage() {
 
       {/* BEST SELLERS */}
       {bestSellers.length > 0 && (
-        <section className="py-24 px-6 md:px-12 lg:px-24 bg-white">
+        <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-sky/40 border-y border-brand-sky-border/40">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>
-                <RevealText as="h2" text="BEST SELLERS" className="font-serif text-3xl md:text-4xl uppercase mb-3" />
+                <RevealText as="h2" text="BEST SELLERS" className="font-serif text-3xl md:text-4xl uppercase mb-3 text-brand-dark" />
                 <Reveal delay={0.15}>
                   <p className="text-brand-gray-600 text-sm md:text-base">Our most-loved pairs, chosen for everyday comfort and style.</p>
                 </Reveal>
               </div>
               <Reveal delay={0.25}>
-                <Link href="/search" className="font-mono text-xs uppercase tracking-widest text-brand-gray-500 hover:text-brand-black transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-black">
+                <Link href="/search" className="font-mono text-xs uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-blue">
                   View All <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
                 </Link>
               </Reveal>
@@ -116,15 +116,15 @@ export default async function HomePage() {
 
       {/* NEW ARRIVALS */}
       {newArrivals.length > 0 && (
-        <section className="py-24 px-6 md:px-12 lg:px-24 bg-white border-t border-brand-gray-100">
+        <section className="py-24 px-6 md:px-12 lg:px-24 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>
-                <RevealText as="p" text="JUST IN" className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4" />
-                <RevealText as="h2" text="New Arrivals" className="font-serif text-3xl md:text-4xl" />
+                <RevealText as="p" text="JUST IN" className="font-mono text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4" />
+                <RevealText as="h2" text="New Arrivals" className="font-serif text-3xl md:text-4xl text-brand-dark" />
               </div>
               <Reveal delay={0.25}>
-                <Link href="/search?sort=Newest" className="font-mono text-xs uppercase tracking-widest text-brand-gray-500 hover:text-brand-black transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-black">
+                <Link href="/search?sort=Newest" className="font-mono text-xs uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-blue">
                   View All <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
                 </Link>
               </Reveal>
@@ -141,58 +141,58 @@ export default async function HomePage() {
       )}
 
       {/* SECTION 1 — MADE WITH INTENT */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-gray-50">
+      <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-cream/80 border-y border-brand-cream-border/60">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <p className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4">WHY KNOOS</p>
+            <p className="font-mono text-sm uppercase tracking-widest text-brand-gold font-semibold mb-4">WHY KNOOS</p>
           </Reveal>
-          <RevealText as="h2" text="MADE WITH INTENT" delay={0.1} className="font-serif text-3xl md:text-4xl mb-16 uppercase" />
+          <RevealText as="h2" text="MADE WITH INTENT" delay={0.1} className="font-serif text-3xl md:text-4xl mb-16 uppercase text-brand-dark" />
 
           <StaggerContainer staggerDelay={0.08} delayChildren={0.2} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-            <StaggerItem yOffset={25} className="flex flex-col items-start">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
+            <StaggerItem yOffset={25} className="flex flex-col items-start group">
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 8v4l3 3" />
                 </svg>
               </div>
-              <h3 className="font-serif text-xl mb-3">Comfort</h3>
+              <h3 className="font-serif text-xl mb-3 text-brand-dark">Comfort</h3>
               <p className="text-brand-gray-600 text-sm leading-relaxed">Cushioned footbeds and considered fit for long days on your feet.</p>
             </StaggerItem>
-            <StaggerItem yOffset={25} className="flex flex-col items-start">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
+            <StaggerItem yOffset={25} className="flex flex-col items-start group">
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.121 14.121L19 19m-7-7l-7-7m7 7a3 3 0 100-6 3 3 0 000 6z" />
                 </svg>
               </div>
-              <h3 className="font-serif text-xl mb-3">Craftsmanship</h3>
+              <h3 className="font-serif text-xl mb-3 text-brand-dark">Craftsmanship</h3>
               <p className="text-brand-gray-600 text-sm leading-relaxed">Clean lines, careful stitching and a finish you can feel.</p>
             </StaggerItem>
-            <StaggerItem yOffset={25} className="flex flex-col items-start">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
+            <StaggerItem yOffset={25} className="flex flex-col items-start group">
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="font-serif text-xl mb-3">Everyday Style</h3>
+              <h3 className="font-serif text-xl mb-3 text-brand-dark">Everyday Style</h3>
               <p className="text-brand-gray-600 text-sm leading-relaxed">Silhouettes that move easily from work to weekend.</p>
             </StaggerItem>
-            <StaggerItem yOffset={25} className="flex flex-col items-start">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
+            <StaggerItem yOffset={25} className="flex flex-col items-start group">
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 10a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v4a.5.5 0 01-.5.5h-5a.5.5 0 01-.5-.5v-4z" />
                 </svg>
               </div>
-              <h3 className="font-serif text-xl mb-3">Quality Materials</h3>
+              <h3 className="font-serif text-xl mb-3 text-brand-dark">Quality Materials</h3>
               <p className="text-brand-gray-600 text-sm leading-relaxed">Selected leathers, knits and durable rubber outsoles.</p>
             </StaggerItem>
-            <StaggerItem yOffset={25} className="flex flex-col items-start">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full border border-brand-gray-200 mb-6 bg-white">
+            <StaggerItem yOffset={25} className="flex flex-col items-start group">
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="font-serif text-xl mb-3">Built To Move</h3>
+              <h3 className="font-serif text-xl mb-3 text-brand-dark">Built To Move</h3>
               <p className="text-brand-gray-600 text-sm leading-relaxed">Flexible construction designed around natural movement.</p>
             </StaggerItem>
           </StaggerContainer>
@@ -200,9 +200,9 @@ export default async function HomePage() {
       </section>
 
       {/* VIDEO — above "Finished with care." */}
-      <section className="relative bg-brand-black">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative aspect-video w-full overflow-hidden">
+      <section className="relative bg-brand-navy py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
             <video
               className="absolute inset-0 h-full w-full object-cover"
               controls
@@ -217,15 +217,15 @@ export default async function HomePage() {
       </section>
 
       {/* SECTION 2 — OUR QUALITY PROCESS */}
-      <section className="py-24 px-6 md:px-12 lg:px-24">
+      <section className="py-24 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-brand-sky/30 to-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <RevealImage scaleFrom={1.05} className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-brand-gray-100 rounded-3xl overflow-hidden">
+            <RevealImage scaleFrom={1.05} className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-white border border-brand-sky-border/40 shadow-lg rounded-3xl overflow-hidden">
               <Image src="/images/process-footwear.jpg" alt="Craftsmanship Process" fill className="object-cover" />
             </RevealImage>
             <div>
-              <RevealText as="p" text="PROCESS" className="font-mono text-sm uppercase tracking-widest text-brand-gray-500 mb-4" />
-              <RevealText as="h2" text="Finished with care." delay={0.1} className="font-serif text-3xl md:text-4xl mb-12" />
+              <RevealText as="p" text="PROCESS" className="font-mono text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4" />
+              <RevealText as="h2" text="Finished with care." delay={0.1} className="font-serif text-3xl md:text-4xl mb-12 text-brand-dark" />
               <StaggerContainer delayChildren={0.2} staggerDelay={0.1} className="space-y-8">
                 {[
                   "Material selection and inspection",
@@ -234,10 +234,10 @@ export default async function HomePage() {
                   "Finishing, cleaning and quality control"
                 ].map((step, idx) => (
                   <StaggerItem key={idx} yOffset={20} className="flex items-start gap-4">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center mt-1">
+                    <div className="w-7 h-7 rounded-full bg-brand-blue flex-shrink-0 flex items-center justify-center mt-1 shadow-sm">
                       <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
-                    <p className="text-lg text-black font-light">{step}</p>
+                    <p className="text-lg text-brand-dark font-light">{step}</p>
                   </StaggerItem>
                 ))}
               </StaggerContainer>

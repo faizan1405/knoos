@@ -175,10 +175,10 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
           Discover something worth walking in.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link href="/men" className="bg-brand-black text-white px-8 py-4 font-mono text-sm uppercase tracking-widest hover:bg-brand-gray-900 transition-colors">
+          <Link href="/men" className="bg-brand-navy hover:bg-brand-blue text-white px-8 py-4 font-mono text-sm uppercase tracking-widest transition-colors rounded-lg shadow-md text-center">
             Shop Men
           </Link>
-          <Link href="/women" className="border border-brand-black text-brand-black px-8 py-4 font-mono text-sm uppercase tracking-widest hover:bg-brand-gray-50 transition-colors">
+          <Link href="/women" className="border border-brand-navy text-brand-navy hover:bg-brand-sky/30 px-8 py-4 font-mono text-sm uppercase tracking-widest transition-colors rounded-lg text-center">
             Shop Women
           </Link>
         </div>
@@ -206,42 +206,42 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
                 key={item.id} 
-                className={`flex flex-col sm:flex-row gap-6 border-b border-brand-gray-100 pb-8 ${isLoading ? 'opacity-50' : ''}`}
+                className={`flex flex-col sm:flex-row gap-6 border-b border-brand-sky-border/25 pb-8 ${isLoading ? 'opacity-50' : ''}`}
               >
-                <div className="w-full sm:w-32 h-40 bg-brand-gray-50 relative shrink-0">
+                <div className="w-full sm:w-32 h-40 bg-brand-sky/20 border border-brand-sky-border/30 rounded-xl overflow-hidden relative shrink-0">
                   {item.imageUrl ? (
                     <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-brand-gray-300 font-mono text-xs">No image</div>
+                    <div className="w-full h-full flex items-center justify-center text-brand-gray-400 font-mono text-xs">No image</div>
                   )}
                 </div>
                 <div className="flex flex-col flex-grow justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2">
-                      <Link href={`/product/${item.slug}`} className="font-serif text-xl hover:text-brand-gray-500 transition-colors">
+                      <Link href={`/product/${item.slug}`} className="font-serif text-xl text-brand-dark hover:text-brand-blue transition-colors">
                         {item.productName}
                       </Link>
-                      <span className="font-mono text-sm">₹{item.price.toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-sm text-brand-dark font-medium">₹{item.price.toLocaleString('en-IN')}</span>
                     </div>
                     <p className="font-mono text-xs text-brand-gray-500 uppercase tracking-widest mb-4">
                       Size: {item.size}
                     </p>
                     
-                    {isUnavailable && <p className="text-red-500 text-sm mb-2 font-medium">This product is no longer available.</p>}
-                    {!isUnavailable && isOutOfStock && <p className="text-red-500 text-sm mb-2 font-medium">Selected size is unavailable.</p>}
+                    {isUnavailable && <p className="text-red-600 text-sm mb-2 font-medium">This product is no longer available.</p>}
+                    {!isUnavailable && isOutOfStock && <p className="text-red-600 text-sm mb-2 font-medium">Selected size is unavailable.</p>}
                     {!isUnavailable && !isOutOfStock && exceedsStock && (
-                      <p className="text-orange-500 text-sm mb-2 font-medium">
+                      <p className="text-amber-700 text-sm mb-2 font-medium">
                         Only {item.stock} available. Please reduce your quantity.
                       </p>
                     )}
                   </div>
                   
                   <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center border border-brand-gray-200">
+                    <div className="flex items-center border border-brand-gray-200 rounded-lg overflow-hidden bg-white">
                       <button
                         onClick={() => handleQuantityUpdate(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1 || isLoading}
-                        className="px-3 py-1 text-brand-gray-500 hover:text-brand-black hover:bg-brand-gray-50 disabled:opacity-30 transition-colors"
+                        className="px-3 py-1 text-brand-gray-500 hover:text-brand-navy hover:bg-brand-sky/40 disabled:opacity-30 transition-colors"
                       >
                         -
                       </button>
@@ -249,14 +249,14 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
                         key={item.quantity} 
                         initial={{ opacity: 0.5, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="px-3 py-1 font-mono text-sm w-10 text-center"
+                        className="px-3 py-1 font-mono text-sm w-10 text-center text-brand-dark"
                       >
                         {item.quantity}
                       </motion.span>
                       <button
                         onClick={() => handleQuantityUpdate(item.id, item.quantity + 1)}
                         disabled={item.quantity >= item.stock || isLoading}
-                        className="px-3 py-1 text-brand-gray-500 hover:text-brand-black hover:bg-brand-gray-50 disabled:opacity-30 transition-colors"
+                        className="px-3 py-1 text-brand-gray-500 hover:text-brand-navy hover:bg-brand-sky/40 disabled:opacity-30 transition-colors"
                       >
                         +
                       </button>
@@ -265,7 +265,7 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
                     <button
                       onClick={() => handleRemove(item.id)}
                       disabled={isLoading}
-                      className="font-mono text-xs text-brand-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors underline underline-offset-4"
+                      className="font-mono text-xs text-brand-gray-400 hover:text-red-600 uppercase tracking-widest transition-colors underline underline-offset-4"
                     >
                       Remove
                     </button>
@@ -284,14 +284,15 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
       </div>
       
       <div>
-        <div className="bg-brand-gray-50 p-8 sticky top-24">
-          <h3 className="font-serif text-2xl mb-6">Summary</h3>
-          <div className="flex justify-between items-center mb-6 font-mono text-sm">
-            <span className="uppercase tracking-widest">Subtotal</span>
+        <div className="bg-gradient-to-b from-brand-sky/40 to-brand-sky/10 border border-brand-sky-border/40 p-8 rounded-2xl sticky top-24 shadow-sm">
+          <h3 className="font-serif text-2xl mb-6 text-brand-dark">Summary</h3>
+          <div className="flex justify-between items-center mb-6 font-mono text-sm text-brand-dark">
+            <span className="uppercase tracking-widest text-brand-gray-600">Subtotal</span>
             <motion.span
               key={subtotal}
               initial={{ opacity: 0.5, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
+              className="font-medium"
             >
               ₹{subtotal.toLocaleString('en-IN')}
             </motion.span>
@@ -311,25 +312,25 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
           />
 
           {coupon && (
-            <div className="mb-6 space-y-3 border-t border-brand-gray-200 pt-5 font-mono text-sm">
+            <div className="mb-6 space-y-3 border-t border-brand-sky-border/40 pt-5 font-mono text-sm text-brand-dark">
               <div className="flex justify-between">
-                <span className="text-brand-gray-500">Coupon discount</span>
-                <span>-₹{coupon.discountAmount.toLocaleString("en-IN")}</span>
+                <span className="text-brand-gray-600">Coupon discount</span>
+                <span className="text-green-700 font-medium">-₹{coupon.discountAmount.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="uppercase tracking-widest">Estimated subtotal</span>
-                <motion.span key={estimatedSubtotal} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }}>
+                <span className="uppercase tracking-widest text-brand-gray-600">Estimated subtotal</span>
+                <motion.span key={estimatedSubtotal} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }} className="font-medium">
                   ₹{estimatedSubtotal.toLocaleString("en-IN")}
                 </motion.span>
               </div>
             </div>
           )}
           
-          <Link href="/checkout" className="block w-full bg-brand-black text-white py-4 font-mono text-sm uppercase tracking-widest text-center hover:bg-brand-gray-900 transition-colors mb-4">
+          <Link href="/checkout" className="block w-full bg-brand-navy hover:bg-brand-blue text-white py-4 font-mono text-sm uppercase tracking-widest text-center transition-all duration-300 rounded-lg shadow-md hover:shadow-lg mb-4">
             Checkout
           </Link>
           
-          <p className="text-xs text-brand-gray-400 font-mono uppercase tracking-widest text-center">
+          <p className="text-xs text-brand-gray-500 font-mono uppercase tracking-widest text-center">
             Shipping & taxes calculated at checkout
           </p>
         </div>

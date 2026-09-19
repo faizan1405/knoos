@@ -9,13 +9,13 @@ export const metadata: Metadata = {
 
 export default function ReturnsRefundsPage() {
   return (
-    <main className="max-w-4xl mx-auto px-6 md:px-12 lg:px-16 py-16 md:py-24 text-brand-black">
+    <main className="max-w-4xl mx-auto px-6 md:px-12 lg:px-16 py-16 md:py-24 text-brand-dark">
       {/* Policy Header */}
-      <div className="border-b border-brand-gray-200 pb-10 mb-12">
-        <span className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 block mb-3">
+      <div className="border-b border-brand-sky-border/80 pb-10 mb-12">
+        <span className="font-mono text-xs uppercase tracking-widest text-brand-blue font-medium block mb-3">
           Customer Service &amp; Policies
         </span>
-        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4">
+        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4 text-brand-dark">
           Return &amp; Refund Policy
         </h1>
         <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-brand-gray-500">
@@ -26,22 +26,22 @@ export default function ReturnsRefundsPage() {
       </div>
 
       {/* Introduction Notice Box */}
-      <div className="bg-brand-gray-50 border border-brand-gray-200 p-6 md:p-8 mb-12">
-        <p className="text-brand-gray-800 text-sm md:text-base leading-relaxed">
-          At <strong className="font-semibold text-black">KNOOS</strong>, we carefully inspect and pack every product before dispatch to ensure the highest standards of quality.
+      <div className="bg-brand-sky/25 border border-brand-sky-border/60 rounded-xl p-6 md:p-8 mb-12">
+        <p className="text-brand-dark text-sm md:text-base leading-relaxed">
+          At <strong className="font-semibold text-brand-navy">KNOOS</strong>, we carefully inspect and pack every product before dispatch to ensure the highest standards of quality.
         </p>
       </div>
 
       {/* Policy Sections */}
       <div className="space-y-12 leading-relaxed text-brand-gray-700 text-sm md:text-base">
         {/* Section 1 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">01</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Return Window</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">01</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Return Window</h2>
           </div>
           <p className="mb-3">
-            Return requests are accepted within <strong className="text-black font-semibold">3 days of delivery</strong>.
+            Return requests are accepted within <strong className="text-brand-navy font-semibold">3 days of delivery</strong>.
           </p>
           <p className="text-brand-gray-500 text-xs md:text-sm">
             Requests raised after the applicable 3-day window may not be accepted.
@@ -49,31 +49,32 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 2 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">02</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Products Eligible for Return</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">02</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Products Eligible for Return</h2>
           </div>
           <p className="mb-3">Returns are accepted only when:</p>
           <ul className="list-disc pl-5 space-y-2 mb-4">
             <li>The product received is wrong/different from the product ordered.</li>
             <li>The product received is damaged or has a manufacturing/transportation-related defect.</li>
           </ul>
-          <div className="bg-white border-l-2 border-black pl-4 py-2 mt-4 text-xs md:text-sm text-brand-gray-800">
-            <strong>Mandatory Verification:</strong> For wrong or damaged products, the customer must have a continuous unboxing video showing the package from the time it is received and opened. The unboxing video may be required to verify the package and product condition at delivery.
+          <div className="bg-brand-sky/20 border-l-2 border-brand-blue pl-4 py-3 mt-4 text-xs md:text-sm text-brand-dark rounded-r-lg">
+            <strong className="text-brand-navy">Mandatory Verification:</strong> For wrong or damaged products, the customer must have a continuous unboxing video showing the package from the time it is received and opened. The unboxing video may be required to verify the package and product condition at delivery.
           </div>
         </section>
 
         {/* Section 3 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        {/* Section 3 */}
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">03</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Size-Related Issues</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">03</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Size-Related Issues</h2>
           </div>
           <p className="mb-3">
-            Size or fitting issues are eligible for <strong className="text-black font-semibold">replacement/exchange only</strong>, subject to availability.
+            Size or fitting issues are eligible for <strong className="text-brand-navy font-semibold">replacement/exchange only</strong>, subject to availability.
           </p>
-          <p className="mb-4 text-black font-medium">
+          <p className="mb-4 text-brand-navy font-medium">
             Size-related issues are NOT eligible for a refund.
           </p>
           <p className="mb-2">The product must be unused, unworn, and in original condition with:</p>
@@ -86,10 +87,10 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 4 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">04</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Replacement Shipping Charges</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">04</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Replacement Shipping Charges</h2>
           </div>
           <p className="mb-3">
             For replacement due to a size or fitting issue, applicable shipping/return charges are borne by the customer.
@@ -100,10 +101,10 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 5 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">05</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Replacement Conditions</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">05</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Replacement Conditions</h2>
           </div>
           <p className="mb-3">The product must:</p>
           <ul className="list-disc pl-5 space-y-1.5 mb-4">
@@ -113,19 +114,19 @@ export default function ReturnsRefundsPage() {
             <li>Include original packaging, box, and accessories where applicable</li>
             <li>Have no stains, scratches, dirt, marks, damage, or signs of use</li>
           </ul>
-          <div className="bg-brand-gray-50 p-4 text-xs md:text-sm text-brand-gray-700">
+          <div className="bg-brand-cream/70 border border-brand-cream-border/60 rounded-xl p-4 text-xs md:text-sm text-brand-dark">
             Customers are advised to try footwear indoors on a clean surface before deciding whether the size is suitable. Products showing signs of outdoor use may not be accepted for replacement.
           </div>
         </section>
 
         {/* Section 6 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">06</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Wrong or Damaged Product</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">06</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Wrong or Damaged Product</h2>
           </div>
           <p className="mb-3">
-            Customers must contact KNOOS within <strong className="text-black font-semibold">3 days of delivery</strong>.
+            Customers must contact KNOOS within <strong className="text-brand-navy font-semibold">3 days of delivery</strong>.
           </p>
           <p className="mb-2">They should keep ready:</p>
           <ul className="list-disc pl-5 space-y-1.5 mb-4">
@@ -141,10 +142,10 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 7 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">07</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Refund Policy</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">07</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Refund Policy</h2>
           </div>
           <p className="mb-3">
             Refunds are applicable only where specifically approved by KNOOS for an eligible wrong or damaged product claim.
@@ -161,10 +162,10 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 8 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">08</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Returns Not Eligible</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">08</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Returns Not Eligible</h2>
           </div>
           <p className="mb-3">Returns/replacements may be rejected when:</p>
           <ul className="list-disc pl-5 space-y-1.5">
@@ -181,10 +182,10 @@ export default function ReturnsRefundsPage() {
         </section>
 
         {/* Section 9 */}
-        <section className="border-b border-brand-gray-100 pb-8">
+        <section className="border-b border-brand-sky-border/50 pb-8">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">09</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">How to Raise a Request</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">09</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">How to Raise a Request</h2>
           </div>
           <p className="mb-3">
             Customers should contact KNOOS through the customer support/contact option available on the website within the applicable 3-day period.
@@ -202,7 +203,7 @@ export default function ReturnsRefundsPage() {
           <div className="flex flex-wrap gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-6 py-3 bg-brand-black text-white text-xs font-mono uppercase tracking-widest hover:bg-brand-gray-800 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 bg-brand-navy text-white text-xs font-mono uppercase tracking-widest hover:bg-brand-blue rounded-xl transition-colors shadow-sm"
             >
               Contact Support Team
             </Link>
@@ -210,7 +211,7 @@ export default function ReturnsRefundsPage() {
               href="https://wa.me/917088808882"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-3 border border-black text-black text-xs font-mono uppercase tracking-widest hover:bg-black hover:text-white transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-brand-navy text-brand-navy text-xs font-mono uppercase tracking-widest hover:bg-brand-navy hover:text-white rounded-xl transition-colors"
             >
               WhatsApp Support (7088808882)
             </a>
@@ -220,8 +221,8 @@ export default function ReturnsRefundsPage() {
         {/* Section 10 */}
         <section className="pt-2">
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-mono text-xs text-brand-gray-400">10</span>
-            <h2 className="font-serif text-xl md:text-2xl text-black">Important Note</h2>
+            <span className="font-mono text-xs text-brand-blue font-medium">10</span>
+            <h2 className="font-serif text-xl md:text-2xl text-brand-navy">Important Note</h2>
           </div>
           <p className="mb-3">
             KNOOS reserves the right to verify every return or replacement request before approval.
@@ -232,7 +233,7 @@ export default function ReturnsRefundsPage() {
           <p className="mb-6">
             By placing an order on the KNOOS website, the customer acknowledges and agrees to this Return &amp; Refund Policy.
           </p>
-          <div className="border-t border-brand-gray-200 pt-6 mt-8">
+          <div className="border-t border-brand-sky-border/80 pt-6 mt-8">
             <Image
               src="/knoos-logo.png"
               alt="KNOOS"
@@ -240,7 +241,7 @@ export default function ReturnsRefundsPage() {
               height={80}
               className="h-8 w-auto object-contain"
             />
-            <div className="font-serif italic text-brand-gray-500 text-sm mt-1">Comfort In Every Step</div>
+            <div className="font-serif italic text-brand-navy text-sm mt-1">Comfort In Every Step</div>
           </div>
         </section>
       </div>

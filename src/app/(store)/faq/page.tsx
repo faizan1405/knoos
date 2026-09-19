@@ -107,10 +107,10 @@ export default async function FaqPage() {
   return (
     <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 md:py-24">
       <div className="max-w-3xl mx-auto text-center mb-16">
-        <h1 className="font-serif text-4xl md:text-5xl text-brand-black mb-6 tracking-tight">
+        <h1 className="font-serif text-4xl md:text-5xl text-brand-dark mb-6 tracking-tight">
           Frequently Asked Questions
         </h1>
-        <p className="font-mono text-sm uppercase tracking-widest text-brand-gray-400">
+        <p className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-blue font-medium">
           Everything you need to know about our products and services.
         </p>
       </div>

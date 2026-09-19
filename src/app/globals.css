@@ -17,13 +17,13 @@
 
   body {
     min-height: 100vh;
-    background-color: #fafafa;
-    color: #0a0a0a;
+    background-color: #ffffff;
+    color: #14212B;
   }
 
   ::selection {
-    background-color: #c8a96e;
-    color: #fafafa;
+    background-color: #16A8F4;
+    color: #ffffff;
   }
 }
 

@@ -127,13 +127,13 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       className="flex flex-col"
     >
       <motion.div variants={itemVariants} className="mb-6">
-        <h1 className="font-serif text-3xl lg:text-4xl mb-3 tracking-tight text-brand-black">{product.name}</h1>
+        <h1 className="font-serif text-3xl lg:text-4xl mb-3 tracking-tight text-brand-dark">{product.name}</h1>
         <div className="flex items-center gap-4 text-xl">
-          <span className="text-brand-black font-medium">₹{selling.toLocaleString('en-IN')}</span>
+          <span className="text-brand-dark font-medium">₹{selling.toLocaleString('en-IN')}</span>
           {discount.hasDiscount && (
             <>
               <span className="text-brand-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
-              <span className="bg-red-50 text-red-600 px-2 py-1 text-xs font-mono tracking-widest uppercase ml-2 rounded-sm">
+              <span className="bg-brand-cream border border-brand-cream-border text-amber-900 px-2.5 py-1 text-xs font-mono tracking-widest uppercase ml-2 rounded font-semibold">
                 {Math.round(discount.discountPercentage)}% OFF
               </span>
             </>
@@ -141,14 +141,14 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="mb-8 text-brand-gray-500 leading-relaxed max-w-prose text-[15px]">
+      <motion.div variants={itemVariants} className="mb-8 text-brand-gray-600 leading-relaxed max-w-prose text-[15px]">
         {product.description || "No description available."}
       </motion.div>
 
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <span className="font-mono text-xs uppercase tracking-widest text-brand-black font-semibold">Select Size</span>
-          <span className="font-mono text-xs text-brand-gray-400">UK Sizing</span>
+          <span className="font-mono text-xs uppercase tracking-widest text-brand-dark font-semibold">Select Size</span>
+          <span className="font-mono text-xs text-brand-gray-500">UK Sizing</span>
         </div>
         
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -165,10 +165,10 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
                   disabled={isOutOfStock}
                   onClick={() => handleVariantSelect(variant.id)}
                   className={`
-                    py-3 text-sm font-mono border transition-all duration-300 rounded-sm
+                    py-3 text-sm font-mono border transition-all duration-300 rounded-lg
                     ${isOutOfStock ? "opacity-40 cursor-not-allowed bg-brand-gray-50 border-brand-gray-100 line-through" : ""}
-                    ${isSelected && !isOutOfStock ? "border-brand-black bg-brand-black text-white shadow-md" : ""}
-                    ${!isSelected && !isOutOfStock ? "border-brand-gray-200 hover:border-brand-black text-brand-black hover:bg-brand-gray-50" : ""}
+                    ${isSelected && !isOutOfStock ? "border-brand-navy bg-brand-navy text-white shadow-md ring-2 ring-brand-blue/30" : ""}
+                    ${!isSelected && !isOutOfStock ? "border-brand-gray-200 hover:border-brand-blue text-brand-dark hover:bg-brand-sky/30 hover:text-brand-navy" : ""}
                   `}
                 >
                   {variant.size}
@@ -184,20 +184,20 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       {/* Quantity Selector */}
       {selectedVariantId && stockAvailable > 0 && (
         <motion.div variants={itemVariants} className="mb-8 flex items-center gap-6">
-          <span className="font-mono text-xs uppercase tracking-widest text-brand-black font-semibold">Quantity</span>
-          <div className="flex items-center border border-brand-gray-200 rounded-sm">
+          <span className="font-mono text-xs uppercase tracking-widest text-brand-dark font-semibold">Quantity</span>
+          <div className="flex items-center border border-brand-gray-200 rounded-lg overflow-hidden bg-white">
             <button
               onClick={() => handleQuantityChange(-1)}
               disabled={quantity <= 1}
-              className="px-4 py-2 text-brand-gray-500 hover:text-brand-black hover:bg-brand-gray-50 disabled:opacity-30 transition-colors"
+              className="px-4 py-2 text-brand-gray-500 hover:text-brand-navy hover:bg-brand-sky/40 disabled:opacity-30 transition-colors"
             >
               -
             </button>
-            <span className="px-4 py-2 font-mono text-sm w-12 text-center">{quantity}</span>
+            <span className="px-4 py-2 font-mono text-sm w-12 text-center text-brand-dark">{quantity}</span>
             <button
               onClick={() => handleQuantityChange(1)}
               disabled={quantity >= stockAvailable}
-              className="px-4 py-2 text-brand-gray-500 hover:text-brand-black hover:bg-brand-gray-50 disabled:opacity-30 transition-colors"
+              className="px-4 py-2 text-brand-gray-500 hover:text-brand-navy hover:bg-brand-sky/40 disabled:opacity-30 transition-colors"
             >
               +
             </button>
@@ -205,18 +205,18 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         </motion.div>
       )}
 
-      {error && <motion.p variants={itemVariants} className="mb-4 text-sm text-red-500 bg-red-50 p-3 rounded-sm">{error}</motion.p>}
-      {success && <motion.p variants={itemVariants} className="mb-4 text-sm text-green-700 bg-green-50 p-3 rounded-sm font-medium">Added to cart successfully!</motion.p>}
+      {error && <motion.p variants={itemVariants} className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">{error}</motion.p>}
+      {success && <motion.p variants={itemVariants} className="mb-4 text-sm text-green-800 bg-green-50 border border-green-200 p-3 rounded-lg font-medium">Added to cart successfully!</motion.p>}
 
       <motion.button
         variants={itemVariants}
         onClick={handleAddToCart}
         disabled={variants.length > 0 && !selectedVariantId || loading || (selectedVariantId && stockAvailable <= 0) || authLoading}
         className={`
-          w-full py-4 font-mono text-sm uppercase tracking-widest transition-all duration-300 rounded-sm
+          w-full py-4 font-mono text-sm uppercase tracking-widest transition-all duration-300 rounded-lg
           ${(variants.length > 0 && !selectedVariantId) || loading || (selectedVariantId && stockAvailable <= 0) || authLoading
             ? "bg-brand-gray-100 text-brand-gray-400 cursor-not-allowed border border-brand-gray-200" 
-            : "bg-brand-black text-white hover:bg-brand-gray-900 hover:shadow-lg transform hover:-translate-y-0.5"}
+            : "bg-brand-navy text-white hover:bg-brand-blue hover:shadow-xl transform hover:-translate-y-0.5 shadow-md"}
         `}
       >
         {authLoading ? "Loading..." :
@@ -227,60 +227,60 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
          "Add to Cart"}
       </motion.button>
 
-      <motion.div variants={itemVariants} className="mt-12 pt-8 border-t border-brand-gray-100">
-        <h3 className="font-serif text-xl mb-6 text-brand-black">Specifications</h3>
+      <motion.div variants={itemVariants} className="mt-12 p-6 rounded-2xl bg-brand-sky/20 border border-brand-sky-border/30">
+        <h3 className="font-serif text-xl mb-6 text-brand-dark">Specifications</h3>
         <ul className="space-y-4 font-mono text-[11px] sm:text-xs text-brand-gray-500 uppercase tracking-widest">
           {(product as any).categoryRel?.name ? (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Category</span>
-              <span className="text-brand-black text-right">
+              <span className="text-brand-dark font-medium text-right">
                 {(product as any).categoryRel?.name}
               </span>
             </li>
           ) : null}
           {product.subCategory && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Sub Category</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.subCategory)}</span>
+              <span className="text-brand-dark font-medium text-right">{formatSpecValue(product.subCategory)}</span>
             </li>
           )}
           {product.color && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Color</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.color)}</span>
+              <span className="text-brand-dark font-medium text-right">{formatSpecValue(product.color)}</span>
             </li>
           )}
           {product.upperMaterial && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Upper Material</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.upperMaterial)}</span>
+              <span className="text-brand-dark font-medium text-right">{formatSpecValue(product.upperMaterial)}</span>
             </li>
           )}
           {product.innerMaterial && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Inner Material</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.innerMaterial)}</span>
+              <span className="text-brand-dark font-medium text-right">{formatSpecValue(product.innerMaterial)}</span>
             </li>
           )}
           {product.sole && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>Sole</span>
-              <span className="text-brand-black text-right">{formatSpecValue(product.sole)}</span>
+              <span className="text-brand-dark font-medium text-right">{formatSpecValue(product.sole)}</span>
             </li>
           )}
           {product.sku && (
-            <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+            <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
               <span>SKU</span>
-              <span className="text-brand-black text-right">{product.sku}</span>
+              <span className="text-brand-dark font-medium text-right">{product.sku}</span>
             </li>
           )}
-          <li className="flex justify-between items-center border-b border-brand-gray-50 pb-3">
+          <li className="flex justify-between items-center border-b border-brand-sky-border/25 pb-3">
             <span>Shipping</span>
-            <span className="text-brand-black text-right">Free Standard Delivery</span>
+            <span className="text-brand-dark font-medium text-right">Free Standard Delivery</span>
           </li>
           <li className="flex justify-between items-center pb-3">
             <span>Returns</span>
-            <span className="text-brand-black text-right">30 Days</span>
+            <span className="text-brand-dark font-medium text-right">30 Days</span>
           </li>
         </ul>
       </motion.div>

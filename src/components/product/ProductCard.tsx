@@ -19,7 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.slug}`} className="group block">
-      <div className="relative aspect-[4/5] bg-brand-gray-50 overflow-hidden mb-4">
+      <div className="relative aspect-[4/5] bg-gradient-to-b from-brand-sky/25 to-brand-sky/10 border border-brand-sky-border/30 rounded-xl overflow-hidden mb-4 transition-all duration-300 group-hover:border-brand-blue/50 group-hover:shadow-md">
         <Image
           src={mainImage}
           alt={product.name}
@@ -37,21 +37,21 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         )}
         {product.salePrice && (
-          <div className="absolute top-4 left-4 bg-brand-black text-white text-xs font-mono uppercase tracking-widest px-3 py-1">
+          <div className="absolute top-3 left-3 bg-brand-navy text-brand-gold border border-brand-gold/30 text-[11px] font-mono uppercase tracking-widest px-2.5 py-1 rounded shadow-sm">
             Sale
           </div>
         )}
       </div>
       <div className="flex flex-col gap-1 transition-none">
-        <h3 className="font-sans font-medium text-sm text-brand-black">{product.name}</h3>
-        <div className="flex items-center gap-3 text-sm">
+        <h3 className="font-sans font-medium text-sm text-brand-dark group-hover:text-brand-blue transition-colors">{product.name}</h3>
+        <div className="flex items-center gap-2.5 text-sm">
           {product.salePrice ? (
             <>
-              <span className="text-brand-black">₹{selling.toLocaleString('en-IN')}</span>
-              <span className="text-brand-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
+              <span className="text-brand-dark font-medium">₹{selling.toLocaleString('en-IN')}</span>
+              <span className="text-brand-gray-400 line-through text-xs">₹{mrp.toLocaleString('en-IN')}</span>
             </>
           ) : (
-            <span className="text-brand-black">₹{mrp.toLocaleString('en-IN')}</span>
+            <span className="text-brand-dark font-medium">₹{mrp.toLocaleString('en-IN')}</span>
           )}
         </div>
       </div>

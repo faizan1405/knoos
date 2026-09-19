@@ -166,14 +166,14 @@ export default function AddressesClient() {
       )}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="border border-brand-gray-200 rounded-lg bg-white p-5 sm:p-6 mb-8">
-          <h3 className="font-serif text-lg mb-5">
+        <form onSubmit={handleSubmit} className="border border-brand-sky-border/60 rounded-xl bg-white p-5 sm:p-6 mb-8 shadow-sm">
+          <h3 className="font-serif text-lg text-brand-navy mb-5">
             {editingId ? "Edit Address" : "Add New Address"}
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+              <label className="block font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-2">
                 Address Label
               </label>
               <div className="flex gap-2 flex-wrap">
@@ -182,10 +182,10 @@ export default function AddressesClient() {
                     key={label}
                     type="button"
                     onClick={() => setForm({ ...form, label })}
-                    className={`px-4 py-2 text-sm border rounded-md transition-colors ${
+                    className={`px-4 py-2 text-sm border rounded-lg transition-colors ${
                       form.label === label
-                        ? "border-black bg-black text-white"
-                        : "border-brand-gray-200 hover:border-brand-gray-400"
+                        ? "border-brand-navy bg-brand-navy text-white shadow-sm"
+                        : "border-brand-sky-border hover:border-brand-blue/50 text-brand-dark"
                     }`}
                   >
                     {label}
@@ -214,16 +214,16 @@ export default function AddressesClient() {
                 type="checkbox"
                 checked={form.isDefault}
                 onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-                className="w-4 h-4 accent-black"
+                className="w-4 h-4 accent-brand-blue"
               />
-              <span className="text-sm">Make this my default delivery address</span>
+              <span className="text-sm text-brand-dark">Make this my default delivery address</span>
             </label>
 
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm disabled:opacity-50"
               >
                 <Save size={16} />
                 {saving ? "Saving..." : "Save Address"}
@@ -232,7 +232,7 @@ export default function AddressesClient() {
                 type="button"
                 onClick={resetForm}
                 disabled={saving}
-                className="inline-flex items-center gap-2 border border-brand-gray-200 px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-50 transition-colors"
+                className="inline-flex items-center gap-2 border border-brand-navy/30 text-brand-navy px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-sky/20 rounded-xl transition-colors"
               >
                 <X size={16} />
                 Cancel
@@ -252,19 +252,19 @@ export default function AddressesClient() {
       ) : (
         <div className="space-y-4">
           {addresses.map((addr) => (
-            <div key={addr.id} className="border border-brand-gray-200 rounded-lg bg-white overflow-hidden">
+            <div key={addr.id} className="border border-brand-sky-border/60 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-0.5 bg-brand-gray-100 text-brand-gray-700 text-xs font-mono uppercase tracking-wider rounded-sm">
+                  <span className="px-2.5 py-0.5 bg-brand-sky text-brand-navy text-xs font-mono uppercase tracking-wider rounded-md font-semibold">
                     {addr.label}
                   </span>
                   {addr.isDefault && (
-                    <span className="px-2 py-0.5 bg-black text-white text-xs font-mono uppercase tracking-wider rounded-sm">
+                    <span className="px-2.5 py-0.5 bg-brand-navy text-white text-xs font-mono uppercase tracking-wider rounded-md">
                       Default
                     </span>
                   )}
                 </div>
-                <p className="font-medium text-sm mb-1">{addr.fullName}</p>
+                <p className="font-medium text-sm text-brand-dark mb-1">{addr.fullName}</p>
                 <p className="text-sm text-brand-gray-600 leading-relaxed">
                   {addr.addressLine1}
                   {addr.addressLine2 && <>, {addr.addressLine2}</>}
@@ -277,25 +277,25 @@ export default function AddressesClient() {
                 <p className="text-sm text-brand-gray-500 mt-2">+91 {addr.phone}</p>
               </div>
 
-              <div className="border-t border-brand-gray-100 px-5 sm:px-6 py-3 flex items-center gap-3 flex-wrap">
+              <div className="border-t border-brand-sky-border/40 px-5 sm:px-6 py-3 flex items-center gap-3 flex-wrap bg-brand-sky/10">
                 {!addr.isDefault && (
                   <>
                     <button
                       onClick={() => handleSetDefault(addr.id)}
-                      className="text-xs font-mono uppercase tracking-widest text-brand-gray-500 hover:text-black transition-colors"
+                      className="text-xs font-mono uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors"
                     >
                       Set as Default
                     </button>
-                    <span className="text-brand-gray-200 hidden sm:inline">|</span>
+                    <span className="text-brand-sky-border hidden sm:inline">|</span>
                   </>
                 )}
                 <button
                   onClick={() => handleEdit(addr)}
-                  className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-brand-gray-500 hover:text-black transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-brand-gray-600 hover:text-brand-blue transition-colors"
                 >
                   <Pencil size={13} /> Edit
                 </button>
-                <span className="text-brand-gray-200 hidden sm:inline">|</span>
+                <span className="text-brand-sky-border hidden sm:inline">|</span>
                 <button
                   onClick={() => setDeletingId(addr.id)}
                   className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-brand-gray-500 hover:text-red-600 transition-colors"
@@ -309,7 +309,7 @@ export default function AddressesClient() {
           {!showForm && (
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="w-full border border-dashed border-brand-gray-300 rounded-lg py-4 text-sm font-mono uppercase tracking-widest text-brand-gray-500 hover:text-black hover:border-brand-gray-400 transition-colors flex items-center justify-center gap-2"
+              className="w-full border border-dashed border-brand-sky-border/80 rounded-xl py-4 text-sm font-mono uppercase tracking-widest text-brand-navy hover:text-brand-blue hover:border-brand-blue/50 transition-colors flex items-center justify-center gap-2 bg-brand-sky/10"
             >
               <Plus size={16} /> Add New Address
             </button>
@@ -318,9 +318,9 @@ export default function AddressesClient() {
       )}
 
       {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
-          <div className="bg-white rounded-lg border border-brand-gray-200 p-6 max-w-sm w-full">
-            <h3 className="font-serif text-lg mb-2">Delete this address?</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xl border border-brand-sky-border/60 p-6 max-w-sm w-full shadow-lg">
+            <h3 className="font-serif text-lg text-brand-navy mb-2">Delete this address?</h3>
             <p className="text-sm text-brand-gray-600 mb-6">
               This cannot be undone. If this is your default address, another will be set as default.
             </p>
@@ -328,14 +328,14 @@ export default function AddressesClient() {
               <button
                 onClick={() => handleDelete(deletingId)}
                 disabled={saving}
-                className="flex-1 bg-red-600 text-white py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-red-700 transition-colors disabled:opacity-50"
+                className="flex-1 bg-red-600 text-white py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50"
               >
                 Delete
               </button>
               <button
                 onClick={() => setDeletingId(null)}
                 disabled={saving}
-                className="flex-1 border border-brand-gray-200 py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-50 transition-colors"
+                className="flex-1 border border-brand-gray-200 py-2.5 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-50 rounded-xl transition-colors"
               >
                 Cancel
               </button>
@@ -364,7 +364,7 @@ function TextField({
 }) {
   return (
     <div>
-      <label className="block font-mono text-xs uppercase tracking-widest text-brand-gray-500 mb-2">
+      <label className="block font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-2">
         {label}
       </label>
       <input
@@ -373,7 +373,7 @@ function TextField({
         onChange={(e) => onChange(e.target.value)}
         inputMode={inputMode as any}
         required={required}
-        className="w-full border border-brand-gray-200 rounded-md px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-black transition-colors placeholder:text-brand-gray-300"
+        className="w-full border border-brand-sky-border/60 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/30 transition-colors placeholder:text-brand-gray-300"
       />
     </div>
   );
@@ -381,15 +381,15 @@ function TextField({
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white py-16 px-6 text-center">
-      <MapPin size={40} className="text-brand-gray-300 mx-auto mb-4" />
-      <h3 className="font-serif text-xl mb-2">No addresses yet</h3>
+    <div className="border border-brand-sky-border/60 rounded-xl bg-white py-16 px-6 text-center shadow-sm">
+      <MapPin size={40} className="text-brand-blue/40 mx-auto mb-4" />
+      <h3 className="font-serif text-xl text-brand-navy mb-2">No addresses yet</h3>
       <p className="text-brand-gray-500 text-sm mb-6 max-w-sm mx-auto">
         Save your delivery addresses for faster checkout.
       </p>
       <button
         onClick={onAdd}
-        className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors"
+        className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm"
       >
         <Plus size={16} />
         Add Address

@@ -41,7 +41,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full aspect-[4/5] bg-brand-gray-50 flex items-center justify-center">
+      <div className="w-full aspect-[4/5] bg-brand-sky/20 border border-brand-sky-border/30 rounded-2xl flex items-center justify-center">
         <span className="font-mono text-sm text-brand-gray-400">No Image Available</span>
       </div>
     );
@@ -80,10 +80,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               <button
                 key={image.id}
                 onClick={() => setActiveIndex(index)}
-                className={`relative aspect-[4/5] w-20 md:w-full flex-shrink-0 border transition-all duration-300 bg-brand-gray-50 ${
+                className={`relative aspect-[4/5] w-20 md:w-full flex-shrink-0 border transition-all duration-300 rounded-lg overflow-hidden bg-brand-sky/20 ${
                   activeIndex === index
-                    ? "border-brand-black opacity-100"
-                    : "border-transparent opacity-50 hover:opacity-100"
+                    ? "border-brand-navy ring-2 ring-brand-blue/30 opacity-100"
+                    : "border-brand-sky-border/40 opacity-60 hover:opacity-100 hover:border-brand-blue/50"
                 }`}
               >
                 <Image
@@ -101,7 +101,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         {/* Main Image Container */}
         <div
           ref={imageContainerRef}
-          className="relative w-full aspect-square md:aspect-[4/5] bg-brand-gray-50 overflow-hidden cursor-zoom-in group rounded-md"
+          className="relative w-full aspect-square md:aspect-[4/5] bg-gradient-to-b from-brand-sky/30 to-brand-sky/10 border border-brand-sky-border/40 overflow-hidden cursor-zoom-in group rounded-2xl shadow-sm"
           onClick={() => {
             setIsLightboxOpen(true);
             setIsMagnifying(false);

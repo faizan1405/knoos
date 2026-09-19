@@ -315,7 +315,7 @@ export function CheckoutClient() {
           {addresses.length > 0 && !isAddingAddress ? (
             <div className="space-y-4">
               {addresses.map((address) => (
-                <label key={address.id} className={`block border p-4 rounded cursor-pointer ${selectedAddressId === address.id ? 'border-black' : 'border-gray-200'}`}>
+                <label key={address.id} className={`block border p-4 rounded-xl cursor-pointer transition-all ${selectedAddressId === address.id ? 'border-brand-navy bg-brand-sky/25 ring-1 ring-brand-blue/30 shadow-xs' : 'border-brand-gray-200 hover:border-brand-sky-border/70 bg-white'}`}>
                   <div className="flex items-start">
                     <input 
                       type="radio" 
@@ -323,39 +323,39 @@ export function CheckoutClient() {
                       value={address.id} 
                       checked={selectedAddressId === address.id} 
                       onChange={() => setSelectedAddressId(address.id)}
-                      className="mt-1 mr-3"
+                      className="mt-1 mr-3 accent-brand-blue"
                     />
                     <div>
-                      <p className="font-medium">{address.name}</p>
-                      <p className="text-sm text-gray-600">{address.address}, {address.city}, {address.state} {address.pincode}</p>
-                      <p className="text-sm text-gray-600">Phone: {address.phone}</p>
+                      <p className="font-medium text-brand-dark">{address.name}</p>
+                      <p className="text-sm text-brand-gray-600">{address.address}, {address.city}, {address.state} {address.pincode}</p>
+                      <p className="text-sm text-brand-gray-600">Phone: {address.phone}</p>
                     </div>
                   </div>
                 </label>
               ))}
               <button 
                 onClick={() => setIsAddingAddress(true)}
-                className="text-sm underline mt-4 inline-block"
+                className="text-sm underline mt-4 inline-block font-mono uppercase tracking-wider text-brand-navy hover:text-brand-blue transition-colors"
               >
                 + Add new address
               </button>
             </div>
           ) : (
-            <form onSubmit={handleAddAddress} className="space-y-4 border p-6 rounded bg-gray-50">
+            <form onSubmit={handleAddAddress} className="space-y-4 border border-brand-sky-border/40 p-6 rounded-2xl bg-brand-sky/20">
               <div className="grid grid-cols-2 gap-4">
-                <input required placeholder="Full Name" className="border p-2 w-full" value={newAddress.name} onChange={e => setNewAddress({...newAddress, name: e.target.value})} />
-                <input required placeholder="Phone Number" className="border p-2 w-full" value={newAddress.phone} onChange={e => setNewAddress({...newAddress, phone: e.target.value})} />
+                <input required placeholder="Full Name" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.name} onChange={e => setNewAddress({...newAddress, name: e.target.value})} />
+                <input required placeholder="Phone Number" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.phone} onChange={e => setNewAddress({...newAddress, phone: e.target.value})} />
               </div>
-              <input required placeholder="Street Address" className="border p-2 w-full" value={newAddress.address} onChange={e => setNewAddress({...newAddress, address: e.target.value})} />
+              <input required placeholder="Street Address" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.address} onChange={e => setNewAddress({...newAddress, address: e.target.value})} />
               <div className="grid grid-cols-3 gap-4">
-                <input required placeholder="City" className="border p-2 w-full" value={newAddress.city} onChange={e => setNewAddress({...newAddress, city: e.target.value})} />
-                <input required placeholder="State" className="border p-2 w-full" value={newAddress.state} onChange={e => setNewAddress({...newAddress, state: e.target.value})} />
-                <input required placeholder="Pincode" className="border p-2 w-full" value={newAddress.pincode} onChange={e => setNewAddress({...newAddress, pincode: e.target.value})} />
+                <input required placeholder="City" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.city} onChange={e => setNewAddress({...newAddress, city: e.target.value})} />
+                <input required placeholder="State" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.state} onChange={e => setNewAddress({...newAddress, state: e.target.value})} />
+                <input required placeholder="Pincode" className="border border-brand-gray-300 rounded-md p-2.5 w-full bg-white focus:outline-none focus:border-brand-blue" value={newAddress.pincode} onChange={e => setNewAddress({...newAddress, pincode: e.target.value})} />
               </div>
-              <div className="flex space-x-4">
-                <button type="submit" className="bg-black text-white px-6 py-2">Save Address</button>
+              <div className="flex space-x-4 pt-2">
+                <button type="submit" className="bg-brand-navy hover:bg-brand-blue text-white px-6 py-2.5 rounded-lg transition-colors font-mono text-sm uppercase tracking-wider shadow-sm">Save Address</button>
                 {addresses.length > 0 && (
-                  <button type="button" onClick={() => setIsAddingAddress(false)} className="px-6 py-2 border">Cancel</button>
+                  <button type="button" onClick={() => setIsAddingAddress(false)} className="px-6 py-2.5 border border-brand-gray-300 rounded-lg text-brand-dark hover:bg-white transition-colors font-mono text-sm uppercase tracking-wider">Cancel</button>
                 )}
               </div>
             </form>
@@ -363,9 +363,9 @@ export function CheckoutClient() {
         </section>
 
         <section>
-          <h2 className="text-xl font-medium mb-6 uppercase tracking-wider border-b pb-2">Delivery</h2>
+          <h2 className="text-xl font-medium mb-6 uppercase tracking-wider border-b pb-2 text-brand-dark">Delivery</h2>
           <div className="space-y-4">
-            <label className={`block border p-4 rounded cursor-pointer ${deliveryMethod === 'STANDARD' ? 'border-black' : 'border-gray-200'}`}>
+            <label className={`block border p-4 rounded-xl cursor-pointer transition-all ${deliveryMethod === 'STANDARD' ? 'border-brand-navy bg-brand-sky/25 ring-1 ring-brand-blue/30 shadow-xs' : 'border-brand-gray-200 hover:border-brand-sky-border/70 bg-white'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input 
@@ -374,14 +374,14 @@ export function CheckoutClient() {
                     value="STANDARD" 
                     checked={deliveryMethod === 'STANDARD'}
                     onChange={() => setDeliveryMethod('STANDARD')}
-                    className="mr-3"
+                    className="mr-3 accent-brand-blue"
                   />
-                  <span>Standard Delivery</span>
+                  <span className="font-medium text-brand-dark">Standard Delivery</span>
                 </div>
-                <span>₹100</span>
+                <span className="font-mono text-brand-dark">₹100</span>
               </div>
             </label>
-            <label className={`block border p-4 rounded cursor-pointer ${deliveryMethod === 'FAST' ? 'border-black' : 'border-gray-200'}`}>
+            <label className={`block border p-4 rounded-xl cursor-pointer transition-all ${deliveryMethod === 'FAST' ? 'border-brand-navy bg-brand-sky/25 ring-1 ring-brand-blue/30 shadow-xs' : 'border-brand-gray-200 hover:border-brand-sky-border/70 bg-white'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input 
@@ -390,11 +390,11 @@ export function CheckoutClient() {
                     value="FAST" 
                     checked={deliveryMethod === 'FAST'}
                     onChange={() => setDeliveryMethod('FAST')}
-                    className="mr-3"
+                    className="mr-3 accent-brand-blue"
                   />
-                  <span>Fast Delivery</span>
+                  <span className="font-medium text-brand-dark">Fast Delivery</span>
                 </div>
-                <span>₹149</span>
+                <span className="font-mono text-brand-dark">₹149</span>
               </div>
             </label>
           </div>
@@ -402,14 +402,14 @@ export function CheckoutClient() {
       </div>
 
       <div className="lg:col-span-5">
-        <div className="bg-gray-50 p-6 rounded border">
-          <h2 className="text-xl font-medium mb-6 uppercase tracking-wider border-b pb-2">Order Summary</h2>
+        <div className="bg-gradient-to-b from-brand-sky/40 to-brand-sky/10 p-6 rounded-2xl border border-brand-sky-border/40 shadow-sm">
+          <h2 className="text-xl font-medium mb-6 uppercase tracking-wider border-b border-brand-sky-border/40 pb-2 text-brand-dark">Order Summary</h2>
           
           <div className="space-y-4 mb-6">
             {cart.items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
-                <span className="text-gray-600">{item.productName} (Size: {item.size}) × {item.quantity}</span>
-                <span>₹{item.total.toLocaleString("en-IN")}</span>
+                <span className="text-brand-gray-600">{item.productName} (Size: {item.size}) × {item.quantity}</span>
+                <span className="font-mono text-brand-dark font-medium">₹{item.total.toLocaleString("en-IN")}</span>
               </div>
             ))}
           </div>
@@ -427,26 +427,26 @@ export function CheckoutClient() {
             onRemove={removeCoupon}
           />
 
-          <div className="border-t pt-4 space-y-2 mb-6">
+          <div className="border-t border-brand-sky-border/40 pt-4 space-y-2 mb-6 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Subtotal</span>
-              <span>₹{cart.subtotal.toLocaleString("en-IN")}</span>
+              <span className="text-brand-gray-600">Subtotal</span>
+              <span className="font-mono text-brand-dark">₹{cart.subtotal.toLocaleString("en-IN")}</span>
             </div>
             {coupon && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Coupon discount</span>
-                <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
+                <span className="text-brand-gray-600">Coupon discount</span>
+                <span className="font-mono text-green-700 font-medium">-₹{discountAmount.toLocaleString("en-IN")}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-600">Delivery</span>
-              <span>₹{deliveryCharge.toLocaleString("en-IN")}</span>
+              <span className="text-brand-gray-600">Delivery</span>
+              <span className="font-mono text-brand-dark">₹{deliveryCharge.toLocaleString("en-IN")}</span>
             </div>
           </div>
 
-          <div className="border-t pt-4 flex justify-between font-medium text-lg mb-8">
+          <div className="border-t border-brand-sky-border/40 pt-4 flex justify-between font-medium text-lg mb-8 text-brand-dark">
             <span>Total</span>
-            <span>₹{total.toLocaleString("en-IN")}</span>
+            <span className="font-semibold">₹{total.toLocaleString("en-IN")}</span>
           </div>
 
           {recommendations.length > 0 && (
@@ -462,7 +462,7 @@ export function CheckoutClient() {
           <button 
             onClick={handlePayment} 
             disabled={paying || !selectedAddressId}
-            className="w-full bg-black text-white py-4 font-medium tracking-wide uppercase disabled:bg-gray-400"
+            className="w-full bg-brand-navy hover:bg-brand-blue text-white py-4 font-medium tracking-wide uppercase transition-all duration-300 rounded-lg shadow-md hover:shadow-lg disabled:bg-brand-gray-300 disabled:cursor-not-allowed"
           >
             {paying ? "Creating secure payment..." : "Pay Securely"}
           </button>

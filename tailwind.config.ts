@@ -10,7 +10,34 @@ module.exports = {
       colors: {
         brand: {
           black: "#0a0a0a",
+          dark: "#14212B",
           white: "#fafafa",
+          blue: {
+            DEFAULT: "#16A8F4",
+            hover: "#0E93D8",
+            light: "#EAF7FF",
+            dark: "#0B72A8",
+          },
+          navy: {
+            DEFAULT: "#102A43",
+            dark: "#0B1D30",
+            light: "#1C3D5A",
+          },
+          sky: {
+            DEFAULT: "#EAF7FF",
+            light: "#F4FAFF",
+            border: "#BAE3FF",
+          },
+          cream: {
+            DEFAULT: "#FFF7ED",
+            light: "#FFFAF3",
+            border: "#FED7AA",
+          },
+          gold: {
+            DEFAULT: "#C8A96E",
+            hover: "#B59556",
+            light: "#FDF8EE",
+          },
           gray: {
             50: "#f9f9f9",
             100: "#f0f0f0",

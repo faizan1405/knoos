@@ -92,12 +92,12 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
             <div ref={shopByRef} className="relative">
               <button
                 onClick={() => setIsShopByOpen(!isShopByOpen)}
-                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-dark hover:text-brand-blue transition-colors"
               >
                 <span>Shop By</span>
                 <ChevronDown
                   size={14}
-                  className={`transition-transform duration-200 ${isShopByOpen ? "rotate-180" : ""}`}
+                  className={`transition-transform duration-200 group-hover:text-brand-blue ${isShopByOpen ? "rotate-180 text-brand-blue" : ""}`}
                 />
               </button>
 
@@ -108,42 +108,42 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="absolute top-full left-0 mt-2 w-48 bg-white border border-brand-gray-200 shadow-lg rounded-sm py-2 z-50"
+                    className="absolute top-full left-0 mt-2 w-52 bg-white/95 backdrop-blur-md border border-brand-sky-border/60 shadow-xl rounded-lg py-2 z-50 overflow-hidden"
                   >
                     <Link
                       href="/men"
                       onClick={() => setIsShopByOpen(false)}
-                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-dark hover:bg-brand-sky hover:text-brand-navy transition-colors"
                     >
                       Men
                     </Link>
                     <Link
                       href="/women"
                       onClick={() => setIsShopByOpen(false)}
-                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-dark hover:bg-brand-sky hover:text-brand-navy transition-colors"
                     >
                       Women
                     </Link>
                     {categories.length > 0 && (
                       <>
-                        <div className="border-t border-brand-gray-100 my-1" />
+                        <div className="border-t border-brand-sky-border/40 my-1" />
                         {categories.map((cat) => (
                           <Link
                             key={cat.id}
                             href={`/search?category=${cat.slug}`}
                             onClick={() => setIsShopByOpen(false)}
-                            className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                            className="block px-4 py-2.5 text-sm font-mono text-brand-dark hover:bg-brand-sky hover:text-brand-navy transition-colors"
                           >
                             {cat.name}
                           </Link>
                         ))}
                       </>
                     )}
-                    <div className="border-t border-brand-gray-100 my-1" />
+                    <div className="border-t border-brand-sky-border/40 my-1" />
                     <Link
                       href="/search?sort=Newest"
                       onClick={() => setIsShopByOpen(false)}
-                      className="block px-4 py-2.5 text-sm font-mono text-brand-gray-700 hover:bg-brand-gray-50 hover:text-black transition-colors"
+                      className="block px-4 py-2.5 text-sm font-mono text-brand-dark hover:bg-brand-sky hover:text-brand-navy transition-colors"
                     >
                       New Arrivals
                     </Link>
@@ -158,27 +158,32 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
             <button 
               type="button"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="group flex items-center gap-2 text-brand-gray-500 hover:text-black transition-colors"
+              className="group flex items-center gap-2 text-brand-gray-500 hover:text-brand-blue transition-colors"
             >
-              <Search size={16} className="group-hover:scale-110 transition-transform" />
+              <Search size={16} className="group-hover:scale-110 group-hover:text-brand-blue transition-transform" />
               <span className="font-mono text-xs uppercase tracking-widest">Search</span>
             </button>
-            <Link href="/cart" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors">
-              <ShoppingBag size={16} className="group-hover:scale-110 transition-transform" />
-              <span>Cart {cartCount > 0 && `(${cartCount})`}</span>
+            <Link href="/cart" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-dark hover:text-brand-blue transition-colors">
+              <ShoppingBag size={16} className="group-hover:scale-110 group-hover:text-brand-blue transition-transform" />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-brand-blue text-white rounded-full leading-none">
+                  {cartCount}
+                </span>
+              )}
             </Link>
             {userName ? (
               <div className="flex items-center gap-4">
                 <Link
                   href="/account"
-                  className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                  className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-dark hover:text-brand-blue transition-colors"
                 >
-                  <User size={16} className="group-hover:scale-110 transition-transform" />
+                  <User size={16} className="group-hover:scale-110 group-hover:text-brand-blue transition-transform" />
                   <span>{userName}</span>
                 </Link>
                 <button 
                   onClick={() => signOutAction()}
-                  className="font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                  className="font-mono text-xs uppercase tracking-widest text-brand-gray-500 hover:text-brand-navy transition-colors"
                 >
                   Sign Out
                 </button>
@@ -186,9 +191,9 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
             ) : (
               <button 
                 onClick={() => signInAction()}
-                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-brand-gray-600 transition-colors"
+                className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-dark hover:text-brand-blue transition-colors"
               >
-                <User size={16} className="group-hover:scale-110 transition-transform" />
+                <User size={16} className="group-hover:scale-110 group-hover:text-brand-blue transition-transform" />
                 <span>Sign In</span>
               </button>
             )}
@@ -224,22 +229,22 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-full left-0 right-0 bg-white border-b border-brand-gray-200 shadow-lg overflow-hidden"
+              className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-b border-brand-sky-border/60 shadow-lg overflow-hidden"
             >
               <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6 md:py-8 flex items-center">
                 <form action="/search" method="GET" className="flex-1 relative flex items-center">
-                  <Search size={24} className="absolute left-0 text-brand-gray-400 pointer-events-none" />
+                  <Search size={24} className="absolute left-0 text-brand-blue pointer-events-none" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     name="q"
                     placeholder="Search for premium footwear..."
-                    className="w-full pl-10 pr-12 py-3 text-lg md:text-2xl font-serif text-brand-black bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-brand-gray-300"
+                    className="w-full pl-10 pr-12 py-3 text-lg md:text-2xl font-serif text-brand-dark bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-brand-gray-300"
                   />
                   <button 
                     type="button"
                     onClick={() => setIsSearchOpen(false)}
-                    className="absolute right-0 p-2 text-brand-gray-400 hover:text-brand-black transition-colors"
+                    className="absolute right-0 p-2 text-brand-gray-400 hover:text-brand-blue transition-colors"
                   >
                     <X size={24} />
                   </button>

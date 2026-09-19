@@ -98,7 +98,7 @@ export default function AccountOverviewClient() {
     <div className="space-y-10">
       {/* Welcome */}
       <div>
-        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl mb-2">
+        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl mb-2 text-brand-dark">
           Welcome back, {firstName}
         </h2>
         <p className="text-brand-gray-500 text-sm">
@@ -122,8 +122,8 @@ export default function AccountOverviewClient() {
       )}
 
       {/* Quick Actions */}
-      <div className="border-t border-brand-gray-200 pt-8">
-        <p className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 mb-4">
+      <div className="border-t border-brand-sky-border/80 pt-8">
+        <p className="font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-4">
           Quick Actions
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -139,8 +139,8 @@ export default function AccountOverviewClient() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white p-4 sm:p-5">
-      <p className="text-xl sm:text-2xl font-serif">{value}</p>
+    <div className="border border-brand-sky-border/60 rounded-xl bg-gradient-to-b from-white to-brand-sky/15 p-4 sm:p-5 hover:border-brand-blue/30 transition-all shadow-sm">
+      <p className="text-xl sm:text-2xl font-serif text-brand-navy">{value}</p>
       <p className="text-xs text-brand-gray-500 mt-1 font-mono uppercase tracking-wider">{label}</p>
     </div>
   );
@@ -148,14 +148,14 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 function RecentOrderCard({ order }: { order: RecentOrder }) {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white overflow-hidden">
-      <div className="px-5 sm:px-6 py-4 border-b border-brand-gray-100">
-        <p className="font-mono text-xs uppercase tracking-widest text-brand-gray-400 mb-2">
+    <div className="border border-brand-sky-border/60 rounded-xl bg-white overflow-hidden shadow-sm">
+      <div className="px-5 sm:px-6 py-4 bg-brand-sky/20 border-b border-brand-sky-border/40">
+        <p className="font-mono text-xs uppercase tracking-widest text-brand-blue font-medium mb-2">
           Recent Order
         </p>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-sm text-brand-gray-700">
+            <p className="font-mono text-sm text-brand-navy font-medium">
               #{order.id.slice(0, 12)}
             </p>
             <p className="text-xs text-brand-gray-400 mt-0.5">
@@ -167,7 +167,7 @@ function RecentOrderCard({ order }: { order: RecentOrder }) {
             </p>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-sm font-medium">₹{order.total.toLocaleString("en-IN")}</p>
+            <p className="text-sm font-semibold text-brand-navy">₹{order.total.toLocaleString("en-IN")}</p>
             <span
               className={`inline-block mt-1.5 px-2 py-0.5 rounded text-xs font-medium border ${
                 STATUS_COLORS[order.orderStatus] || "bg-gray-100 text-gray-800 border-gray-200"
@@ -181,7 +181,7 @@ function RecentOrderCard({ order }: { order: RecentOrder }) {
       <div className="px-5 sm:px-6 py-3">
         <Link
           href={`/account/orders/${order.id}`}
-          className="inline-flex items-center gap-1.5 text-sm font-mono uppercase tracking-widest text-brand-gray-600 hover:text-black transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-mono uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors"
         >
           View Order <ChevronRightIcon />
         </Link>
@@ -194,9 +194,9 @@ function QuickLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="flex items-center justify-between border border-brand-gray-200 rounded-lg px-5 py-4 hover:border-brand-gray-400 transition-colors group bg-white"
+      className="flex items-center justify-between border border-brand-sky-border/60 rounded-xl px-5 py-4 hover:border-brand-blue/40 hover:bg-brand-sky/15 transition-all group bg-white shadow-sm"
     >
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-medium text-brand-dark group-hover:text-brand-blue transition-colors">{label}</span>
       <ChevronRightIcon />
     </Link>
   );
@@ -204,15 +204,15 @@ function QuickLink({ href, label }: { href: string; label: string }) {
 
 function EmptyState() {
   return (
-    <div className="border border-brand-gray-200 rounded-lg bg-white py-16 px-6 text-center">
+    <div className="border border-brand-sky-border/60 rounded-xl bg-white py-16 px-6 text-center shadow-sm">
       <ShoppingBagIcon />
-      <h3 className="font-serif text-2xl mb-2">No orders yet</h3>
+      <h3 className="font-serif text-2xl mb-2 text-brand-navy">No orders yet</h3>
       <p className="text-brand-gray-500 text-sm mb-6 max-w-sm mx-auto">
         Your orders will appear here once you make a purchase.
       </p>
       <Link
         href="/search"
-        className="inline-block bg-black text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-gray-800 transition-colors"
+        className="inline-block bg-brand-navy text-white px-8 py-3 text-sm font-mono tracking-widest uppercase hover:bg-brand-blue rounded-xl transition-colors shadow-sm"
       >
         Start Shopping
       </Link>
@@ -223,7 +223,7 @@ function EmptyState() {
 function ChevronRightIcon() {
   return (
     <svg
-      className="shrink-0 text-brand-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all"
+      className="shrink-0 text-brand-gray-400 group-hover:text-brand-blue group-hover:translate-x-1 transition-all"
       width="16"
       height="16"
       viewBox="0 0 24 24"

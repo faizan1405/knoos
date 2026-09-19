@@ -35,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}>
-      <body className="font-sans bg-white text-brand-black antialiased">
+      <body className="font-sans bg-white text-brand-dark antialiased">
         <PageTransitionLoader />
         {children}
       </body>

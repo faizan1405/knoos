@@ -65,18 +65,18 @@ export function Hero() {
           <source src="/videos/video.mp4" type="video/mp4" />
         </video>
 
-        {/* Subtle Overlay for text readability (gradient) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none z-0" />
+        {/* Subtle Overlay for text readability & atmospheric soft-sky/navy tone */}
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/60 via-brand-navy/20 to-transparent pointer-events-none z-0" />
         
-        {/* Secondary subtle dark overlay to ensure white text is always readable */}
-        <div className="absolute inset-0 bg-black/20 pointer-events-none z-0" />
+        {/* Secondary atmospheric gradient for gentle bottom vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none z-0" />
 
         {/* Content Layers */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-24 h-full pointer-events-none flex items-center">
           
           {/* Message 1 */}
           <motion.div style={{ opacity: opacity1, y: y1 }} className="absolute max-w-xl pointer-events-auto">
-            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-gray-300 mb-4 drop-shadow-md">
+            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-sky/90 mb-4 drop-shadow-md">
               KNOOS Original
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-tight drop-shadow-lg">
@@ -90,7 +90,7 @@ export function Hero() {
 
           {/* Message 2 */}
           <motion.div style={{ opacity: opacity2, y: y2 }} className="absolute max-w-xl pointer-events-auto">
-            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-gray-300 mb-4 drop-shadow-md">
+            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-sky/90 mb-4 drop-shadow-md">
               Craftsmanship
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-tight drop-shadow-lg">
@@ -104,7 +104,7 @@ export function Hero() {
 
           {/* Message 3 */}
           <motion.div style={{ opacity: opacity3, y: y3 }} className="absolute max-w-xl pointer-events-auto">
-            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-gray-300 mb-4 drop-shadow-md">
+            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-sky/90 mb-4 drop-shadow-md">
               Movement
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-tight drop-shadow-lg">
@@ -118,7 +118,7 @@ export function Hero() {
 
           {/* Message 4 & CTA */}
           <motion.div style={{ opacity: opacity4, y: y4 }} className="absolute max-w-xl pointer-events-auto">
-            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-gray-300 mb-4 drop-shadow-md">
+            <p className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-brand-sky/90 mb-4 drop-shadow-md">
               Collection
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-tight drop-shadow-lg">
@@ -131,13 +131,13 @@ export function Hero() {
             <div className="flex flex-wrap gap-4">
               <a
                 href="/men"
-                className="inline-block border border-white/40 bg-black/20 backdrop-blur-sm px-8 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-brand-black transition-colors duration-500"
+                className="inline-block bg-brand-navy border border-brand-blue/50 px-8 py-3.5 font-mono text-xs uppercase tracking-widest text-white hover:bg-brand-blue shadow-lg hover:shadow-brand-blue/20 transition-all duration-300 rounded-sm"
               >
                 Shop Men
               </a>
               <a
                 href="/women"
-                className="inline-block border border-white/40 bg-black/20 backdrop-blur-sm px-8 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-brand-black transition-colors duration-500"
+                className="inline-block border border-white/60 bg-white/10 backdrop-blur-md px-8 py-3.5 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-brand-navy transition-all duration-300 rounded-sm"
               >
                 Shop Women
               </a>
