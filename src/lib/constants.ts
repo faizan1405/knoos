@@ -23,6 +23,13 @@ export const Gender = {
 export type Gender = (typeof Gender)[keyof typeof Gender];
 
 /**
+ * Footwear sizes by collection / search catalog.
+ */
+export const MEN_SIZES = ["6", "7", "8", "9", "10"];
+export const WOMEN_SIZES = ["4", "5", "6", "7", "8"];
+export const SEARCH_SIZES = ["4", "5", "6", "7", "8", "9", "10"];
+
+/**
  * Product status.
  */
 export const ProductStatus = {

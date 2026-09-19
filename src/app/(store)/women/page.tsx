@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getProducts } from "@/lib/products";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { CollectionLayout } from "@/components/product/CollectionLayout";
+import { WOMEN_SIZES } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Women's Collection | KNOOS",
@@ -31,6 +32,7 @@ export default async function WomenPage({ searchParams }: WomenPageProps) {
     <CollectionLayout 
       title="Women's Collection" 
       count={products.length}
+      sizes={WOMEN_SIZES}
     >
       <ProductGrid 
         products={products} 

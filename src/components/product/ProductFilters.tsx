@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { SEARCH_SIZES } from "@/lib/constants";
 
 interface CategoryOption {
   id: string;
@@ -9,7 +10,6 @@ interface CategoryOption {
   slug: string;
 }
 
-const SIZES = ["6", "7", "8", "9", "10", "11", "12"];
 const SORTS = [
   { value: "Featured", label: "Featured" },
   { value: "Newest", label: "Newest" },
@@ -17,7 +17,11 @@ const SORTS = [
   { value: "price-high", label: "Price: High to Low" },
 ];
 
-export function ProductFilters() {
+export interface ProductFiltersProps {
+  sizes?: string[];
+}
+
+export function ProductFilters({ sizes = SEARCH_SIZES }: ProductFiltersProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [categories, setCategories] = useState<CategoryOption[]>([]);
@@ -188,7 +192,7 @@ export function ProductFilters() {
       <div>
         <h3 className="font-serif text-lg mb-4">Size</h3>
         <div className="grid grid-cols-4 gap-2">
-          {SIZES.map((size) => {
+          {sizes.map((size) => {
             const isActive = activeSize === size;
             return (
               <button

@@ -3,7 +3,11 @@
 import { useState, Suspense } from "react";
 import { ProductFilters } from "./ProductFilters";
 
-export function MobileFilters() {
+interface MobileFiltersProps {
+  sizes?: string[];
+}
+
+export function MobileFilters({ sizes }: MobileFiltersProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -31,7 +35,7 @@ export function MobileFilters() {
           <div className="flex-1 overflow-y-auto p-6">
             <div className="[&>div]:block [&>div]:w-full">
               <Suspense fallback={null}>
-                <ProductFilters />
+                <ProductFilters sizes={sizes} />
               </Suspense>
             </div>
           </div>

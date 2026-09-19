@@ -7,9 +7,10 @@ interface CollectionLayoutProps {
   count: number;
   description?: string;
   children: ReactNode;
+  sizes?: string[];
 }
 
-export function CollectionLayout({ title, count, description, children }: CollectionLayoutProps) {
+export function CollectionLayout({ title, count, description, children, sizes }: CollectionLayoutProps) {
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-16 md:py-24">
       <div className="mb-12 text-center">
@@ -21,12 +22,12 @@ export function CollectionLayout({ title, count, description, children }: Collec
       </div>
 
       <Suspense fallback={null}>
-        <MobileFilters />
+        <MobileFilters sizes={sizes} />
       </Suspense>
 
       <div className="flex flex-col lg:flex-row gap-8">
         <Suspense fallback={<div className="hidden lg:block w-64 flex-shrink-0" />}>
-          <ProductFilters />
+          <ProductFilters sizes={sizes} />
         </Suspense>
         <div className="flex-1">
           {children}

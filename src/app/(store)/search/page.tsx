@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getProducts } from "@/lib/products";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { CollectionLayout } from "@/components/product/CollectionLayout";
+import { SEARCH_SIZES } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Search — KNOOS",
@@ -31,6 +32,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       title={params.q ? `Results for "${params.q}"` : "Search"} 
       count={products.length}
       description={params.q ? undefined : "Browse and filter our entire catalog."}
+      sizes={SEARCH_SIZES}
     >
       <ProductGrid 
         products={products} 
