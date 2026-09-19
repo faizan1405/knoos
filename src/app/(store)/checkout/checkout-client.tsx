@@ -283,7 +283,9 @@ export function CheckoutClient() {
         className="py-24 text-center"
       >
         <p className="font-serif text-2xl mb-4">Your cart is empty.</p>
-        <a href="/shop" className="underline font-mono text-sm uppercase tracking-widest">Go shopping</a>
+        <a href="/search" className="underline font-mono text-sm uppercase tracking-widest">
+          Go shopping
+        </a>
       </motion.div>
     );
   }
