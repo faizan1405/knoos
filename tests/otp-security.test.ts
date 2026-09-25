@@ -154,23 +154,33 @@ describe("OTP Challenge Lifecycle, Cooldown & Security (Section 6, 7, 8, 19)", (
   });
 
   it("fails gracefully with OTP_SERVICE_UNAVAILABLE when no SMS provider is configured", async () => {
-    setSmsProviderForTesting(new UnconfiguredSmsProvider());
+    const prevFlag = process.env.NEXT_PUBLIC_OTP_ENABLED;
+    process.env.NEXT_PUBLIC_OTP_ENABLED = "true";
+    try {
+      setSmsProviderForTesting(new UnconfiguredSmsProvider());
 
-    const req = new Request("http://localhost:3000/api/auth/otp/request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: "9876543210" }),
-    });
+      const req = new Request("http://localhost:3000/api/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: "9876543210" }),
+      });
 
-    const res = await requestOtpRoute(req);
-    assert.strictEqual(res.status, 503);
+      const res = await requestOtpRoute(req);
+      assert.strictEqual(res.status, 503);
 
-    const body = await res.json();
-    assert.strictEqual(body.code, "OTP_SERVICE_UNAVAILABLE");
-    assert.ok(body.error.includes("SMS service is currently unavailable"));
-    // OTP never returned in response
-    assert.strictEqual(body.otp, undefined);
-    assert.strictEqual(body.codeHash, undefined);
+      const body = await res.json();
+      assert.strictEqual(body.code, "OTP_SERVICE_UNAVAILABLE");
+      assert.ok(body.error.includes("SMS service is currently unavailable"));
+      // OTP never returned in response
+      assert.strictEqual(body.otp, undefined);
+      assert.strictEqual(body.codeHash, undefined);
+    } finally {
+      if (prevFlag !== undefined) {
+        process.env.NEXT_PUBLIC_OTP_ENABLED = prevFlag;
+      } else {
+        delete process.env.NEXT_PUBLIC_OTP_ENABLED;
+      }
+    }
   });
 
   it("enforces resend cooldown (60 seconds) between requests", () => {

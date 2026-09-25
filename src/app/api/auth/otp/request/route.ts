@@ -10,10 +10,20 @@
  */
 
 import { NextResponse } from "next/server";
-import { requestOtpChallenge } from "@/lib/otp";
+import { requestOtpChallenge, isOtpFeatureEnabled } from "@/lib/otp";
 
 export async function POST(request: Request) {
   try {
+    if (!isOtpFeatureEnabled()) {
+      return NextResponse.json(
+        {
+          error: "Mobile OTP authentication is currently disabled. Please sign in with Google.",
+          code: "OTP_FEATURE_DISABLED",
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body.phone !== "string") {
