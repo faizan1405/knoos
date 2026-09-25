@@ -76,6 +76,20 @@ export const productImageSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional(),
 });
 
+// Product color group key (for grouping sibling colorways of the same product)
+export const colorGroupKeySchema = z
+  .preprocess((val) => {
+    if (val === undefined) return undefined;
+    if (val === null) return null;
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      return trimmed === "" ? null : trimmed.toLowerCase();
+    }
+    return val;
+  }, z.string().max(100, "Color group key must be at most 100 characters").nullable().optional())
+  .optional()
+  .nullable();
+
 // Combined create product schema
 export const createProductSchema = z
   .object({
@@ -85,6 +99,7 @@ export const createProductSchema = z
     gender: productGenderSchema,
     categoryId: z.string().max(36, "Category ID must be at most 36 characters").optional().nullable(),
     color: z.string().max(50, "Color must be at most 50 characters").optional().nullable(),
+    colorGroupKey: colorGroupKeySchema,
     subCategory: z.string().max(50, "Sub category must be at most 50 characters").optional().nullable(),
     upperMaterial: z.string().max(100, "Upper material must be at most 100 characters").optional().nullable(),
     innerMaterial: z.string().max(100, "Inner material must be at most 100 characters").optional().nullable(),
@@ -116,6 +131,7 @@ export const updateProductSchema = z
     gender: productGenderSchema.optional(),
     categoryId: z.string().max(36, "Please select a valid category.").optional().nullable(),
     color: z.string().max(50).optional().nullable(),
+    colorGroupKey: colorGroupKeySchema,
     subCategory: z.string().max(50).optional().nullable(),
     upperMaterial: z.string().max(100).optional().nullable(),
     innerMaterial: z.string().max(100).optional().nullable(),

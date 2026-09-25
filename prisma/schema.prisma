@@ -50,6 +50,7 @@ model Product {
   category         String? @db.VarChar(50)
   categoryId       String? @db.VarChar(36)
   color            String? @db.VarChar(50)
+  colorGroupKey    String? @db.VarChar(100)
   subCategory      String? @db.VarChar(50)
   upperMaterial    String? @db.VarChar(100)
   innerMaterial    String? @db.VarChar(100)
@@ -81,6 +82,7 @@ model Product {
   @@index([categoryId])
   @@index([slug])
   @@index([status, createdAt])
+  @@index([colorGroupKey])
 }
 
 model ProductImage {
