@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { Product, ProductVariant } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { loginWithGoogle } from "@/lib/auth-actions";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getVariantPrices, calculateDiscount } from "@/lib/pricing";
 
 type ProductWithCategory = Product & {
@@ -36,12 +38,33 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
 
   const selectedVariant = variants.find(v => v.id === selectedVariantId);
   const stockAvailable = selectedVariant ? selectedVariant.stock : 0;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSizeGuideOpen) {
+        setIsSizeGuideOpen(false);
+      }
+    };
+
+    if (isSizeGuideOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSizeGuideOpen]);
 
   // When a variant is selected, variant pricing is authoritative.
   // When no variant is selected (or no variant pricing exists), fall back to product pricing.
@@ -128,12 +151,12 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
     >
       <motion.div variants={itemVariants} className="mb-6">
         <h1 className="font-serif text-3xl lg:text-4xl mb-3 tracking-tight text-brand-dark">{product.name}</h1>
-        <div className="flex items-center gap-4 text-xl">
-          <span className="text-brand-dark font-medium">₹{selling.toLocaleString('en-IN')}</span>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <span className="text-3xl font-semibold text-brand-dark">₹{selling.toLocaleString('en-IN')}</span>
           {discount.hasDiscount && (
             <>
-              <span className="text-brand-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>
-              <span className="bg-brand-cream border border-brand-cream-border text-amber-900 px-2.5 py-1 text-xs font-mono tracking-widest uppercase ml-2 rounded font-semibold">
+              <span className="text-brand-gray-400 line-through text-base">MRP: ₹{mrp.toLocaleString('en-IN')}</span>
+              <span className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-0.5 text-xs font-mono tracking-widest uppercase rounded font-semibold">
                 {Math.round(discount.discountPercentage)}% OFF
               </span>
             </>
@@ -148,7 +171,17 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <span className="font-mono text-xs uppercase tracking-widest text-brand-dark font-semibold">Select Size</span>
-          <span className="font-mono text-xs text-brand-gray-500">UK Sizing</span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsSizeGuideOpen(true)}
+              className="font-mono text-xs text-brand-blue hover:text-brand-navy underline underline-offset-2 flex items-center gap-1 transition-colors font-medium"
+            >
+              Size Guide
+            </button>
+            <span className="text-brand-gray-300">|</span>
+            <span className="font-mono text-xs text-brand-gray-500">UK Sizing</span>
+          </div>
         </div>
         
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -279,11 +312,70 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
             <span className="text-brand-dark font-medium text-right">Free Standard Delivery</span>
           </li>
           <li className="flex justify-between items-center pb-3">
-            <span>Returns</span>
-            <span className="text-brand-dark font-medium text-right">30 Days</span>
+            <span>Return &amp; Exchange Policy</span>
+            <Link
+              href="/returns-refunds"
+              className="text-brand-blue hover:text-brand-navy hover:underline transition-colors font-medium flex items-center gap-1"
+            >
+              View Policy &rarr;
+            </Link>
           </li>
         </ul>
       </motion.div>
+
+      {/* Size Guide Modal / Bottom Sheet */}
+      <AnimatePresence>
+        {isSizeGuideOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs"
+            onClick={() => setIsSizeGuideOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="size-guide-modal-title"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="relative w-full max-w-xl max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-brand-sky-border/40 overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-brand-sky-border/40 bg-brand-sky/15">
+                <div>
+                  <h3 id="size-guide-modal-title" className="font-serif text-xl text-brand-dark">Size Guide</h3>
+                  <p className="font-mono text-xs text-brand-gray-500 mt-0.5">Footwear Size Chart &amp; Conversion</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeGuideOpen(false)}
+                  aria-label="Close Size Guide"
+                  className="p-2 text-brand-gray-400 hover:text-brand-dark hover:bg-brand-sky/30 rounded-lg transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)] flex flex-col items-center">
+                <div className="relative w-full aspect-[1750/3271] max-w-md bg-brand-sky/10 rounded-xl overflow-hidden shadow-xs border border-brand-sky-border/30">
+                  <Image
+                    src="/images/size-chart.webp"
+                    alt="KNOOS Size Chart"
+                    fill
+                    sizes="(max-width: 640px) 90vw, 500px"
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

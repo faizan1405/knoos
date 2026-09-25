@@ -1,12 +1,14 @@
 "use client";
 
 import { motion, useScroll, useSpring, useMotionValueEvent, useReducedMotion, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const targetTimeRef = useRef<number>(0);
+  const rafIdRef = useRef<number | null>(null);
 
   // Track the scroll progress of the entire 400vh section
   const { scrollYProgress } = useScroll({
@@ -21,15 +23,53 @@ export function Hero() {
     restDelta: 0.001 
   });
 
-  // Update video currentTime based on the smoothed scroll progress
+  const applyVideoSeek = () => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+
+    // If browser is still decoding/seeking previous frame, defer to 'seeked' event
+    if (video.seeking) return;
+
+    const target = targetTimeRef.current;
+    // Only seek if change is significant (> 1 frame at 24fps ≈ 0.04s)
+    if (Math.abs(video.currentTime - target) > 0.03) {
+      video.currentTime = target;
+    }
+  };
+
+  // Coalesce video seeking via requestAnimationFrame to avoid decoder thrashing
   useMotionValueEvent(smoothProgress, "change", (latest) => {
     if (shouldReduceMotion) return; // Respect prefers-reduced-motion
 
     const video = videoRef.current;
     if (video && Number.isFinite(video.duration) && video.duration > 0) {
-      video.currentTime = latest * video.duration;
+      targetTimeRef.current = latest * video.duration;
+      if (rafIdRef.current === null) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          rafIdRef.current = null;
+          applyVideoSeek();
+        });
+      }
     }
   });
+
+  // Listen to 'seeked' to apply any latest target accumulated during active seeking
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleSeeked = () => {
+      applyVideoSeek();
+    };
+
+    video.addEventListener("seeked", handleSeeked);
+    return () => {
+      video.removeEventListener("seeked", handleSeeked);
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   // Message 1: 0% to 25%
   const opacity1 = useTransform(smoothProgress, [0, 0.05, 0.2, 0.25], [1, 1, 1, 0]);
@@ -60,8 +100,10 @@ export function Hero() {
           className="absolute inset-0 h-full w-full object-cover"
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
+          poster="/images/hero-poster.webp"
         >
+          <source src="/videos/video-optimized.mp4" type="video/mp4" />
           <source src="/videos/video.mp4" type="video/mp4" />
         </video>
 

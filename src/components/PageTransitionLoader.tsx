@@ -131,9 +131,10 @@ function LoaderContent() {
           style={{ animationDuration: '2s' }}
         >
           <Image
-            src="/knoos-logo.png"
+            src="/knoos-logo-sm.webp"
             alt="Loading..."
             fill
+            sizes="80px"
             className="object-contain p-2"
             priority
           />

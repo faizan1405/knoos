@@ -16,6 +16,28 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [isMagnifying, setIsMagnifying] = useState(false);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const mobileSliderRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSlide = (index: number) => {
+    setActiveIndex(index);
+    if (mobileSliderRef.current) {
+      const clientWidth = mobileSliderRef.current.clientWidth;
+      mobileSliderRef.current.scrollTo({
+        left: index * clientWidth,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleMobileScroll = () => {
+    if (!mobileSliderRef.current) return;
+    const { scrollLeft, clientWidth } = mobileSliderRef.current;
+    if (clientWidth === 0) return;
+    const newIndex = Math.round(scrollLeft / clientWidth);
+    if (newIndex !== activeIndex && newIndex >= 0 && newIndex < images.length) {
+      setActiveIndex(newIndex);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,11 +72,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const activeImage = images[activeIndex];
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    const nextIdx = activeIndex === images.length - 1 ? 0 : activeIndex + 1;
+    scrollToSlide(nextIdx);
   };
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    const prevIdx = activeIndex === 0 ? images.length - 1 : activeIndex - 1;
+    scrollToSlide(prevIdx);
   };
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
@@ -79,7 +103,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             {images.map((image, index) => (
               <button
                 key={image.id}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => scrollToSlide(index)}
                 className={`relative aspect-[4/5] w-20 md:w-full flex-shrink-0 border transition-all duration-300 rounded-lg overflow-hidden bg-brand-sky/20 ${
                   activeIndex === index
                     ? "border-brand-navy ring-2 ring-brand-blue/30 opacity-100"
@@ -98,10 +122,61 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           </div>
         )}
 
-        {/* Main Image Container */}
+        {/* Mobile Swipeable Gallery (< md) */}
+        <div className="relative w-full aspect-square bg-gradient-to-b from-brand-sky/30 to-brand-sky/10 border border-brand-sky-border/40 rounded-2xl overflow-hidden shadow-sm block md:hidden">
+          <div
+            ref={mobileSliderRef}
+            onScroll={handleMobileScroll}
+            className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar touch-pan-x"
+          >
+            {images.map((image, index) => (
+              <div
+                key={image.id}
+                className="relative w-full h-full flex-shrink-0 snap-center snap-always cursor-zoom-in p-4"
+                onClick={() => {
+                  setActiveIndex(index);
+                  setIsLightboxOpen(true);
+                }}
+              >
+                <Image
+                  src={image.imageUrl}
+                  alt={`${productName} view ${index + 1}`}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  className="object-contain"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Pagination Indicators */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center items-center gap-1.5 pointer-events-none">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`Go to image ${index + 1}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    scrollToSlide(index);
+                  }}
+                  className={`pointer-events-auto h-1.5 transition-all duration-300 rounded-full ${
+                    activeIndex === index
+                      ? "w-6 bg-brand-navy shadow-xs"
+                      : "w-1.5 bg-brand-navy/30 hover:bg-brand-navy/60"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Main Image Container (>= md) */}
         <div
           ref={imageContainerRef}
-          className="relative w-full aspect-square md:aspect-[4/5] bg-gradient-to-b from-brand-sky/30 to-brand-sky/10 border border-brand-sky-border/40 overflow-hidden cursor-zoom-in group rounded-2xl shadow-sm"
+          className="relative w-full aspect-square md:aspect-[4/5] bg-gradient-to-b from-brand-sky/30 to-brand-sky/10 border border-brand-sky-border/40 overflow-hidden cursor-zoom-in group rounded-2xl shadow-sm hidden md:block"
           onClick={() => {
             setIsLightboxOpen(true);
             setIsMagnifying(false);
@@ -124,7 +199,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 alt={productName}
                 fill
                 priority
-                sizes="(max-width: 768px) 100vw, 60vw"
+                sizes="60vw"
                 className="object-contain"
               />
             </motion.div>
