@@ -18,6 +18,10 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { verifyOtpChallenge } from "@/lib/otp";
+import { normalizeIndianMobile } from "@/lib/phone";
+
+import { resolveOrCreatePhoneUser } from "@/lib/phone-auth";
 
 if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
   process.env.AUTH_URL = process.env.NEXTAUTH_URL;
@@ -56,6 +60,7 @@ const nextAuth = NextAuth({
       issuer: "https://accounts.google.com",
     }),
     Credentials({
+      id: "credentials",
       name: "Admin Login",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -96,13 +101,57 @@ const nextAuth = NextAuth({
         }
       }
     }),
+    Credentials({
+      id: "phone-otp",
+      name: "Customer Phone OTP",
+      credentials: {
+        phone: { label: "Phone", type: "text" },
+        code: { label: "OTP Code", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.phone || !credentials?.code) return null;
+
+        const rawPhone = credentials.phone as string;
+        const code = (credentials.code as string).trim();
+
+        // 1. Verify OTP challenge
+        const verifyResult = await verifyOtpChallenge(rawPhone, code);
+        if (!verifyResult.success) {
+          return null;
+        }
+
+        const validation = normalizeIndianMobile(rawPhone);
+        if (!validation.isValid || !validation.normalized) {
+          return null;
+        }
+        const phone = validation.normalized;
+
+        try {
+          // 2. Safe authoritative account resolution via PhoneAuthIdentity
+          const resolution = await resolveOrCreatePhoneUser(phone);
+          if (!resolution.success) {
+            return null;
+          }
+
+          return {
+            id: resolution.user.id,
+            name: resolution.user.name,
+            email: resolution.user.email,
+            role: resolution.user.role || "CUSTOMER",
+          };
+        } catch (error) {
+          console.error("Phone OTP authorize error:", error);
+          return null;
+        }
+      }
+    }),
   ],
   callbacks: {
     /**
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
-      if (account?.provider === "credentials") {
+      if (account?.provider === "credentials" || account?.provider === "phone-otp") {
         return true;
       }
 
@@ -141,19 +190,32 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
-      if (user && user.email) {
-        // Fetch user from DB since we are not using PrismaAdapter
+      if (user) {
+        if (user.id) {
+          token.id = user.id;
+        }
+        if ((user as { role?: string }).role) {
+          token.role = (user as { role?: string }).role!;
+        }
+
         try {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            select: { id: true, role: true },
-          });
+          const dbUser = user.id
+            ? await prisma.user.findUnique({
+                where: { id: user.id },
+                select: { id: true, role: true },
+              })
+            : user.email
+            ? await prisma.user.findUnique({
+                where: { email: user.email },
+                select: { id: true, role: true },
+              })
+            : null;
+
           if (dbUser) {
             token.role = dbUser.role;
             token.id = dbUser.id;
-          } else {
+          } else if (!token.role) {
             token.role = "CUSTOMER";
-            token.id = token.sub ?? "";
           }
         } catch (error) {
           // Ignore
