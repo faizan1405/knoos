@@ -78,6 +78,63 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  // Load active sibling products in the same color family (if colorGroupKey is defined)
+  let colorSiblings: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+    status: string;
+    price: number;
+    salePrice: number | null;
+    images: { id: string; imageUrl: string }[];
+  }> = [];
+
+  if (product.colorGroupKey) {
+    try {
+      colorSiblings = await prisma.product.findMany({
+        where: {
+          colorGroupKey: product.colorGroupKey,
+          status: "ACTIVE",
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          color: true,
+          status: true,
+          price: true,
+          salePrice: true,
+          images: {
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+            select: {
+              id: true,
+              imageUrl: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+      });
+    } catch (error) {
+      console.error("Error fetching color siblings:", error);
+    }
+
+    // Always include current product logically in color choices even if edge-case data inconsistency occurred
+    if (!colorSiblings.some((sibling) => sibling.id === product.id)) {
+      colorSiblings.unshift({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        color: product.color,
+        status: product.status,
+        price: product.price,
+        salePrice: product.salePrice,
+        images: product.images.slice(0, 1).map((img) => ({ id: img.id, imageUrl: img.imageUrl })),
+      });
+    }
+  }
+
   // Format reviews to match the props structure expected by ProductReviews
   const formattedReviews = product.reviews.map(r => ({
     ...r,
@@ -99,7 +156,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductGallery images={product.images} productName={product.name} />
         </div>
         <div className="w-full lg:sticky lg:top-24">
-          <ProductInfo product={product} variants={product.variants} />
+          <ProductInfo product={product} variants={product.variants} colorSiblings={colorSiblings} />
         </div>
       </div>
       

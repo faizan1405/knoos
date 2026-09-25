@@ -15,7 +15,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   name      String?
-  email     String   @unique
+  email     String?  @unique
   googleId  String?  @unique
   password  String?
   image     String?
@@ -28,9 +28,12 @@ model User {
   carts     Cart[]
   orders    Order[]
   reviews   Review[]
+  customerPreference CustomerPreference?
+  phoneIdentity PhoneAuthIdentity?
 
   @@index([email])
   @@index([googleId])
+  @@index([phone])
 }
 
 /**
@@ -50,6 +53,7 @@ model Product {
   category         String? @db.VarChar(50)
   categoryId       String? @db.VarChar(36)
   color            String? @db.VarChar(50)
+  colorGroupKey    String? @db.VarChar(100)
   subCategory      String? @db.VarChar(50)
   upperMaterial    String? @db.VarChar(100)
   innerMaterial    String? @db.VarChar(100)
@@ -81,6 +85,7 @@ model Product {
   @@index([categoryId])
   @@index([slug])
   @@index([status, createdAt])
+  @@index([colorGroupKey])
 }
 
 model ProductImage {
@@ -311,3 +316,57 @@ model Coupon {
   @@index([isActive])
   @@index([startDate, endDate])
 }
+
+/**
+ * Server-side database-backed OTP challenge for phone login.
+ * Single-use, short expiry, cooldown enforced, never stores plaintext OTP.
+ */
+model OtpChallenge {
+  id         String   @id @default(cuid())
+  phone      String   @unique @db.VarChar(20)
+  codeHash   String   @db.VarChar(255)
+  expiresAt  DateTime @db.DateTime(0)
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now()) @db.DateTime(0)
+  createdAt  DateTime @default(now()) @db.DateTime(0)
+  updatedAt  DateTime @updatedAt @db.DateTime(0)
+
+  @@index([phone])
+}
+
+/**
+ * Customer preference section titled "Let Us Know".
+ * Stores customer shopping preferences: Name (in User.name), Gender, and Shoe Size.
+ */
+model CustomerPreference {
+  id               String   @id @default(cuid())
+  userId           String   @unique @db.VarChar(36)
+  genderPreference String?  @db.VarChar(50)
+  shoeSize         String?  @db.VarChar(20)
+  createdAt        DateTime @default(now()) @db.DateTime(0)
+  updatedAt        DateTime @updatedAt @db.DateTime(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/**
+ * Authoritative OTP verified phone identity for customer authentication.
+ * Distinct from User.phone, which remains an unverified profile/contact field.
+ * Phone is strictly unique at the database level to prevent race conditions.
+ */
+model PhoneAuthIdentity {
+  id         String   @id @default(cuid())
+  phone      String   @unique @db.VarChar(20)
+  userId     String   @unique @db.VarChar(36)
+  verifiedAt DateTime @default(now()) @db.DateTime(0)
+  createdAt  DateTime @default(now()) @db.DateTime(0)
+  updatedAt  DateTime @updatedAt @db.DateTime(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+

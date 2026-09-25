@@ -6,7 +6,7 @@ import { Download, ChevronDown } from "lucide-react";
 interface Customer {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   image: string | null;
   createdAt: string;
   totalOrders: number;
@@ -51,7 +51,7 @@ export default function AdminCustomersClient({ customers }: Props) {
     return customers.filter(
       (c) =>
         (c.name && c.name.toLowerCase().includes(q)) ||
-        c.email.toLowerCase().includes(q)
+        (c.email && c.email.toLowerCase().includes(q))
     );
   }, [customers, searchQuery]);
 
@@ -223,7 +223,7 @@ export default function AdminCustomersClient({ customers }: Props) {
                         <span className="font-medium">{customer.name || "—"}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-brand-gray-500">{customer.email}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brand-gray-500">{customer.email || "—"}</td>
                     <td className="px-4 py-3 font-mono text-xs text-center">{customer.totalOrders}</td>
                     <td className="px-4 py-3 font-mono text-xs text-right">{formatINR(customer.totalSpent)}</td>
                     <td className="px-4 py-3 font-mono text-xs text-brand-gray-400">

@@ -48,6 +48,7 @@ interface Product {
   categoryId: string | null;
   category?: { id: string; name: string } | null;
   color: string | null;
+  colorGroupKey: string | null;
   subCategory: string | null;
   upperMaterial: string | null;
   innerMaterial: string | null;
@@ -79,6 +80,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
   const [status, setStatus] = useState("ACTIVE");
   const [categoryId, setCategoryId] = useState("");
   const [color, setColor] = useState("");
+  const [colorGroupKey, setColorGroupKey] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [upperMaterial, setUpperMaterial] = useState("");
   const [innerMaterial, setInnerMaterial] = useState("");
@@ -140,6 +142,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
         setStatus(data.status);
         setCategoryId(data.categoryId ?? "");
         setColor(data.color ?? "");
+        setColorGroupKey(data.colorGroupKey ?? "");
         setSubCategory(data.subCategory ?? "");
         setUpperMaterial(data.upperMaterial ?? "");
         setInnerMaterial(data.innerMaterial ?? "");
@@ -289,6 +292,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
       status,
       categoryId: categoryId || null,
       color: color || null,
+      colorGroupKey: colorGroupKey ? colorGroupKey.trim().toLowerCase() : null,
       subCategory: subCategory || null,
       upperMaterial: upperMaterial || null,
       innerMaterial: innerMaterial || null,
@@ -481,6 +485,24 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
               <input id="color" type="text" value={color} onChange={(e) => setColor(e.target.value)}
                 className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors ${fieldErrors.color ? "border-red-300" : "border-brand-gray-200"}`} placeholder="e.g. Black" />
               {fieldErrors.color && <p className="text-red-600 text-xs mt-1">{fieldErrors.color}</p>}
+            </div>
+            <div>
+              <label htmlFor="colorGroupKey" className="block font-mono text-xs uppercase tracking-wide mb-2">
+                Color Group
+              </label>
+              <input
+                id="colorGroupKey"
+                type="text"
+                value={colorGroupKey}
+                onChange={(e) => setColorGroupKey(e.target.value)}
+                maxLength={100}
+                className={`w-full border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-black transition-colors font-mono ${fieldErrors.colorGroupKey ? "border-red-300" : "border-brand-gray-200"}`}
+                placeholder="e.g. wave-323"
+              />
+              <p className="text-[11px] text-brand-gray-500 mt-1">
+                Use the same key for the same shoe sold in different colors. (e.g. wave-323)
+              </p>
+              {fieldErrors.colorGroupKey && <p className="text-red-600 text-xs mt-1">{fieldErrors.colorGroupKey}</p>}
             </div>
             <div>
               <label htmlFor="subCategory" className="block font-mono text-xs uppercase tracking-wide mb-2">Sub Category</label>

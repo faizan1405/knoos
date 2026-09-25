@@ -7,7 +7,8 @@
  *   - signIn       → trigger Google Sign-In
  *   - signOut      → trigger sign-out
  *
- * Authentication is exclusively via Google OAuth.
+ * Authentication supports customer Google OAuth and optional mobile phone OTP,
+ * while administrator access is authenticated via credentials.
  * Roles are CUSTOMER (default) or ADMIN (assigned explicitly in the DB).
  * The role is server-managed and signed into the JWT — the client cannot
  * alter it.
@@ -18,6 +19,10 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { verifyOtpChallenge, isOtpFeatureEnabled } from "@/lib/otp";
+import { normalizeIndianMobile } from "@/lib/phone";
+
+import { resolveOrCreatePhoneUser } from "@/lib/phone-auth";
 
 if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
   process.env.AUTH_URL = process.env.NEXTAUTH_URL;
@@ -35,6 +40,63 @@ if (
    process.env.AUTH_URL.includes("127.0.0.1"))
 ) {
   process.env.AUTH_URL = "";
+}
+
+/**
+ * Helper to resolve the authenticated database user ID and role into the JWT token.
+ *
+ * Prioritizes resolving the database User by email first (Google OAuth & Admin credentials).
+ * Falls back to resolving by id when email is null (Phone OTP).
+ * Never overwrites a valid database token ID with an unverified provider ID.
+ */
+export async function resolveJwtUser({
+  token,
+  user,
+  db = prisma,
+}: {
+  token: { id?: string; role?: string; [key: string]: any };
+  user?: { id?: string; email?: string | null; role?: string; [key: string]: any };
+  db?: any;
+}): Promise<{ id?: string; role?: string; [key: string]: any }> {
+  if (user) {
+    if (user.role) {
+      token.role = user.role;
+    }
+
+    try {
+      const dbUser = user.email
+        ? await db.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, role: true },
+          })
+        : user.id
+        ? await db.user.findUnique({
+            where: { id: user.id },
+            select: { id: true, role: true },
+          })
+        : null;
+
+      if (dbUser) {
+        token.id = dbUser.id;
+        token.role = dbUser.role;
+      } else {
+        // If DB lookup unexpectedly fails:
+        // Do NOT overwrite a previously valid database token ID with an unverified provider ID.
+        if (!token.id && !user.email && user.id) {
+          token.id = user.id;
+        }
+        if (!token.role) {
+          token.role = "CUSTOMER";
+        }
+      }
+    } catch (error) {
+      if (!token.role) {
+        token.role = "CUSTOMER";
+      }
+    }
+  }
+
+  return token;
 }
 
 const nextAuth = NextAuth({
@@ -56,6 +118,7 @@ const nextAuth = NextAuth({
       issuer: "https://accounts.google.com",
     }),
     Credentials({
+      id: "credentials",
       name: "Admin Login",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -96,13 +159,63 @@ const nextAuth = NextAuth({
         }
       }
     }),
+    Credentials({
+      id: "phone-otp",
+      name: "Customer Phone OTP",
+      credentials: {
+        phone: { label: "Phone", type: "text" },
+        code: { label: "OTP Code", type: "text" }
+      },
+      async authorize(credentials) {
+        // Enforce server-side OTP feature gate
+        if (!isOtpFeatureEnabled()) {
+          console.warn("[AUTH] Phone OTP login attempted while feature is disabled.");
+          return null;
+        }
+
+        if (!credentials?.phone || !credentials?.code) return null;
+
+        const rawPhone = credentials.phone as string;
+        const code = (credentials.code as string).trim();
+
+        // 1. Verify OTP challenge
+        const verifyResult = await verifyOtpChallenge(rawPhone, code);
+        if (!verifyResult.success) {
+          return null;
+        }
+
+        const validation = normalizeIndianMobile(rawPhone);
+        if (!validation.isValid || !validation.normalized) {
+          return null;
+        }
+        const phone = validation.normalized;
+
+        try {
+          // 2. Safe authoritative account resolution via PhoneAuthIdentity
+          const resolution = await resolveOrCreatePhoneUser(phone);
+          if (!resolution.success) {
+            return null;
+          }
+
+          return {
+            id: resolution.user.id,
+            name: resolution.user.name,
+            email: resolution.user.email,
+            role: resolution.user.role || "CUSTOMER",
+          };
+        } catch (error) {
+          console.error("Phone OTP authorize error:", error);
+          return null;
+        }
+      }
+    }),
   ],
   callbacks: {
     /**
      * Manually sync user to DB on sign-in since PrismaAdapter is removed.
      */
     async signIn({ user, account, profile }) {
-      if (account?.provider === "credentials") {
+      if (account?.provider === "credentials" || account?.provider === "phone-otp") {
         return true;
       }
 
@@ -141,24 +254,7 @@ const nextAuth = NextAuth({
      * Persist role/id into the JWT on first sign-in.
      */
     async jwt({ token, user, trigger }) {
-      if (user && user.email) {
-        // Fetch user from DB since we are not using PrismaAdapter
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            select: { id: true, role: true },
-          });
-          if (dbUser) {
-            token.role = dbUser.role;
-            token.id = dbUser.id;
-          } else {
-            token.role = "CUSTOMER";
-            token.id = token.sub ?? "";
-          }
-        } catch (error) {
-          // Ignore
-        }
-      }
+      await resolveJwtUser({ token, user, db: prisma });
 
       // On manual session refresh, re-read the role from the database so
       // an admin promotion takes effect without forcing a re-login.

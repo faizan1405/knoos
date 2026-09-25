@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   if (adminResult instanceof Response) return adminResult;
 
   const body = await request.json();
-  const { name, gender, price, salePrice, description, sku, status, images, variants } = body;
+  const { name, gender, price, salePrice, description, sku, status, color, colorGroupKey, images, variants } = body;
 
   if (!name || !gender || price == null || !sku) {
     return Response.json({ error: "Missing required fields" }, { status: 400 });
@@ -67,6 +67,8 @@ export async function POST(request: Request) {
       price,
       salePrice: salePrice ?? null,
       description: description ?? null,
+      color: color || null,
+      colorGroupKey: colorGroupKey ? colorGroupKey.trim().toLowerCase() : null,
       slug: slugify(name),
       sku,
       status: status ?? "ACTIVE",
