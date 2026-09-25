@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { loginWithGoogle } from "@/lib/auth-actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { getVariantPrices, calculateDiscount } from "@/lib/pricing";
+import { ColorSelector, ColorSibling } from "./ColorSelector";
 
 type ProductWithCategory = Product & {
   categoryRel?: { id: string; name: string; slug: string } | null;
@@ -17,6 +18,7 @@ type ProductWithCategory = Product & {
 interface ProductInfoProps {
   product: ProductWithCategory;
   variants: ProductVariant[];
+  colorSiblings?: ColorSibling[];
 }
 
 function formatSpecValue(value: string | null | undefined): string {
@@ -32,7 +34,7 @@ function formatSpecValue(value: string | null | undefined): string {
     .join(" / ");
 }
 
-export function ProductInfo({ product, variants }: ProductInfoProps) {
+export function ProductInfo({ product, variants, colorSiblings = [] }: ProductInfoProps) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -166,6 +168,15 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
 
       <motion.div variants={itemVariants} className="mb-8 text-brand-gray-600 leading-relaxed max-w-prose text-[15px]">
         {product.description || "No description available."}
+      </motion.div>
+
+      {/* Color Selector / Swatches */}
+      <motion.div variants={itemVariants}>
+        <ColorSelector
+          currentProductId={product.id}
+          currentColor={product.color}
+          siblings={colorSiblings}
+        />
       </motion.div>
 
       <motion.div variants={itemVariants} className="mb-8">
