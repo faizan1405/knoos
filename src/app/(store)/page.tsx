@@ -103,7 +103,7 @@ export default async function HomePage() {
         />
       )}
 
-      {/* 5. BEST SELLERS */}
+      {/* 5. FEATURED PICKS */}
       {bestSellers.length > 0 && (
         <section className="py-16 md:py-20 lg:py-24 px-6 md:px-12 lg:px-24 bg-brand-sky/40 border-y border-brand-sky-border/40">
           <div className="max-w-7xl mx-auto">
@@ -111,12 +111,12 @@ export default async function HomePage() {
               <div>
                 <RevealText
                   as="h2"
-                  text="BEST SELLERS"
+                  text="FEATURED PICKS"
                   className="font-serif text-3xl md:text-4xl uppercase mb-3 text-brand-dark"
                 />
                 <Reveal delay={0.15}>
                   <p className="text-brand-gray-600 text-sm md:text-base">
-                    Our most-loved pairs, chosen for everyday comfort and style.
+                    Selected styles worth discovering.
                   </p>
                 </Reveal>
               </div>
