@@ -16,11 +16,12 @@ export interface ProductSearchParams {
   stock?: string;
   sort?: string;
   page?: string;
+  limit?: number;
 }
 
 export async function getProducts(params: ProductSearchParams): Promise<ProductWithImages[]> {
   try {
-    const { q, gender, category, size, min, max, stock, sort } = params;
+    const { q, gender, category, size, min, max, stock, sort, limit } = params;
 
     const where: Prisma.ProductWhereInput = {
       status: "ACTIVE",
@@ -108,6 +109,8 @@ export async function getProducts(params: ProductSearchParams): Promise<ProductW
           select: { id: true, name: true, slug: true },
         },
       },
+      // Push take to DB if we do not need client-side price sorting
+      take: limit && sort !== "price-low" && sort !== "price-high" ? limit : undefined,
       // Preliminary sorting
       orderBy: sort === "Newest" ? { createdAt: "desc" } : { createdAt: "desc" },
     });
@@ -132,7 +135,7 @@ export async function getProducts(params: ProductSearchParams): Promise<ProductW
       });
     }
 
-    return products;
+    return limit ? products.slice(0, limit) : products;
   } catch (error) {
     console.error("Error in getProducts:", error);
     return [];

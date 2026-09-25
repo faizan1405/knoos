@@ -16,10 +16,8 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const allProducts = await getProducts({});
-
-  // Since we don't have actual sales data, we'll use a curated selection (first 4 products) as a fallback for Best Sellers.
-  const bestSellers = allProducts.slice(0, 4);
+  // Curated selection (first 4 products) as a fallback for Best Sellers.
+  const bestSellers = await getProducts({ limit: 4 });
 
   // Exact Prisma query for New Arrivals
   const newArrivals = await prisma.product.findMany({
