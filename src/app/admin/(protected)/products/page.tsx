@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductImportPanel from "./ProductImportPanel";
+import NormalizeSlugsModal from "./NormalizeSlugsModal";
 
 const GENDERS = ["MEN", "WOMEN"] as const;
 const STATUSES = ["ACTIVE", "INACTIVE"] as const;
@@ -61,6 +62,7 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [normalizeModalOpen, setNormalizeModalOpen] = useState(false);
 
   // Load categories for filter dropdown
   useEffect(() => {
@@ -159,12 +161,21 @@ export default function AdminProductsPage() {
           <h1 className="font-serif text-3xl">Products</h1>
           <p className="text-brand-gray-500 font-mono text-sm mt-1">Manage your product catalog</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="bg-brand-black text-white px-5 py-2.5 text-sm font-mono uppercase tracking-wide hover:bg-brand-gray-800 transition-colors"
-        >
-          + Add Product
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setNormalizeModalOpen(true)}
+            className="border border-brand-gray-300 text-brand-black px-4 py-2.5 text-xs font-mono uppercase tracking-wide hover:border-brand-black hover:bg-brand-gray-50 transition-colors"
+          >
+            Normalize Existing Slugs
+          </button>
+          <Link
+            href="/admin/products/new"
+            className="bg-brand-black text-white px-5 py-2.5 text-sm font-mono uppercase tracking-wide hover:bg-brand-gray-800 transition-colors"
+          >
+            + Add Product
+          </Link>
+        </div>
       </div>
 
       <ProductImportPanel />
@@ -378,6 +389,12 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      <NormalizeSlugsModal
+        isOpen={normalizeModalOpen}
+        onClose={() => setNormalizeModalOpen(false)}
+        onSuccess={fetchProducts}
+      />
     </div>
   );
 }
