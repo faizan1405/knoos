@@ -7,101 +7,135 @@ import { StaggerContainer } from "@/components/motion/StaggerContainer";
 import { StaggerItem } from "@/components/motion/StaggerItem";
 import Image from "next/image";
 import Link from "next/link";
-import { getProducts } from "@/lib/products";
+import { ProductWithImages } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
+import { PromoBanners } from "@/components/home/PromoBanners";
+import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 
 export const metadata = {
   title: "KNOOS - Premium Footwear",
   description: "KNOOS - Premium footwear for men and women.",
 };
 
-export default async function HomePage() {
-  // Curated selection (first 4 products) as a fallback for Best Sellers.
-  const bestSellers = await getProducts({ limit: 4 });
+export const revalidate = 60;
 
-  // Exact Prisma query for New Arrivals
-  const newArrivals = await prisma.product.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    include: {
-      images: {
-        orderBy: { sortOrder: "asc" },
-      },
-      categoryRel: {
-        select: { id: true, name: true, slug: true },
-      },
-    },
-  });
+export default async function HomePage() {
+  let newArrivals: ProductWithImages[] = [];
+  let bestSellers: ProductWithImages[] = [];
+  let promoProduct: ProductWithImages | null = null;
+
+  try {
+    const [arrivalsData, bestSellersData, spotlightData] = await Promise.all([
+      // Top 8 active products for the homepage carousel
+      prisma.product.findMany({
+        where: { status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
+          categoryRel: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      }),
+      // Top 4 curated products for Best Sellers grid
+      prisma.product.findMany({
+        where: { status: "ACTIVE" },
+        orderBy: { updatedAt: "desc" },
+        take: 4,
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
+          categoryRel: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      }),
+      // Stable active product with an image for promotional spotlight
+      prisma.product.findFirst({
+        where: {
+          status: "ACTIVE",
+          images: { some: {} },
+        },
+        orderBy: { createdAt: "desc" },
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
+          categoryRel: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      }),
+    ]);
+
+    newArrivals = arrivalsData as ProductWithImages[];
+    bestSellers = bestSellersData as ProductWithImages[];
+    promoProduct = spotlightData as ProductWithImages | null;
+  } catch (error) {
+    console.error("Error loading homepage products:", error);
+  }
 
   return (
-    <main>
+    <main className="overflow-x-hidden">
+      {/* 1. HERO (Phase 1 Owned Component) */}
       <Hero />
 
-      <section className="py-24 px-6 md:px-12 lg:px-24">
-        <div className="max-w-7xl mx-auto">
-          <RevealText as="h2" text="Shop by Category" className="font-serif text-3xl md:text-4xl mb-12" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <RevealImage delay={0} scaleFrom={1.04} className="h-full">
-              <Link href="/men" className="group block relative h-full aspect-[4/5] bg-brand-sky/20 border border-brand-sky-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
-                <Image
-                  src="/images/men-category.jpg"
-                  alt="Men's Footwear"
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
-                  <span className="font-serif text-3xl md:text-4xl text-white mb-3 tracking-wide">
-                    Men
-                  </span>
-                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-sky flex items-center gap-2 group-hover:text-white transition-colors">
-                    Shop Men <span className="transition-transform duration-500 group-hover:translate-x-1 text-brand-blue group-hover:text-white">&rarr;</span>
-                  </span>
-                </div>
-              </Link>
-            </RevealImage>
-            <RevealImage delay={0.1} scaleFrom={1.04} className="h-full">
-              <Link href="/women" className="group block relative h-full aspect-[4/5] bg-brand-sky/20 border border-brand-sky-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
-                <Image
-                  src="/images/women-category.jpg"
-                  alt="Women's Footwear"
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 flex flex-col items-start transition-transform duration-700 ease-out group-hover:-translate-y-2">
-                  <span className="font-serif text-3xl md:text-4xl text-white mb-3 tracking-wide">
-                    Women
-                  </span>
-                  <span className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-sky flex items-center gap-2 group-hover:text-white transition-colors">
-                    Shop Women <span className="transition-transform duration-500 group-hover:translate-x-1 text-brand-blue group-hover:text-white">&rarr;</span>
-                  </span>
-                </div>
-              </Link>
-            </RevealImage>
-          </div>
-        </div>
-      </section>
+      {/* 2. SHOP BY CATEGORY (MEN | WOMEN) */}
+      <CategoryShowcase />
 
-      {/* BEST SELLERS */}
+      {/* 3. PROMOTIONAL BANNERS */}
+      <PromoBanners featuredProduct={promoProduct} />
+
+      {/* 4. HOMEPAGE CAROUSEL (NEW ARRIVALS) */}
+      {newArrivals.length > 0 && (
+        <FeaturedCarousel
+          products={newArrivals}
+          title="New Arrivals"
+          eyebrow="JUST IN"
+          subtitle="Our latest footwear arrivals, engineered for everyday movement and refined comfort."
+          viewAllHref="/search?sort=Newest"
+          viewAllText="View All"
+        />
+      )}
+
+      {/* 5. BEST SELLERS */}
       {bestSellers.length > 0 && (
-        <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-sky/40 border-y border-brand-sky-border/40">
+        <section className="py-16 md:py-20 lg:py-24 px-6 md:px-12 lg:px-24 bg-brand-sky/40 border-y border-brand-sky-border/40">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
               <div>
-                <RevealText as="h2" text="BEST SELLERS" className="font-serif text-3xl md:text-4xl uppercase mb-3 text-brand-dark" />
+                <RevealText
+                  as="h2"
+                  text="BEST SELLERS"
+                  className="font-serif text-3xl md:text-4xl uppercase mb-3 text-brand-dark"
+                />
                 <Reveal delay={0.15}>
-                  <p className="text-brand-gray-600 text-sm md:text-base">Our most-loved pairs, chosen for everyday comfort and style.</p>
+                  <p className="text-brand-gray-600 text-sm md:text-base">
+                    Our most-loved pairs, chosen for everyday comfort and style.
+                  </p>
                 </Reveal>
               </div>
               <Reveal delay={0.25}>
-                <Link href="/search" className="font-mono text-xs uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-blue">
-                  View All <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+                <Link
+                  href="/search"
+                  className="font-mono text-xs uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-blue"
+                >
+                  <span>View All</span>
+                  <span className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </Link>
               </Reveal>
             </div>
-            <StaggerContainer staggerDelay={0.1} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+            <StaggerContainer
+              staggerDelay={0.1}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
+            >
               {bestSellers.map((product) => (
                 <StaggerItem key={product.id} yOffset={30}>
                   <ProductCard product={product} />
@@ -112,41 +146,26 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* NEW ARRIVALS */}
-      {newArrivals.length > 0 && (
-        <section className="py-24 px-6 md:px-12 lg:px-24 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-              <div>
-                <RevealText as="p" text="JUST IN" className="font-mono text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4" />
-                <RevealText as="h2" text="New Arrivals" className="font-serif text-3xl md:text-4xl text-brand-dark" />
-              </div>
-              <Reveal delay={0.25}>
-                <Link href="/search?sort=Newest" className="font-mono text-xs uppercase tracking-widest text-brand-navy hover:text-brand-blue transition-colors group flex items-center gap-2 pb-1 border-b border-transparent hover:border-brand-blue">
-                  View All <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
-                </Link>
-              </Reveal>
-            </div>
-            <StaggerContainer staggerDelay={0.1} className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {newArrivals.map((product) => (
-                <StaggerItem key={product.id} yOffset={30}>
-                  <ProductCard product={product} />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-      )}
-
-      {/* SECTION 1 — MADE WITH INTENT */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 bg-brand-cream/80 border-y border-brand-cream-border/60">
+      {/* 6. MADE WITH INTENT */}
+      <section className="py-16 md:py-20 lg:py-24 px-6 md:px-12 lg:px-24 bg-brand-cream/80 border-y border-brand-cream-border/60">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <p className="font-mono text-sm uppercase tracking-widest text-brand-gold font-semibold mb-4">WHY KNOOS</p>
+            <p className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-gold font-semibold mb-3">
+              WHY KNOOS
+            </p>
           </Reveal>
-          <RevealText as="h2" text="MADE WITH INTENT" delay={0.1} className="font-serif text-3xl md:text-4xl mb-16 uppercase text-brand-dark" />
+          <RevealText
+            as="h2"
+            text="MADE WITH INTENT"
+            delay={0.1}
+            className="font-serif text-3xl md:text-4xl mb-12 md:mb-16 uppercase text-brand-dark"
+          />
 
-          <StaggerContainer staggerDelay={0.08} delayChildren={0.2} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+          <StaggerContainer
+            staggerDelay={0.08}
+            delayChildren={0.2}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8"
+          >
             <StaggerItem yOffset={25} className="flex flex-col items-start group">
               <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -154,8 +173,11 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3 text-brand-dark">Comfort</h3>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">Cushioned footbeds and considered fit for long days on your feet.</p>
+              <p className="text-brand-gray-600 text-sm leading-relaxed">
+                Cushioned footbeds and considered fit for long days on your feet.
+              </p>
             </StaggerItem>
+
             <StaggerItem yOffset={25} className="flex flex-col items-start group">
               <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -163,8 +185,11 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3 text-brand-dark">Craftsmanship</h3>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">Clean lines, careful stitching and a finish you can feel.</p>
+              <p className="text-brand-gray-600 text-sm leading-relaxed">
+                Clean lines, careful stitching and a finish you can feel.
+              </p>
             </StaggerItem>
+
             <StaggerItem yOffset={25} className="flex flex-col items-start group">
               <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -172,8 +197,11 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3 text-brand-dark">Everyday Style</h3>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">Silhouettes that move easily from work to weekend.</p>
+              <p className="text-brand-gray-600 text-sm leading-relaxed">
+                Silhouettes that move easily from work to weekend.
+              </p>
             </StaggerItem>
+
             <StaggerItem yOffset={25} className="flex flex-col items-start group">
               <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -182,8 +210,11 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3 text-brand-dark">Quality Materials</h3>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">Selected leathers, knits and durable rubber outsoles.</p>
+              <p className="text-brand-gray-600 text-sm leading-relaxed">
+                Selected leathers, knits and durable rubber outsoles.
+              </p>
             </StaggerItem>
+
             <StaggerItem yOffset={25} className="flex flex-col items-start group">
               <div className="w-14 h-14 flex items-center justify-center rounded-2xl border border-brand-cream-border/70 mb-6 bg-white text-brand-navy shadow-sm group-hover:scale-105 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -191,13 +222,15 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="font-serif text-xl mb-3 text-brand-dark">Built To Move</h3>
-              <p className="text-brand-gray-600 text-sm leading-relaxed">Flexible construction designed around natural movement.</p>
+              <p className="text-brand-gray-600 text-sm leading-relaxed">
+                Flexible construction designed around natural movement.
+              </p>
             </StaggerItem>
           </StaggerContainer>
         </div>
       </section>
 
-      {/* VIDEO — above "Finished with care." */}
+      {/* 7. VIDEO */}
       <section className="relative bg-brand-navy py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
@@ -214,28 +247,46 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 2 — OUR QUALITY PROCESS */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-brand-sky/30 to-white">
+      {/* 8. OUR QUALITY PROCESS */}
+      <section className="py-16 md:py-20 lg:py-24 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-brand-sky/30 to-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <RevealImage scaleFrom={1.05} className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-white border border-brand-sky-border/40 shadow-lg rounded-3xl overflow-hidden">
-              <Image src="/images/process-footwear.jpg" alt="Craftsmanship Process" fill className="object-cover" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <RevealImage
+              scaleFrom={1.05}
+              className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-white border border-brand-sky-border/40 shadow-lg rounded-3xl overflow-hidden"
+            >
+              <Image
+                src="/images/process-footwear.jpg"
+                alt="Craftsmanship Process"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
             </RevealImage>
             <div>
-              <RevealText as="p" text="PROCESS" className="font-mono text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4" />
-              <RevealText as="h2" text="Finished with care." delay={0.1} className="font-serif text-3xl md:text-4xl mb-12 text-brand-dark" />
-              <StaggerContainer delayChildren={0.2} staggerDelay={0.1} className="space-y-8">
+              <RevealText
+                as="p"
+                text="PROCESS"
+                className="font-mono text-xs md:text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4"
+              />
+              <RevealText
+                as="h2"
+                text="Finished with care."
+                delay={0.1}
+                className="font-serif text-3xl md:text-4xl mb-8 md:mb-12 text-brand-dark"
+              />
+              <StaggerContainer delayChildren={0.2} staggerDelay={0.1} className="space-y-6 md:space-y-8">
                 {[
                   "Material selection and inspection",
                   "Cutting and stitched construction",
                   "Comfort-focused footbed assembly",
-                  "Finishing, cleaning and quality control"
+                  "Finishing, cleaning and quality control",
                 ].map((step, idx) => (
                   <StaggerItem key={idx} yOffset={20} className="flex items-start gap-4">
                     <div className="w-7 h-7 rounded-full bg-brand-blue flex-shrink-0 flex items-center justify-center mt-1 shadow-sm">
                       <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
-                    <p className="text-lg text-brand-dark font-light">{step}</p>
+                    <p className="text-base md:text-lg text-brand-dark font-light">{step}</p>
                   </StaggerItem>
                 ))}
               </StaggerContainer>
@@ -243,7 +294,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
     </main>
   );
 }
