@@ -53,15 +53,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
           select: { id: true, name: true, slug: true },
         },
         reviews: {
-          where: { isActive: true },
+          where: {
+            moderationStatus: "APPROVED",
+            isActive: true,
+          },
           orderBy: { createdAt: "desc" },
           select: {
             id: true,
             displayName: true,
             rating: true,
             reviewText: true,
+            customerPhotoUrl: true,
+            productPhotoUrl: true,
             createdAt: true,
-          }
+          },
         }
       },
     });

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
 import { loginWithGoogle } from "@/lib/auth-actions";
-import { ProductRecommendations } from "@/components/product/ProductRecommendations";
 import { CouponEntry } from "@/components/cart/CouponEntry";
 import { APPLIED_COUPON_STORAGE_KEY, type CouponApplication } from "@/lib/coupon";
 
@@ -46,7 +45,6 @@ export function CheckoutClient() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
   const [couponCode, setCouponCode] = useState("");
   const [coupon, setCoupon] = useState<CouponApplication | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -110,15 +108,6 @@ export function CheckoutClient() {
         }
 
         setCart(cartData);
-
-        if (cartData?.items?.length > 0) {
-          const cartIds = cartData.items.map((i: any) => i.productId).join(",");
-          const gender = cartData.items[0]?.product?.gender || ""; // Fallback handled by API
-          fetch(`/api/recommendations?cartIds=${cartIds}&limit=3&gender=${gender}`)
-            .then(res => res.json())
-            .then(data => setRecommendations(data))
-            .catch(err => console.error("Failed to load recommendations", err));
-        }
 
         const storedCouponCode = localStorage.getItem(APPLIED_COUPON_STORAGE_KEY);
         if (storedCouponCode && cartData?.items?.length > 0) {
@@ -448,16 +437,6 @@ export function CheckoutClient() {
             <span>Total</span>
             <span className="font-semibold">₹{total.toLocaleString("en-IN")}</span>
           </div>
-
-          {recommendations.length > 0 && (
-            <div className="mb-8">
-              <ProductRecommendations 
-                title="BEFORE YOU GO" 
-                products={recommendations} 
-                mode="checkout" 
-              />
-            </div>
-          )}
 
           <button 
             onClick={handlePayment} 
