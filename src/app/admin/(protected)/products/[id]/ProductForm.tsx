@@ -182,7 +182,7 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_]+/g, "-")
+      .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
     setSlug(s);
   }, [name]);
