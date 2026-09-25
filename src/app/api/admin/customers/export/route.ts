@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
       const row = [
         user.id,
         user.name || "",
-        user.email,
-        address?.phone || "",
+        user.email || "",
+        user.phone || address?.phone || "",
         user.createdAt.toISOString().split("T")[0],
         totalOrders,
         totalPaidOrders,

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Phone, Search, ShoppingBag, X, ChevronDown } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
+import { CustomerLoginModal } from "@/components/auth/CustomerLoginModal";
 
 interface Category {
   id: string;
@@ -26,6 +27,7 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShopByOpen, setIsShopByOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const shopByRef = useRef<HTMLDivElement>(null);
 
@@ -190,7 +192,13 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
               </div>
             ) : (
               <button 
-                onClick={() => signInAction()}
+                onClick={() => {
+                  if (process.env.NEXT_PUBLIC_OTP_ENABLED === "true") {
+                    setIsLoginModalOpen(true);
+                  } else {
+                    signInAction();
+                  }
+                }}
                 className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-dark hover:text-brand-blue transition-colors"
               >
                 <User size={16} className="group-hover:scale-110 group-hover:text-brand-blue transition-transform" />
@@ -277,6 +285,12 @@ export function HeaderClient({ cartCount, userName, signInAction, signOutAction,
         signInAction={signInAction}
         signOutAction={signOutAction}
         categories={categories}
+        openLoginModal={() => setIsLoginModalOpen(true)}
+      />
+
+      <CustomerLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
     </>
   );

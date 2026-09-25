@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { signIn } from "@/lib/auth";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
@@ -21,19 +22,33 @@ export default async function CartPage() {
         <p className="text-brand-gray-500 font-mono text-sm uppercase tracking-widest mb-8">
           Sign in to view your cart
         </p>
-        <form
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: "/cart" });
-          }}
-        >
-          <button
-            type="submit"
-            className="bg-brand-black text-white px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-brand-gray-900 transition-colors"
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          {process.env.NEXT_PUBLIC_OTP_ENABLED === "true" && (
+            <Link
+              href="/login?callbackUrl=/cart"
+              className="bg-brand-navy text-white px-8 py-3.5 font-mono text-xs uppercase tracking-widest hover:bg-brand-blue rounded-xl transition-colors shadow-sm text-center min-w-[200px]"
+            >
+              Sign In with Mobile OTP
+            </Link>
+          )}
+          <form
+            action={async () => {
+              "use server";
+              await signIn("google", { redirectTo: "/cart" });
+            }}
           >
-            Sign in with Google
-          </button>
-        </form>
+            <button
+              type="submit"
+              className={`${
+                process.env.NEXT_PUBLIC_OTP_ENABLED === "true"
+                  ? "border border-brand-sky-border/80 bg-white text-brand-dark hover:bg-brand-sky/20"
+                  : "bg-brand-navy text-white hover:bg-brand-blue"
+              } px-8 py-3.5 font-mono text-xs uppercase tracking-widest rounded-xl transition-colors shadow-sm text-center min-w-[200px]`}
+            >
+              Sign in with Google
+            </button>
+          </form>
+        </div>
       </div>
     );
   }

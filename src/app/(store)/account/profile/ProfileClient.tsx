@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Save, X, CheckCircle, AlertCircle } from "lucide-react";
+import { LetUsKnowSection } from "@/components/account/LetUsKnowSection";
 
 interface ProfileData {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   phone: string | null;
 }
 
 interface ProfileClientProps {
-  initialUser: { id: string; name: string; email: string };
+  initialUser: { id: string; name: string; email?: string | null };
 }
 
 export default function ProfileClient({ initialUser }: ProfileClientProps) {
@@ -102,7 +103,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
   };
 
   const displayName = profile.name || "Not set";
-  const displayEmail = profile.email;
+  const displayEmail = profile.email || "Not set";
   const displayPhone = profile.phone || "Not set";
 
   return (
@@ -193,6 +194,15 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           </div>
         </div>
       )}
+
+      {/* Customer Preferences: Let Us Know */}
+      <LetUsKnowSection
+        initialName={profile.name || ""}
+        onSaved={(updatedName) => {
+          setProfile((prev) => ({ ...prev, name: updatedName }));
+          setEditForm((prev) => ({ ...prev, name: updatedName }));
+        }}
+      />
     </div>
   );
 }

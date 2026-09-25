@@ -20,6 +20,7 @@ interface MobileMenuProps {
   signInAction: () => void;
   signOutAction: () => void;
   categories: Category[];
+  openLoginModal?: () => void;
 }
 
 export function MobileMenu({
@@ -30,6 +31,7 @@ export function MobileMenu({
   signInAction,
   signOutAction,
   categories,
+  openLoginModal,
 }: MobileMenuProps) {
   const [isShopByOpen, setIsShopByOpen] = useState(false);
 
@@ -157,7 +159,14 @@ export function MobileMenu({
                 </>
               ) : (
                 <button
-                  onClick={() => { signInAction(); onClose(); }}
+                  onClick={() => {
+                    if (openLoginModal && process.env.NEXT_PUBLIC_OTP_ENABLED === "true") {
+                      openLoginModal();
+                    } else {
+                      signInAction();
+                    }
+                    onClose();
+                  }}
                   className="font-mono text-sm uppercase tracking-widest text-brand-gray-600 hover:text-brand-blue transition-colors"
                 >
                   Sign In

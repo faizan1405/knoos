@@ -48,19 +48,26 @@ export default function AccountOverviewClient() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [summary, setSummary] = useState<OrderSummary | null>(null);
   const [recentOrder, setRecentOrder] = useState<RecentOrder | null>(null);
+  const [isPrefConfigured, setIsPrefConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     let cancelled = false;
     try {
-      const [profileRes, ordersRes, addressesRes] = await Promise.all([
+      const [profileRes, ordersRes, addressesRes, prefRes] = await Promise.all([
         fetch("/api/account/profile", { cache: "no-store" }),
         fetch("/api/orders", { cache: "no-store" }),
         fetch("/api/addresses", { cache: "no-store" }),
+        fetch("/api/account/preferences", { cache: "no-store" }),
       ]);
 
       if (profileRes.ok && !cancelled) {
         setProfile(await profileRes.json());
+      }
+
+      if (prefRes.ok && !cancelled) {
+        const prefData = await prefRes.json();
+        setIsPrefConfigured(Boolean(prefData.isConfigured));
       }
 
       if (ordersRes.ok && !cancelled) {
@@ -106,6 +113,31 @@ export default function AccountOverviewClient() {
         </p>
       </div>
 
+      {/* Non-blocking Onboarding Prompt for Let Us Know Preferences */}
+      {!isPrefConfigured && !loading && (
+        <div className="bg-brand-sky/25 border border-brand-sky-border/80 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-brand-blue font-semibold">
+                Shopping Preferences
+              </span>
+            </div>
+            <h3 className="font-serif text-lg text-brand-navy">
+              Personalize Your Fit: Let Us Know
+            </h3>
+            <p className="text-xs sm:text-sm text-brand-gray-500 mt-0.5 max-w-xl">
+              Tell us your shoe size and style preferences to get curated recommendations tailored to you.
+            </p>
+          </div>
+          <Link
+            href="/account/profile"
+            className="inline-flex items-center justify-center whitespace-nowrap bg-brand-navy text-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest rounded-xl hover:bg-brand-blue transition-colors shrink-0 shadow-sm"
+          >
+            Complete Preferences
+          </Link>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <StatCard label="Total Orders" value={(summary?.total ?? 0).toString()} />
@@ -127,7 +159,7 @@ export default function AccountOverviewClient() {
           Quick Actions
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <QuickLink href="/account/profile" label="Edit Profile" />
+          <QuickLink href="/account/profile" label="Profile &amp; Preferences" />
           <QuickLink href="/account/addresses" label="Manage Addresses" />
           <QuickLink href="/account/orders" label="View All Orders" />
           <QuickLink href="/account/help" label="Help & Support" />
