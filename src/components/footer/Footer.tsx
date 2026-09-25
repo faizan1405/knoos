@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
-import { Camera, Mail, Phone, MessageCircle, Home, User, Users, Info, HelpCircle, Shield, FileText, ShoppingBag } from "lucide-react";
+import { Mail, Phone, MessageCircle, Home, User, Users, Info, HelpCircle, Shield, FileText, ShoppingBag } from "lucide-react";
 
 export function Footer() {
   return (
@@ -23,21 +23,46 @@ export function Footer() {
               Comfort In Every Step
             </p>
             <p className="text-slate-300 text-xs leading-relaxed max-w-xs">
-              Premium footwear designed for everyday comfort and refined elegance by KRIPA KIRAN SHOE COMPANY.
+              Premium footwear designed for everyday comfort and refined elegance by KNOOS.
             </p>
             <div className="pt-2">
               <span className="font-mono text-xs uppercase tracking-widest text-brand-gold block mb-2">
                 Social
               </span>
-              <a
-                href="https://www.instagram.com/knoosshoes"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-white transition-colors"
-              >
-                <Camera size={14} className="text-brand-blue group-hover:scale-110 group-hover:text-brand-gold transition-transform" />
-                <span className="font-mono font-medium text-white group-hover:text-brand-gold group-hover:underline">@KNOOSSHOES</span>
-              </a>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://www.instagram.com/knoosshoes"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="KNOOS Instagram"
+                  className="group inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-brand-blue group-hover:scale-110 group-hover:text-brand-gold transition-transform"
+                    aria-hidden="true"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                  <span className="font-mono font-medium text-white group-hover:text-brand-gold group-hover:underline">@KNOOSSHOES</span>
+                </a>
+
+                {/* 
+                  Facebook link: Currently omitted per project requirement:
+                  "DO NOT invent one. DO NOT link to facebook.com generically. DO NOT use '#'. Report: FACEBOOK PROFILE URL REQUIRED"
+                  When official profile is provided by client, enable here:
+                  <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="KNOOS Facebook" className="...">...</a>
+                */}
+              </div>
             </div>
           </div>
 
@@ -120,7 +145,7 @@ export function Footer() {
             </h4>
             <div className="space-y-3 text-sm text-slate-300">
               <div className="font-medium text-white">
-                KRIPA KIRAN SHOE COMPANY
+                KNOOS
               </div>
               <p className="text-xs leading-relaxed text-slate-300">
                 15/5 SORON KTRA SHAHGANJ<br />
@@ -150,7 +175,7 @@ export function Footer() {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-mono text-xs text-slate-400 text-center sm:text-left">
-            &copy; {new Date().getFullYear()} KNOOS (KRIPA KIRAN SHOE COMPANY). All rights reserved.
+            &copy; {new Date().getFullYear()} KNOOS. All rights reserved.
           </p>
           <p className="font-mono text-xs text-brand-gold/90 text-center sm:text-right">
             Comfort In Every Step
