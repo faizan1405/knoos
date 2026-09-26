@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 const GENDERS = ["MEN", "WOMEN"] as const;
 
@@ -715,28 +715,37 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
 
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-3 mb-4">
-              {images.map((img, index) => (
-                <div key={img.id ?? index} className="relative group">
-                  <Image
-                    src={img.imageUrl}
-                    alt={`Product ${index + 1}`}
-                    width={100}
-                    height={100}
-                    className="w-full aspect-square object-cover border border-brand-gray-100"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%239a9a9a' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='12'%3EError%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-black/70 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    x
-                  </button>
-                </div>
-              ))}
+              {images.map((img, index) => {
+                const isLegacyImage =
+                  img.imageUrl.startsWith("/uploads/") ||
+                  img.imageUrl.startsWith("http://") ||
+                  img.imageUrl.startsWith("https://");
+
+                return (
+                  <div key={img.id ?? index} className="relative group border border-brand-gray-100 rounded-lg p-1.5 bg-brand-gray-50/50">
+                    <FallbackImage
+                      src={img.imageUrl}
+                      alt={`Product ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="w-full aspect-square object-cover border border-brand-gray-200 rounded"
+                      fallbackType="product"
+                    />
+                    {isLegacyImage && (
+                      <p className="mt-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-center leading-tight font-mono">
+                        Legacy local image — re-upload recommended
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-black/70 hover:bg-red-600 text-white w-5 h-5 flex items-center justify-center text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      x
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 

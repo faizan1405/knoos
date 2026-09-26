@@ -79,7 +79,9 @@ export async function finalizePaidOrder({
       }
     }
 
-    await tx.cart.deleteMany({ where: { userId: order.userId } });
+    if (order.checkoutMode === "CART") {
+      await tx.cart.deleteMany({ where: { userId: order.userId } });
+    }
     return true;
   });
 }

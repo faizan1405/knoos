@@ -185,6 +185,7 @@ model Order {
   deliveryCharge    Int
   total             Int
   deliveryMethod    String   @db.VarChar(20)
+  checkoutMode      String   @default("CART") @db.VarChar(20)
   orderStatus       String   @default("PENDING") @db.VarChar(20)
   paymentStatus     String   @default("PENDING") @db.VarChar(20)
   razorpayOrderId   String?  @unique @db.VarChar(100)

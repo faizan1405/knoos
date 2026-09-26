@@ -23,10 +23,10 @@ export const revalidate = 60;
 export default async function HomePage() {
   let newArrivals: ProductWithImages[] = [];
   let bestSellers: ProductWithImages[] = [];
-  let promoProduct: ProductWithImages | null = null;
+  let bannerProducts: ProductWithImages[] = [];
 
   try {
-    const [arrivalsData, bestSellersData, spotlightData] = await Promise.all([
+    const [arrivalsData, bestSellersData, promoData] = await Promise.all([
       // Top 8 active products for the homepage carousel
       prisma.product.findMany({
         where: { status: "ACTIVE" },
@@ -55,13 +55,14 @@ export default async function HomePage() {
           },
         },
       }),
-      // Stable active product with an image for promotional spotlight
-      prisma.product.findFirst({
+      // Up to 2 active products with images for promotional banner backgrounds
+      prisma.product.findMany({
         where: {
           status: "ACTIVE",
           images: { some: {} },
         },
         orderBy: { createdAt: "desc" },
+        take: 2,
         include: {
           images: {
             orderBy: { sortOrder: "asc" },
@@ -75,7 +76,7 @@ export default async function HomePage() {
 
     newArrivals = arrivalsData as ProductWithImages[];
     bestSellers = bestSellersData as ProductWithImages[];
-    promoProduct = spotlightData as ProductWithImages | null;
+    bannerProducts = promoData as ProductWithImages[];
   } catch (error) {
     console.error("Error loading homepage products:", error);
   }
@@ -89,7 +90,7 @@ export default async function HomePage() {
       <CategoryShowcase />
 
       {/* 3. PROMOTIONAL BANNERS */}
-      <PromoBanners featuredProduct={promoProduct} />
+      <PromoBanners bannerProducts={bannerProducts} featuredProduct={bannerProducts[0] ?? null} />
 
       {/* 4. HOMEPAGE CAROUSEL (NEW ARRIVALS) */}
       {newArrivals.length > 0 && (

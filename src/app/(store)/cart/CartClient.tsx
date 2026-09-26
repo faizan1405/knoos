@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CouponEntry } from "@/components/cart/CouponEntry";
 import { APPLIED_COUPON_STORAGE_KEY, type CouponApplication } from "@/lib/coupon";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 interface CartItemData {
   id: string;
@@ -210,7 +210,13 @@ export function CartClient({ initialItems, initialSubtotal, recommendationsSlot 
               >
                 <div className="w-full sm:w-32 h-40 bg-brand-sky/20 border border-brand-sky-border/30 rounded-xl overflow-hidden relative shrink-0">
                   {item.imageUrl ? (
-                    <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" />
+                    <FallbackImage
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      fill
+                      className="object-cover"
+                      fallbackType="product"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-brand-gray-400 font-mono text-xs">No image</div>
                   )}

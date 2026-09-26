@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Product, ProductImage } from "@prisma/client";
 import { getProductPrices } from "@/lib/pricing";
 import { ProductCard } from "./ProductCard";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 type ProductWithImages = Product & { images: ProductImage[] };
 
@@ -31,7 +31,13 @@ export function ProductRecommendations({
             return (
               <Link key={product.id} href={`/product/${product.slug}`} className="group flex items-center gap-3">
                 <div className="relative h-[90px] w-[90px] shrink-0 overflow-hidden bg-brand-sky/25 border border-brand-sky-border/40 rounded-xl">
-                  <Image src={image} alt={product.name} fill sizes="90px" className="object-cover object-center transition-transform duration-500 group-hover:scale-105" />
+                  <FallbackImage
+                    src={image}
+                    alt={product.name}
+                    fill
+                    sizes="90px"
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  />
                   {product.salePrice && (
                     <span className="absolute left-1.5 top-1.5 bg-brand-navy text-brand-gold px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide rounded font-medium">Sale</span>
                   )}
