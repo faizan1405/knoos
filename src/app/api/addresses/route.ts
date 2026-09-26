@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { normalizeIndianMobile } from "@/lib/phone";
 
 export async function GET() {
   const session = await auth();
@@ -45,8 +46,42 @@ export async function POST(request: Request) {
       isDefault,
     } = body;
 
-    if (!fullName || !phone || !addressLine1 || !city || !state || !postalCode) {
-      return NextResponse.json({ error: "Please fill all required fields." }, { status: 400 });
+    const trimmedFullName = typeof fullName === "string" ? fullName.trim() : "";
+    const trimmedPhone = typeof phone === "string" ? phone.trim() : "";
+    const trimmedAddressLine1 = typeof addressLine1 === "string" ? addressLine1.trim() : "";
+    const trimmedCity = typeof city === "string" ? city.trim() : "";
+    const trimmedState = typeof state === "string" ? state.trim() : "";
+    const trimmedPostalCode = typeof postalCode === "string" ? postalCode.trim() : "";
+
+    if (
+      !trimmedFullName ||
+      !trimmedPhone ||
+      !trimmedAddressLine1 ||
+      !trimmedCity ||
+      !trimmedState ||
+      !trimmedPostalCode
+    ) {
+      return NextResponse.json(
+        { error: "Please fill all required fields." },
+        { status: 400 }
+      );
+    }
+
+    // Validate Indian phone number (10 digits starting with 6, 7, 8, or 9)
+    const phoneValidation = normalizeIndianMobile(trimmedPhone);
+    if (!phoneValidation.isValid || !phoneValidation.digits) {
+      return NextResponse.json(
+        { error: phoneValidation.error || "Please enter a valid 10-digit Indian phone number." },
+        { status: 400 }
+      );
+    }
+
+    // Validate postal code (exactly 6 digits)
+    if (!/^\d{6}$/.test(trimmedPostalCode)) {
+      return NextResponse.json(
+        { error: "Please enter a valid 6-digit PIN code." },
+        { status: 400 }
+      );
     }
 
     let makeDefault = isDefault ?? false;
@@ -70,16 +105,16 @@ export async function POST(request: Request) {
     const address = await prisma.address.create({
       data: {
         userId: session.user.id,
-        label: label || "HOME",
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        addressLine1: addressLine1.trim(),
-        addressLine2: addressLine2?.trim() || null,
-        landmark: landmark?.trim() || null,
-        city: city.trim(),
-        state: state.trim(),
-        postalCode: postalCode.trim(),
-        country: country || "India",
+        label: typeof label === "string" && label.trim() ? label.trim().toUpperCase() : "HOME",
+        fullName: trimmedFullName,
+        phone: phoneValidation.digits,
+        addressLine1: trimmedAddressLine1,
+        addressLine2: typeof addressLine2 === "string" && addressLine2.trim() ? addressLine2.trim() : null,
+        landmark: typeof landmark === "string" && landmark.trim() ? landmark.trim() : null,
+        city: trimmedCity,
+        state: trimmedState,
+        postalCode: trimmedPostalCode,
+        country: typeof country === "string" && country.trim() ? country.trim() : "India",
         isDefault: makeDefault,
       },
     });
@@ -87,6 +122,9 @@ export async function POST(request: Request) {
     return NextResponse.json(address, { status: 201 });
   } catch (error) {
     console.error("Create address error:", error);
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong. Please try again." },
+      { status: 500 }
+    );
   }
 }

@@ -56,12 +56,31 @@ export function Footer() {
                   <span className="font-mono font-medium text-white group-hover:text-brand-gold group-hover:underline">@KNOOSSHOES</span>
                 </a>
 
-                {/* 
-                  Facebook link: Currently omitted per project requirement:
-                  "DO NOT invent one. DO NOT link to facebook.com generically. DO NOT use '#'. Report: FACEBOOK PROFILE URL REQUIRED"
-                  When official profile is provided by client, enable here:
-                  <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="KNOOS Facebook" className="...">...</a>
-                */}
+                {process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() && (
+                  <a
+                    href={process.env.NEXT_PUBLIC_FACEBOOK_URL.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="KNOOS Facebook"
+                    className="group inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-brand-blue group-hover:scale-110 group-hover:text-brand-gold transition-transform"
+                      aria-hidden="true"
+                    >
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                    <span className="font-mono font-medium text-white group-hover:text-brand-gold group-hover:underline">Facebook</span>
+                  </a>
+                )}
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { loginWithGoogle } from "@/lib/auth-actions";
 import AccountShell from "../AccountShell";
 
 interface OrderItem {
@@ -67,8 +68,7 @@ export default function OrdersPage() {
         const res = await fetch("/api/orders", { cache: "no-store" });
         if (!res.ok) {
           if (res.status === 401) {
-            // Middleware should catch this, but handle gracefully
-            setError("Please sign in to view your orders.");
+            await loginWithGoogle("/account/orders");
             return;
           }
           throw new Error("Failed to fetch orders");

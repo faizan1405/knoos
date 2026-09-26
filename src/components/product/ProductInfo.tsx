@@ -121,6 +121,28 @@ export function ProductInfo({ product, variants, colorSiblings = [] }: ProductIn
     }
   };
 
+  const handleBuyNow = async () => {
+    if (variants.length > 0 && !selectedVariantId) {
+      setError("Please select a size first.");
+      return;
+    }
+
+    if (selectedVariant && selectedVariant.stock <= 0) {
+      setError("Selected size is currently out of stock.");
+      return;
+    }
+
+    const buyNowVariantId = selectedVariantId || (variants[0]?.id ?? "");
+    const targetUrl = `/checkout?mode=buy-now&productId=${product.id}&variantId=${buyNowVariantId}&quantity=${quantity}`;
+
+    if (!user) {
+      await loginWithGoogle(targetUrl);
+      return;
+    }
+
+    router.push(targetUrl);
+  };
+
   const handleVariantSelect = (id: string) => {
     setSelectedVariantId(id);
     setQuantity(1);
@@ -252,24 +274,44 @@ export function ProductInfo({ product, variants, colorSiblings = [] }: ProductIn
       {error && <motion.p variants={itemVariants} className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">{error}</motion.p>}
       {success && <motion.p variants={itemVariants} className="mb-4 text-sm text-green-800 bg-green-50 border border-green-200 p-3 rounded-lg font-medium">Added to cart successfully!</motion.p>}
 
-      <motion.button
-        variants={itemVariants}
-        onClick={handleAddToCart}
-        disabled={variants.length > 0 && !selectedVariantId || loading || (selectedVariantId && stockAvailable <= 0) || authLoading}
-        className={`
-          w-full py-4 font-mono text-sm uppercase tracking-widest transition-all duration-300 rounded-lg
-          ${(variants.length > 0 && !selectedVariantId) || loading || (selectedVariantId && stockAvailable <= 0) || authLoading
-            ? "bg-brand-gray-100 text-brand-gray-400 cursor-not-allowed border border-brand-gray-200" 
-            : "bg-brand-navy text-white hover:bg-brand-blue hover:shadow-xl transform hover:-translate-y-0.5 shadow-md"}
-        `}
-      >
-        {authLoading ? "Loading..." :
-         loading ? "Adding..." :
-         variants.length > 0 && !selectedVariantId ? "Select a Size" :
-         selectedVariantId && stockAvailable <= 0 ? "Unavailable" :
-         !user ? "Sign in to Add" :
-         "Add to Cart"}
-      </motion.button>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <motion.button
+          variants={itemVariants}
+          onClick={handleAddToCart}
+          disabled={variants.length > 0 && !selectedVariantId || loading || (selectedVariantId && stockAvailable <= 0) || authLoading}
+          className={`
+            flex-1 py-4 font-mono text-sm uppercase tracking-widest transition-all duration-300 rounded-lg border
+            ${(variants.length > 0 && !selectedVariantId) || loading || (selectedVariantId && stockAvailable <= 0) || authLoading
+              ? "bg-brand-gray-100 text-brand-gray-400 cursor-not-allowed border-brand-gray-200" 
+              : "border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white shadow-xs hover:shadow-sm"}
+          `}
+        >
+          {authLoading ? "Loading..." :
+           loading ? "Adding..." :
+           variants.length > 0 && !selectedVariantId ? "Select a Size" :
+           selectedVariantId && stockAvailable <= 0 ? "Unavailable" :
+           !user ? "Sign in to Add" :
+           "Add to Cart"}
+        </motion.button>
+
+        <motion.button
+          variants={itemVariants}
+          onClick={handleBuyNow}
+          disabled={variants.length > 0 && !selectedVariantId || (selectedVariantId && stockAvailable <= 0) || authLoading}
+          className={`
+            flex-1 py-4 font-mono text-sm uppercase tracking-widest transition-all duration-300 rounded-lg shadow-md
+            ${(variants.length > 0 && !selectedVariantId) || (selectedVariantId && stockAvailable <= 0) || authLoading
+              ? "bg-brand-gray-100 text-brand-gray-400 cursor-not-allowed border border-brand-gray-200" 
+              : "bg-brand-navy text-white hover:bg-brand-blue hover:shadow-xl transform hover:-translate-y-0.5"}
+          `}
+        >
+          {authLoading ? "Loading..." :
+           variants.length > 0 && !selectedVariantId ? "Select a Size" :
+           selectedVariantId && stockAvailable <= 0 ? "Unavailable" :
+           !user ? "Sign in to Buy" :
+           "Buy Now"}
+        </motion.button>
+      </div>
 
       <motion.div variants={itemVariants} className="mt-12 p-6 rounded-2xl bg-brand-sky/20 border border-brand-sky-border/30">
         <h3 className="font-serif text-xl mb-6 text-brand-dark">Specifications</h3>

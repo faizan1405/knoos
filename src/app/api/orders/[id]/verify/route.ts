@@ -37,8 +37,9 @@ export async function POST(
 
   // Already marked as PAID via webhook or previous call
   if (order.paymentStatus === "PAID") {
-    // We can clear cart here safely if not already cleared
-    await prisma.cart.deleteMany({ where: { userId: session.user.id } });
+    if (order.checkoutMode === "CART") {
+      await prisma.cart.deleteMany({ where: { userId: session.user.id } });
+    }
     return NextResponse.json({ success: true, orderId: order.id });
   }
 

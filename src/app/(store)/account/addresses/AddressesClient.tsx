@@ -47,11 +47,18 @@ export default function AddressesClient() {
   const fetchAddresses = useCallback(async () => {
     try {
       const res = await fetch("/api/addresses", { cache: "no-store" });
-      if (res.ok) {
-        setAddresses(await res.json());
+      if (res.status === 401) {
+        setMessage({ type: "error", text: "Please sign in to view and manage your addresses." });
+        return;
       }
+      if (!res.ok) {
+        setMessage({ type: "error", text: "Unable to load addresses right now. Please refresh or try again later." });
+        return;
+      }
+      const data = await res.json();
+      setAddresses(data);
     } catch {
-      // silent
+      setMessage({ type: "error", text: "Unable to load addresses right now. Please refresh or try again later." });
     } finally {
       setLoading(false);
     }
@@ -100,7 +107,7 @@ export default function AddressesClient() {
 
       const data = await res.json();
       if (!res.ok) {
-        setMessage({ type: "error", text: data.error || "Something went wrong." });
+        setMessage({ type: "error", text: data.error || "Failed to save address." });
         return;
       }
 
@@ -119,6 +126,7 @@ export default function AddressesClient() {
 
   const handleDelete = async (id: string) => {
     setSaving(true);
+    setMessage(null);
     try {
       const res = await fetch(`/api/addresses/${id}`, { method: "DELETE" });
       const data = await res.json();
@@ -137,16 +145,22 @@ export default function AddressesClient() {
   };
 
   const handleSetDefault = async (id: string) => {
+    setMessage(null);
     try {
-      await fetch(`/api/addresses/${id}`, {
+      const res = await fetch(`/api/addresses/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isDefault: true }),
       });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setMessage({ type: "error", text: data?.error || "Failed to set default address." });
+        return;
+      }
       await fetchAddresses();
       setMessage({ type: "success", text: "Default address updated." });
     } catch {
-      // silent
+      setMessage({ type: "error", text: "Unable to update default address. Please try again." });
     }
   };
 

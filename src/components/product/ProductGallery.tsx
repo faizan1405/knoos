@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect, useRef, MouseEvent } from "react";
 import { ProductImage } from "@prisma/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 interface ProductGalleryProps {
   images: ProductImage[];
@@ -110,10 +110,11 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                     : "border-brand-sky-border/40 opacity-60 hover:opacity-100 hover:border-brand-blue/50"
                 }`}
               >
-                <Image
+                <FallbackImage
                   src={image.imageUrl}
                   alt={`${productName} thumbnail ${index + 1}`}
                   fill
+                  fallbackType="product"
                   sizes="(max-width: 768px) 80px, 128px"
                   className="object-contain p-2"
                 />
@@ -138,11 +139,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   setIsLightboxOpen(true);
                 }}
               >
-                <Image
+                <FallbackImage
                   src={image.imageUrl}
                   alt={`${productName} view ${index + 1}`}
                   fill
                   priority={index === 0}
+                  fallbackType="product"
                   sizes="100vw"
                   className="object-contain"
                 />
@@ -194,11 +196,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="absolute inset-0 p-4 md:p-8"
             >
-              <Image
+              <FallbackImage
                 src={activeImage.imageUrl}
                 alt={productName}
                 fill
                 priority
+                fallbackType="product"
                 sizes="60vw"
                 className="object-contain"
               />
@@ -215,10 +218,11 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   transform: "scale(2.2)",
                 }}
               >
-                <Image
+                <FallbackImage
                   src={activeImage.imageUrl}
                   alt={productName}
                   fill
+                  fallbackType="product"
                   sizes="60vw"
                   className="object-contain p-8"
                 />
@@ -296,10 +300,11 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   transition={{ duration: 0.3 }}
                   className="absolute inset-0"
                 >
-                  <Image
+                  <FallbackImage
                     src={activeImage.imageUrl}
                     alt={productName}
                     fill
+                    fallbackType="product"
                     sizes="100vw"
                     className="object-contain"
                   />
@@ -323,10 +328,11 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                           : "border-2 border-transparent opacity-40 hover:opacity-100"
                       }`}
                     >
-                      <Image
+                      <FallbackImage
                         src={image.imageUrl}
                         alt={`Thumbnail ${index + 1}`}
                         fill
+                        fallbackType="product"
                         sizes="64px"
                         className="object-cover"
                       />

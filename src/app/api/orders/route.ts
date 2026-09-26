@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { deliveryMethod, addressId, couponCode } = body;
+  const { mode, deliveryMethod, addressId, couponCode, productId, variantId, quantity: rawQuantity } = body;
 
   if (!Object.values(DeliveryMethod).includes(deliveryMethod) || !addressId) {
     return NextResponse.json({ error: "deliveryMethod and addressId are required" }, { status: 400 });
@@ -39,15 +39,6 @@ export async function POST(request: Request) {
 
   if (couponCode !== undefined && couponCode !== null && typeof couponCode !== "string") {
     return NextResponse.json({ error: "Invalid coupon code" }, { status: 400 });
-  }
-
-  const cart = await prisma.cart.findUnique({
-    where: { userId: session.user.id },
-    include: { items: { include: { product: true, variant: true } } },
-  });
-
-  if (!cart || cart.items.length === 0) {
-    return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
   }
 
   const address = await prisma.address.findFirst({
@@ -58,28 +49,119 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Address not found" }, { status: 404 });
   }
 
-  for (const item of cart.items) {
-    if (!item.product || item.product.status !== "ACTIVE") {
-      return NextResponse.json({ error: `Product ${item.product.name} is no longer available.` }, { status: 400 });
-    }
-    if (!item.variant || item.variant.productId !== item.product.id) {
-      return NextResponse.json({ error: `Invalid variant for ${item.product.name}.` }, { status: 400 });
-    }
-    if (item.variant.stock < item.quantity) {
+  const isBuyNow = mode === "BUY_NOW";
+  let subtotal = 0;
+  let itemsToCreate: Array<{
+    productId: string;
+    productName: string;
+    size: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }> = [];
+
+  if (isBuyNow) {
+    if (!productId || !variantId) {
       return NextResponse.json(
-        { error: `Insufficient stock for ${item.product.name} (size ${item.variant.size}). Please review your cart.` },
+        { error: "productId and variantId are required for Buy Now mode." },
         { status: 400 }
       );
     }
-    if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-       return NextResponse.json({ error: `Invalid quantity for ${item.product.name}.` }, { status: 400 });
-    }
-  }
 
-  const subtotal = cart.items.reduce((sum, item) => {
-    const price = getEffectiveSellingPrice(item.product, item.variant);
-    return sum + price * item.quantity;
-  }, 0);
+    const qty = rawQuantity ? parseInt(rawQuantity, 10) : 1;
+    if (isNaN(qty) || qty < 1) {
+      return NextResponse.json({ error: "Invalid quantity specified." }, { status: 400 });
+    }
+
+    // Server-authoritative reload of Product and Variant
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product || product.status !== "ACTIVE") {
+      return NextResponse.json(
+        { error: "Product is no longer available." },
+        { status: 400 }
+      );
+    }
+
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: variantId },
+    });
+
+    if (!variant || variant.productId !== product.id) {
+      return NextResponse.json(
+        { error: `Invalid variant for ${product.name}.` },
+        { status: 400 }
+      );
+    }
+
+    if (variant.stock < qty) {
+      return NextResponse.json(
+        { error: `Insufficient stock for ${product.name} (size ${variant.size}).` },
+        { status: 400 }
+      );
+    }
+
+    const unitPrice = getEffectiveSellingPrice(product, variant);
+    subtotal = unitPrice * qty;
+
+    itemsToCreate = [
+      {
+        productId: product.id,
+        productName: product.name,
+        size: variant.size,
+        quantity: qty,
+        price: unitPrice,
+        total: subtotal,
+      },
+    ];
+  } else {
+    // CART Mode: Authoritative load and validation of user's active cart
+    const cart = await prisma.cart.findUnique({
+      where: { userId: session.user.id },
+      include: { items: { include: { product: true, variant: true } } },
+    });
+
+    if (!cart || cart.items.length === 0) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+
+    for (const item of cart.items) {
+      if (!item.product || item.product.status !== "ACTIVE") {
+        return NextResponse.json({ error: `Product ${item.product.name} is no longer available.` }, { status: 400 });
+      }
+      if (!item.variant || item.variant.productId !== item.product.id) {
+        return NextResponse.json({ error: `Invalid variant for ${item.product.name}.` }, { status: 400 });
+      }
+      if (item.variant.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for ${item.product.name} (size ${item.variant.size}). Please review your cart.` },
+          { status: 400 }
+        );
+      }
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+         return NextResponse.json({ error: `Invalid quantity for ${item.product.name}.` }, { status: 400 });
+      }
+    }
+
+    subtotal = cart.items.reduce((sum, item) => {
+      const price = getEffectiveSellingPrice(item.product, item.variant);
+      return sum + price * item.quantity;
+    }, 0);
+
+    itemsToCreate = cart.items.map((item) => {
+      const price = getEffectiveSellingPrice(item.product, item.variant);
+      return {
+        productId: item.productId,
+        productName: item.product.name,
+        size: item.variant.size,
+        quantity: item.quantity,
+        price,
+        total: price * item.quantity,
+      };
+    });
+  }
 
   try {
     const txResult = await prisma.$transaction(async (tx) => {
@@ -88,7 +170,6 @@ export async function POST(request: Request) {
 
       if (couponCode?.trim()) {
         try {
-          // validateCouponForSubtotal internally uses prisma but does not mutate
           couponApplication = await validateCouponForSubtotal(couponCode, subtotal);
         } catch (error) {
           if (error instanceof CouponValidationError) {
@@ -130,17 +211,11 @@ export async function POST(request: Request) {
           deliveryCharge,
           total,
           deliveryMethod,
+          checkoutMode: isBuyNow ? "BUY_NOW" : "CART",
           orderStatus: "PENDING",
           paymentStatus: "PENDING",
           items: {
-            create: cart.items.map((item) => ({
-              productId: item.productId,
-              productName: item.product.name,
-              size: item.variant.size,
-              quantity: item.quantity,
-              price: getEffectiveSellingPrice(item.product, item.variant),
-              total: getEffectiveSellingPrice(item.product, item.variant) * item.quantity,
-            })),
+            create: itemsToCreate,
           },
           address: {
             create: {
