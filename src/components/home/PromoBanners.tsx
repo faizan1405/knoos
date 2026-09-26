@@ -1,9 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ProductWithImages } from "@/lib/products";
 import { Reveal } from "@/components/motion/Reveal";
 import { RevealText } from "@/components/motion/RevealText";
 import { RevealImage } from "@/components/motion/RevealImage";
-import { FallbackImage } from "@/components/ui/FallbackImage";
 
 export interface BannerItem {
   id: string;
@@ -24,65 +24,55 @@ export type FeaturedProductBannerData = ProductWithImages & {
 
 interface PromoBannersProps {
   featuredProduct?: FeaturedProductBannerData | null;
-  bannerProducts?: (FeaturedProductBannerData | ProductWithImages)[] | null;
   customBanners?: BannerItem[];
 }
 
-export function PromoBanners({ featuredProduct, bannerProducts, customBanners }: PromoBannersProps) {
-  const p1 = bannerProducts && bannerProducts.length > 0 ? bannerProducts[0] : null;
-  const p2 =
-    bannerProducts && bannerProducts.length > 1
-      ? bannerProducts[1]
-      : featuredProduct && (!p1 || featuredProduct.id !== p1.id)
-      ? featuredProduct
-      : null;
+export function PromoBanners({ featuredProduct, customBanners }: PromoBannersProps) {
+  // Built-in banners referencing real routes and active product data or fallback assets
+  const defaultBanners: BannerItem[] = [
+    {
+      id: "new-arrivals-editorial",
+      badge: "NEW ARRIVALS",
+      title: "Crafted For Daily Movement",
+      description: "Ergonomic comfort, breathable construction, and timeless silhouettes made for everyday life.",
+      ctaText: "Explore New Arrivals",
+      href: "/search?sort=Newest",
+      imageSrc: "/images/process-footwear.jpg",
+      imageAlt: "KNOOS Handcrafted Footwear Process",
+      highlightTag: "New Season",
+    },
+    featuredProduct
+      ? {
+          id: `product-spotlight-${featuredProduct.id}`,
+          badge:
+            featuredProduct.categoryRel?.name?.toUpperCase() ||
+            (featuredProduct.gender === "MEN" ? "MEN'S SPOTLIGHT" : "WOMEN'S SPOTLIGHT"),
+          title: featuredProduct.name,
+          description:
+            featuredProduct.description ||
+            "Timeless design meets exceptional comfort and deliberate craftsmanship.",
+          ctaText: "View Product",
+          href: `/product/${featuredProduct.slug}`,
+          imageSrc: featuredProduct.images[0]?.imageUrl || "/images/men-category.jpg",
+          imageAlt: featuredProduct.name,
+          priceTag: featuredProduct.salePrice
+            ? `₹${featuredProduct.salePrice.toLocaleString("en-IN")}`
+            : `₹${featuredProduct.price.toLocaleString("en-IN")}`,
+          highlightTag: "Featured Shoe",
+        }
+      : {
+          id: "men-editorial",
+          badge: "SIGNATURE SERIES",
+          title: "The Men's Collection",
+          description: "From relaxed everyday slip-ons to refined lace-ups, constructed for enduring style.",
+          ctaText: "Shop Men's Collection",
+          href: "/men",
+          imageSrc: "/images/men-category.jpg",
+          imageAlt: "KNOOS Men's Collection",
+          highlightTag: "Curated",
+        },
+  ];
 
-  // Banner 1: New Arrivals editorial with real active product image when available
-  const banner1: BannerItem = {
-    id: p1 ? `editorial-arrival-${p1.id}` : "new-arrivals-editorial",
-    badge: "NEW ARRIVALS",
-    title: "Crafted For Daily Movement",
-    description: "Ergonomic comfort, breathable construction, and timeless silhouettes made for everyday life.",
-    ctaText: "Explore New Arrivals",
-    href: "/search?sort=Newest",
-    imageSrc: p1?.images[0]?.imageUrl || "",
-    imageAlt: p1?.name || "KNOOS Handcrafted Footwear",
-    highlightTag: "New Season",
-  };
-
-  // Banner 2: Featured spotlight product with another distinct real product image
-  const banner2: BannerItem = p2
-    ? {
-        id: `product-spotlight-${p2.id}`,
-        badge:
-          (p2 as any).categoryRel?.name?.toUpperCase() ||
-          (p2.gender === "MEN" ? "MEN'S SPOTLIGHT" : "WOMEN'S SPOTLIGHT"),
-        title: p2.name,
-        description:
-          p2.description ||
-          "Timeless design meets exceptional comfort and deliberate craftsmanship.",
-        ctaText: "View Product",
-        href: `/product/${p2.slug}`,
-        imageSrc: p2.images[0]?.imageUrl || "",
-        imageAlt: p2.name,
-        priceTag: p2.salePrice
-          ? `₹${p2.salePrice.toLocaleString("en-IN")}`
-          : `₹${p2.price.toLocaleString("en-IN")}`,
-        highlightTag: "Featured Shoe",
-      }
-    : {
-        id: "curated-editorial",
-        badge: "SIGNATURE SERIES",
-        title: "The Signature Collection",
-        description: "From relaxed everyday slip-ons to refined lace-ups, constructed for enduring style.",
-        ctaText: "Shop Collection",
-        href: "/search",
-        imageSrc: "",
-        imageAlt: "KNOOS Curated Collection",
-        highlightTag: "Curated",
-      };
-
-  const defaultBanners: BannerItem[] = [banner1, banner2];
   const banners = customBanners && customBanners.length > 0 ? customBanners : defaultBanners;
 
   return (
@@ -124,12 +114,11 @@ export function PromoBanners({ featuredProduct, bannerProducts, customBanners }:
                 href={banner.href}
                 className="group relative flex flex-col justify-end min-h-[380px] sm:min-h-[440px] md:min-h-[480px] rounded-2xl overflow-hidden bg-brand-navy border border-brand-navy-light/40 shadow-md hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2"
               >
-                {/* Responsive Next/Image with fallback */}
-                <FallbackImage
+                {/* Responsive Next/Image with proper sizing */}
+                <Image
                   src={banner.imageSrc}
                   alt={banner.imageAlt}
                   fill
-                  fallbackType="banner"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-80 group-hover:opacity-90"
                 />
