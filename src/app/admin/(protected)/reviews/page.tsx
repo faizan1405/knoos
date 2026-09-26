@@ -15,7 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
-import { FallbackImage } from "@/components/ui/FallbackImage";
+import Image from "next/image";
 import { format } from "date-fns";
 import type { AdminReview, ModerationStatus } from "@/lib/reviews";
 
@@ -284,10 +284,9 @@ export default function AdminReviewsPage() {
                               }
                               className="relative w-10 h-10 rounded-full overflow-hidden border border-brand-gray-200 shrink-0 hover:ring-2 hover:ring-brand-blue"
                             >
-                              <FallbackImage
+                              <Image
                                 src={review.customerPhotoUrl}
                                 alt={review.displayName}
-                                fallbackType="product"
                                 fill
                                 sizes="40px"
                                 className="object-cover"
@@ -295,10 +294,9 @@ export default function AdminReviewsPage() {
                             </button>
                           ) : review.user?.image ? (
                             <div className="relative w-10 h-10 rounded-full overflow-hidden border border-brand-gray-200 shrink-0">
-                              <FallbackImage
+                              <Image
                                 src={review.user.image}
                                 alt={review.displayName}
-                                fallbackType="product"
                                 fill
                                 sizes="40px"
                                 className="object-cover"
@@ -373,10 +371,9 @@ export default function AdminReviewsPage() {
                               className="relative w-9 h-9 rounded-lg border border-brand-gray-200 overflow-hidden hover:ring-2 hover:ring-brand-blue group/img"
                               title="Customer Photo"
                             >
-                              <FallbackImage
+                              <Image
                                 src={review.customerPhotoUrl}
                                 alt="Customer"
-                                fallbackType="product"
                                 fill
                                 sizes="36px"
                                 className="object-cover"
@@ -396,10 +393,9 @@ export default function AdminReviewsPage() {
                               className="relative w-9 h-9 rounded-lg border border-brand-gray-200 overflow-hidden hover:ring-2 hover:ring-brand-blue group/img"
                               title="Product Photo"
                             >
-                              <FallbackImage
+                              <Image
                                 src={review.productPhotoUrl}
                                 alt="Product Review"
-                                fallbackType="product"
                                 fill
                                 sizes="36px"
                                 className="object-cover"
@@ -576,10 +572,9 @@ export default function AdminReviewsPage() {
                           }
                           className="relative w-full h-44 rounded-lg overflow-hidden border border-brand-gray-100 hover:opacity-95"
                         >
-                          <FallbackImage
+                          <Image
                             src={selectedReview.customerPhotoUrl}
                             alt="Customer"
-                            fallbackType="product"
                             fill
                             sizes="(max-width: 640px) 100vw, 300px"
                             className="object-cover"
@@ -604,10 +599,9 @@ export default function AdminReviewsPage() {
                           }
                           className="relative w-full h-44 rounded-lg overflow-hidden border border-brand-gray-100 hover:opacity-95"
                         >
-                          <FallbackImage
+                          <Image
                             src={selectedReview.productPhotoUrl}
                             alt="Product Review"
-                            fallbackType="product"
                             fill
                             sizes="(max-width: 640px) 100vw, 300px"
                             className="object-cover"
@@ -720,10 +714,9 @@ export default function AdminReviewsPage() {
               </button>
             </div>
             <div className="relative w-full h-[65vh] rounded-xl overflow-hidden bg-black/50">
-              <FallbackImage
+              <Image
                 src={previewPhoto.url}
                 alt={previewPhoto.title}
-                fallbackType="product"
                 fill
                 sizes="(max-width: 1024px) 100vw, 800px"
                 className="object-contain"
