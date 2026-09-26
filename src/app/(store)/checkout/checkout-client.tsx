@@ -81,10 +81,23 @@ export function CheckoutClient() {
     setApplyingCoupon(true);
     setCouponError(null);
     try {
+      const payload = isBuyNow
+        ? {
+            code,
+            mode: "BUY_NOW",
+            productId: buyNowProductId,
+            variantId: buyNowVariantId,
+            quantity: buyNowQuantity,
+          }
+        : {
+            code,
+            mode: "CART",
+          };
+
       const response = await fetch("/api/coupons/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to apply coupon");
@@ -101,7 +114,7 @@ export function CheckoutClient() {
     } finally {
       setApplyingCoupon(false);
     }
-  }, []);
+  }, [isBuyNow, buyNowProductId, buyNowVariantId, buyNowQuantity]);
 
   const removeCoupon = () => {
     setCoupon(null);
@@ -286,12 +299,13 @@ export function CheckoutClient() {
             mode: "BUY_NOW",
             productId: buyNowProductId,
             variantId: buyNowVariantId,
-            quantity: parseInt(buyNowQuantity, 10) || 1,
+            quantity: buyNowQuantity,
             deliveryMethod,
             addressId: selectedAddressId,
             couponCode: coupon?.code,
           }
         : {
+            mode: "CART",
             deliveryMethod,
             addressId: selectedAddressId,
             couponCode: coupon?.code,

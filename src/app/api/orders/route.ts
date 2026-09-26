@@ -8,6 +8,7 @@ import { createRazorpayOrder } from "@/lib/razorpay";
 import { getEffectiveSellingPrice } from "@/lib/pricing";
 import { CouponValidationError, calculateFinalTotal } from "@/lib/coupon";
 import { validateCouponForSubtotal } from "@/lib/coupon-service";
+import { parsePositiveIntegerQuantity } from "@/lib/utils";
 
 export async function GET() {
   const session = await auth();
@@ -49,6 +50,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Address not found" }, { status: 404 });
   }
 
+  if (mode !== undefined && mode !== null && mode !== "CART" && mode !== "BUY_NOW") {
+    return NextResponse.json(
+      { error: "Invalid checkout mode", code: "INVALID_CHECKOUT_MODE" },
+      { status: 400 }
+    );
+  }
+
   const isBuyNow = mode === "BUY_NOW";
   let subtotal = 0;
   let itemsToCreate: Array<{
@@ -68,8 +76,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const qty = rawQuantity ? parseInt(rawQuantity, 10) : 1;
-    if (isNaN(qty) || qty < 1) {
+    const qty = parsePositiveIntegerQuantity(rawQuantity);
+    if (!qty) {
       return NextResponse.json({ error: "Invalid quantity specified." }, { status: 400 });
     }
 

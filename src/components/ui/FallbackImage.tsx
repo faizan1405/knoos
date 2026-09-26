@@ -3,6 +3,65 @@
 import { useState, useEffect } from "react";
 import Image, { ImageProps } from "next/image";
 
+export type ImageSourceClassification =
+  | { type: "local"; url: string }
+  | { type: "cloudinary"; url: string }
+  | { type: "legacy-remote"; url: string }
+  | { type: "invalid" };
+
+/**
+ * Classifies an image source string:
+ * - "local": relative or rooted path (e.g. /uploads/products/derby.jpg)
+ * - "cloudinary": approved CDN (https://res.cloudinary.com/...)
+ * - "legacy-remote": valid external HTTP/HTTPS URL from any other host
+ * - "invalid": empty, non-string, malformed, or unsafe schemes (javascript:, data:, file:)
+ */
+export function classifyImageSource(src: unknown): ImageSourceClassification {
+  if (typeof src !== "string") {
+    if (src && typeof src === "object" && "src" in src && typeof (src as any).src === "string") {
+      return classifyImageSource((src as any).src);
+    }
+    return { type: "invalid" };
+  }
+
+  const trimmed = src.trim();
+  if (!trimmed) {
+    return { type: "invalid" };
+  }
+
+  const lower = trimmed.toLowerCase();
+  // Reject dangerous schemes immediately
+  if (
+    lower.startsWith("javascript:") ||
+    lower.startsWith("data:") ||
+    lower.startsWith("file:") ||
+    lower.startsWith("vbscript:")
+  ) {
+    return { type: "invalid" };
+  }
+
+  // Local path: starts with "/" (but not protocol-relative "//")
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+    return { type: "local", url: trimmed };
+  }
+
+  // Parse as absolute URL
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { type: "invalid" };
+    }
+
+    if (parsed.hostname.toLowerCase() === "res.cloudinary.com") {
+      return { type: "cloudinary", url: trimmed };
+    }
+
+    return { type: "legacy-remote", url: trimmed };
+  } catch {
+    return { type: "invalid" };
+  }
+}
+
 interface FallbackImageProps extends Omit<ImageProps, "onError"> {
   fallbackType?: "product" | "banner";
   fallbackClassName?: string;
@@ -14,6 +73,9 @@ export function FallbackImage({
   className,
   fallbackType = "product",
   fallbackClassName,
+  priority,
+  fill,
+  sizes,
   ...props
 }: FallbackImageProps) {
   const [error, setError] = useState(false);
@@ -22,8 +84,10 @@ export function FallbackImage({
     setError(false);
   }, [src]);
 
-  // If no source or runtime load error occurred, render branded fallback
-  if (!src || error) {
+  const classification = classifyImageSource(src);
+
+  // If source is invalid or runtime load error occurred, render branded fallback
+  if (classification.type === "invalid" || error) {
     if (fallbackType === "banner") {
       return (
         <div
@@ -80,11 +144,46 @@ export function FallbackImage({
     );
   }
 
+  // Legacy remote image from external hostname (e.g. old Hostinger URLs):
+  // Render via normal <img> to avoid Next/Image domain validation error throwing
+  if (classification.type === "legacy-remote") {
+    const imgStyle: React.CSSProperties = fill
+      ? {
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+          inset: 0,
+          objectFit: (props.style?.objectFit as any) || "cover",
+          ...props.style,
+        }
+      : { ...props.style };
+
+    return (
+      /* eslint-disable-next-line @next/next/no-img-element */
+      <img
+        src={classification.url}
+        alt={alt}
+        className={className}
+        width={props.width as number | undefined}
+        height={props.height as number | undefined}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onError={() => setError(true)}
+        style={imgStyle}
+      />
+    );
+  }
+
+  // Local or Cloudinary images: use Next/Image with optimization
   return (
     <Image
-      src={src}
+      src={classification.url}
       alt={alt}
       className={className}
+      priority={priority}
+      fill={fill}
+      sizes={sizes}
       onError={() => setError(true)}
       {...props}
     />

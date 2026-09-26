@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getEffectiveSellingPrice } from "@/lib/pricing";
+import { parsePositiveIntegerQuantity } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -21,8 +22,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const quantity = rawQuantity ? parseInt(rawQuantity, 10) : 1;
-  if (isNaN(quantity) || quantity < 1) {
+  const quantity = rawQuantity === null ? 1 : parsePositiveIntegerQuantity(rawQuantity);
+  if (!quantity) {
     return NextResponse.json(
       { error: "Invalid quantity specified." },
       { status: 400 }
