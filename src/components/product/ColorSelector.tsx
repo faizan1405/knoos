@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { getColorSwatch } from "@/lib/colors";
-import { FallbackImage } from "@/components/ui/FallbackImage";
 
 export interface ColorSibling {
   id: string;
@@ -108,13 +108,12 @@ export function ColorSelector({
               {/* Optional tiny product thumbnail */}
               {firstImage ? (
                 <div className="relative w-8 h-8 rounded-md overflow-hidden bg-brand-sky/20 flex-shrink-0 border border-brand-sky-border/40">
-                  <FallbackImage
+                  <Image
                     src={firstImage}
                     alt={sibling.name || swatch.label}
                     fill
                     sizes="32px"
                     className="object-contain p-0.5"
-                    fallbackType="product"
                   />
                 </div>
               ) : null}
