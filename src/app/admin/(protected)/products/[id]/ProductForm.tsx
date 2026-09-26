@@ -717,9 +717,9 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
             <div className="grid grid-cols-4 gap-3 mb-4">
               {images.map((img, index) => {
                 const isLegacyImage =
-                  img.imageUrl.includes("/uploads/products/") ||
-                  img.imageUrl.includes("hostinger") ||
-                  img.imageUrl.startsWith("/uploads/");
+                  img.imageUrl.startsWith("/uploads/") ||
+                  img.imageUrl.startsWith("http://") ||
+                  img.imageUrl.startsWith("https://");
 
                 return (
                   <div key={img.id ?? index} className="relative group border border-brand-gray-100 rounded-lg p-1.5 bg-brand-gray-50/50">

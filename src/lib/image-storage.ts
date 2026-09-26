@@ -1,4 +1,9 @@
 import crypto from "node:crypto";
+import { mkdir, writeFile, access } from "node:fs/promises";
+import { constants } from "node:fs";
+import path from "node:path";
+
+// ─── Configuration ────────────────────────────────────────────────────────────
 
 export const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 export const ALLOWED_IMAGE_TYPES = new Set([
@@ -8,33 +13,55 @@ export const ALLOWED_IMAGE_TYPES = new Set([
   "image/webp",
 ]);
 
-export interface CloudinaryConfig {
-  cloudName: string;
-  apiKey: string;
-  apiSecret: string;
-}
+// Extension mapping: MIME type → safe lowercase extension
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+};
 
-export function getCloudinaryConfig(): CloudinaryConfig | null {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
-  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
-  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
+// ─── Storage Root Resolution ──────────────────────────────────────────────────
 
-  if (!cloudName || !apiKey || !apiSecret) {
-    return null;
+/**
+ * Resolve the Hostinger persistent storage root.
+ *
+ * Priority:
+ *  1. HOSTINGER_UPLOAD_ROOT environment variable
+ *  2. $HOME/knoos-storage (only when HOME is set)
+ *
+ * Returns null when no usable storage root is available.
+ * Never falls back to public/uploads or any deployment-managed directory.
+ */
+export function getHostingerUploadRoot(): string | null {
+  const configured = process.env.HOSTINGER_UPLOAD_ROOT?.trim();
+  if (configured) {
+    return configured;
   }
 
-  return { cloudName, apiKey, apiSecret };
+  const home = process.env.HOME?.trim();
+  if (home) {
+    return path.join(home, "knoos-storage");
+  }
+
+  return null;
 }
 
-export function isCloudinaryConfigured(): boolean {
-  return getCloudinaryConfig() !== null;
+export function getProductUploadDirectory(): string | null {
+  const root = getHostingerUploadRoot();
+  if (!root) return null;
+  return path.join(root, "products");
 }
 
-export function validateImageFile(file: { size: number; type: string }): {
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+export interface ImageValidationResult {
   valid: boolean;
   error?: string;
   code?: string;
-} {
+}
+
+export function validateImageFile(file: { size: number; type: string }): ImageValidationResult {
   const normalizedType = file.type.toLowerCase().trim();
   if (!ALLOWED_IMAGE_TYPES.has(normalizedType)) {
     return {
@@ -55,49 +82,117 @@ export function validateImageFile(file: { size: number; type: string }): {
   return { valid: true };
 }
 
-export function generateSafePublicId(originalFileName: string): string {
-  const sanitized = originalFileName
-    .replace(/\.[^/.]+$/, "") // strip extension
-    .replace(/[^a-zA-Z0-9_-]/g, "_")
-    .replace(/_+/g, "_")
-    .slice(0, 50);
+// ─── Filename Generation ──────────────────────────────────────────────────────
+
+/**
+ * Generate a safe, unique filename for a product image.
+ *
+ * Format: {timestamp}-{slugified-original-name}-{random-hex}{ext}
+ * All special characters are stripped. The result contains only [a-zA-Z0-9._-].
+ */
+export function generateSafeFilename(originalFileName: string): string {
+  // Strip extension first
+  const lastDot = originalFileName.lastIndexOf(".");
+  const baseName = lastDot >= 0 ? originalFileName.slice(0, lastDot) : originalFileName;
+  const rawExt = lastDot >= 0 ? originalFileName.slice(lastDot) : "";
+
+  // Determine safe extension from MIME-aware source, default to original lowercase ext
+  const ext = rawExt.toLowerCase().replace(/[^a-z0-9.]/g, "") || ".bin";
+
+  // Sanitize base name: only alphanumeric, dash, underscore
+  const sanitized = baseName.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").slice(0, 50);
 
   const timestamp = Date.now();
   const randomSuffix = crypto.randomBytes(4).toString("hex");
-  return sanitized ? `${timestamp}_${sanitized}_${randomSuffix}` : `${timestamp}_${randomSuffix}`;
+
+  if (sanitized) {
+    return `${timestamp}-${sanitized}-${randomSuffix}${ext}`;
+  }
+  return `${timestamp}-${randomSuffix}${ext}`;
 }
 
-export function generateCloudinarySignature(
-  params: Record<string, string | number>,
-  apiSecret: string
-): string {
-  // Sort parameters alphabetically by key
-  const sortedKeys = Object.keys(params).sort();
-  const serialized = sortedKeys.map((key) => `${key}=${params[key]}`).join("&");
-  const stringToSign = `${serialized}${apiSecret}`;
+// ─── Path Safety ──────────────────────────────────────────────────────────────
 
-  return crypto.createHash("sha1").update(stringToSign).digest("hex");
+/**
+ * Reject any filename containing path traversal or encoded traversal characters.
+ */
+export function isSafeFilename(filename: string): boolean {
+  if (!filename || typeof filename !== "string") return false;
+
+  // Reject null bytes (literal and URL-encoded)
+  if (filename.includes("\0") || filename.includes("%00")) return false;
+
+  // Reject path separators (literal and URL-encoded)
+  if (filename.includes("/") || filename.includes("\\")) return false;
+  if (filename.includes("%2f") || filename.includes("%5c") || filename.includes("%2F") || filename.includes("%5C")) return false;
+
+  // Reject parent directory references (literal and URL-encoded)
+  if (filename.includes("..")) return false;
+  if (filename.toLowerCase().includes("%2e%2e")) return false;
+
+  // Reject backtick, shell metacharacters
+  if (/[`$&|;<>]/.test(filename)) return false;
+
+  // Must have a safe extension
+  const ext = path.extname(filename).toLowerCase();
+  if (!ext || ![...ALLOWED_IMAGE_TYPES].some((t) => MIME_TO_EXT[t] === ext)) return false;
+
+  return true;
 }
 
-export type ImageUploadResult =
-  | { success: true; url: string; publicId: string }
-  | { success: false; error: string; code: string };
+/**
+ * Resolve a product image path and verify it stays inside the product directory.
+ * Returns the absolute path on success, null on failure.
+ */
+export function resolveProductImagePath(filename: string): string | null {
+  if (!isSafeFilename(filename)) return null;
 
-export async function uploadProductImage(file: {
+  const productDir = getProductUploadDirectory();
+  if (!productDir) return null;
+
+  const resolved = path.resolve(productDir, filename);
+
+  // Ensure resolved path is inside product directory
+  if (!resolved.startsWith(productDir + path.sep) && resolved !== productDir) {
+    return null;
+  }
+
+  return resolved;
+}
+
+// ─── Storage Operations ───────────────────────────────────────────────────────
+
+export interface SaveResult {
+  success: true;
+  url: string;
+  filename: string;
+}
+
+export interface SaveError {
+  success: false;
+  error: string;
+  code: string;
+}
+
+export type ImageStorageResult = SaveResult | SaveError;
+
+/**
+ * Save a product image to Hostinger persistent storage.
+ *
+ * - Creates storage directory recursively if missing
+ * - Validates file type and size
+ * - Generates a unique, safe filename
+ * - Writes atomically via writeFile
+ *
+ * Returns the public URL (/media/products/...) on success.
+ */
+export async function saveProductImage(file: {
   arrayBuffer: () => Promise<ArrayBuffer>;
   name: string;
   size: number;
   type: string;
-}): Promise<ImageUploadResult> {
-  const config = getCloudinaryConfig();
-  if (!config) {
-    return {
-      success: false,
-      error: "Permanent image storage is not configured yet.",
-      code: "IMAGE_STORAGE_NOT_CONFIGURED",
-    };
-  }
-
+}): Promise<ImageStorageResult> {
+  // Validate file
   const validation = validateImageFile(file);
   if (!validation.valid) {
     return {
@@ -107,58 +202,97 @@ export async function uploadProductImage(file: {
     };
   }
 
-  const folder = "knoos/products";
-  const publicId = generateSafePublicId(file.name || "product_image");
-  const timestamp = Math.floor(Date.now() / 1000);
-
-  const signatureParams: Record<string, string | number> = {
-    folder,
-    public_id: publicId,
-    timestamp,
-  };
-
-  const signature = generateCloudinarySignature(signatureParams, config.apiSecret);
-
-  try {
-    const fileBytes = await file.arrayBuffer();
-    const blob = new Blob([fileBytes], { type: file.type });
-
-    const formData = new FormData();
-    formData.append("file", blob, file.name || "image");
-    formData.append("api_key", config.apiKey);
-    formData.append("timestamp", timestamp.toString());
-    formData.append("folder", folder);
-    formData.append("public_id", publicId);
-    formData.append("signature", signature);
-
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`;
-    const response = await fetch(uploadUrl, {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok || !data?.secure_url) {
-      console.error("[CLOUDINARY_UPLOAD_ERROR]", data);
-      return {
-        success: false,
-        error: data?.error?.message || "Failed to upload image to durable storage.",
-        code: "UPLOAD_FAILED",
-      };
-    }
-
-    return {
-      success: true,
-      url: data.secure_url,
-      publicId: data.public_id || publicId,
-    };
-  } catch (error) {
-    console.error("[CLOUDINARY_NETWORK_ERROR]", error);
+  // Check storage configuration
+  const productDir = getProductUploadDirectory();
+  if (!productDir) {
     return {
       success: false,
-      error: "Network error while uploading image to storage.",
-      code: "NETWORK_ERROR",
+      error: "Persistent Hostinger image storage is not available.",
+      code: "HOSTINGER_STORAGE_NOT_AVAILABLE",
     };
+  }
+
+  // Create storage directory
+  try {
+    await mkdir(productDir, { recursive: true });
+  } catch (err) {
+    console.error("[IMAGE_STORAGE_MKDIR_ERROR]", err);
+    return {
+      success: false,
+      error: "Failed to create storage directory.",
+      code: "STORAGE_MKDIR_FAILED",
+    };
+  }
+
+  // Verify directory is writable
+  try {
+    await access(productDir, constants.W_OK);
+  } catch {
+    return {
+      success: false,
+      error: "Storage directory is not writable.",
+      code: "STORAGE_NOT_WRITABLE",
+    };
+  }
+
+  // Generate safe filename
+  const filename = generateSafeFilename(file.name || "product_image");
+
+  // Double-check the filename is safe (belt-and-suspenders)
+  if (!isSafeFilename(filename)) {
+    return {
+      success: false,
+      error: "Generated filename failed safety check.",
+      code: "UNSAFE_FILENAME",
+    };
+  }
+
+  // Resolve and verify final path stays inside product directory
+  const filePath = path.resolve(productDir, filename);
+  if (!filePath.startsWith(productDir + path.sep)) {
+    return {
+      success: false,
+      error: "Path traversal detected.",
+      code: "PATH_TRAVERSAL",
+    };
+  }
+
+  // Write file
+  try {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    await writeFile(filePath, buffer, { flag: "wx" });
+  } catch (err) {
+    console.error("[IMAGE_STORAGE_WRITE_ERROR]", err);
+    return {
+      success: false,
+      error: "Failed to write image to storage.",
+      code: "STORAGE_WRITE_FAILED",
+    };
+  }
+
+  // Return stable public URL
+  const url = `/media/products/${filename}`;
+
+  return {
+    success: true,
+    url,
+    filename,
+  };
+}
+
+/**
+ * Get the absolute filesystem path for a product image by filename.
+ * Returns null if the filename is unsafe or the file doesn't exist inside the product directory.
+ */
+export async function getProductImagePath(filename: string): Promise<string | null> {
+  const resolved = resolveProductImagePath(filename);
+  if (!resolved) return null;
+
+  try {
+    await access(resolved, constants.R_OK);
+    return resolved;
+  } catch {
+    return null;
   }
 }

@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { classifyImageSource } from "../src/components/ui/FallbackImage";
 
 describe("Legacy Image Classification & Fallback Architecture (Section 5 - 7)", () => {
-  it("Cloudinary URL classified as optimized remote", () => {
+  it("Cloudinary URL classified as legacy-remote", () => {
     const cloudinaryUrl = "https://res.cloudinary.com/knoos/image/upload/v1720000000/products/derby.webp";
     const res = classifyImageSource(cloudinaryUrl);
-    assert.strictEqual(res.type, "cloudinary");
-    if (res.type === "cloudinary") {
+    assert.strictEqual(res.type, "legacy-remote");
+    if (res.type === "legacy-remote") {
       assert.strictEqual(res.url, cloudinaryUrl);
     }
   });

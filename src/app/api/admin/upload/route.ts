@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import { NextResponse } from "next/server";
-import { uploadProductImage, validateImageFile } from "@/lib/image-storage";
+import { validateImageFile, saveProductImage } from "@/lib/image-storage";
 
 export async function POST(request: Request) {
   const adminResult = await requireAdmin();
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Pre-validate before attempting upload
+    // Validate file type and size
     const validation = validateImageFile(file);
     if (!validation.valid) {
       return NextResponse.json(
@@ -26,18 +26,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploadResult = await uploadProductImage(file);
-    if (!uploadResult.success) {
-      const status = uploadResult.code === "IMAGE_STORAGE_NOT_CONFIGURED" ? 503 : 400;
+    // Upload to Hostinger persistent storage
+    const result = await saveProductImage({
+      arrayBuffer: () => file.arrayBuffer(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+    });
+
+    if (!result.success) {
+      const status = result.code === "HOSTINGER_STORAGE_NOT_AVAILABLE" ? 503 : 400;
       return NextResponse.json(
-        { error: uploadResult.error, code: uploadResult.code },
+        { error: result.error, code: result.code },
         { status }
       );
     }
 
     return NextResponse.json({
-      url: uploadResult.url,
-      filename: uploadResult.publicId,
+      url: result.url,
+      filename: result.filename,
     });
   } catch (err) {
     console.error("Upload error:", err);

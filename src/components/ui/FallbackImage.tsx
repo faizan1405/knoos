@@ -5,16 +5,14 @@ import Image, { ImageProps } from "next/image";
 
 export type ImageSourceClassification =
   | { type: "local"; url: string }
-  | { type: "cloudinary"; url: string }
   | { type: "legacy-remote"; url: string }
   | { type: "invalid" };
 
 /**
  * Classifies an image source string:
- * - "local": relative or rooted path (e.g. /uploads/products/derby.jpg)
- * - "cloudinary": approved CDN (https://res.cloudinary.com/...)
- * - "legacy-remote": valid external HTTP/HTTPS URL from any other host
- * - "invalid": empty, non-string, malformed, or unsafe schemes (javascript:, data:, file:)
+ * - "local": relative path starting with "/" (e.g. /media/products/abc.jpg, /images/..., /uploads/...)
+ * - "legacy-remote": valid external HTTP/HTTPS URL from any host
+ * - "invalid": empty, non-string, malformed, or unsafe schemes (javascript:, data:, file:, vbscript:)
  */
 export function classifyImageSource(src: unknown): ImageSourceClassification {
   if (typeof src !== "string") {
@@ -30,7 +28,6 @@ export function classifyImageSource(src: unknown): ImageSourceClassification {
   }
 
   const lower = trimmed.toLowerCase();
-  // Reject dangerous schemes immediately
   if (
     lower.startsWith("javascript:") ||
     lower.startsWith("data:") ||
@@ -51,11 +48,6 @@ export function classifyImageSource(src: unknown): ImageSourceClassification {
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return { type: "invalid" };
     }
-
-    if (parsed.hostname.toLowerCase() === "res.cloudinary.com") {
-      return { type: "cloudinary", url: trimmed };
-    }
-
     return { type: "legacy-remote", url: trimmed };
   } catch {
     return { type: "invalid" };
@@ -86,7 +78,6 @@ export function FallbackImage({
 
   const classification = classifyImageSource(src);
 
-  // If source is invalid or runtime load error occurred, render branded fallback
   if (classification.type === "invalid" || error) {
     if (fallbackType === "banner") {
       return (
@@ -94,10 +85,9 @@ export function FallbackImage({
           className={`absolute inset-0 w-full h-full bg-gradient-to-br from-brand-navy via-[#1e293b] to-brand-navy-dark flex items-center justify-center overflow-hidden ${fallbackClassName || ""}`}
           aria-label={alt}
         >
-          {/* Subtle Decorative Geometric Accents */}
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-blue/10 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-brand-gold/10 blur-3xl pointer-events-none" />
-          
+
           <div className="relative z-0 opacity-15 flex flex-col items-center select-none pointer-events-none">
             <svg
               className="w-36 h-36 text-white"
@@ -118,7 +108,6 @@ export function FallbackImage({
       );
     }
 
-    // Default product fallback
     return (
       <div
         className={`w-full h-full bg-gradient-to-b from-brand-sky/30 to-brand-sky/10 flex flex-col items-center justify-center p-4 select-none ${fallbackClassName || ""}`}
@@ -144,8 +133,7 @@ export function FallbackImage({
     );
   }
 
-  // Legacy remote image from external hostname (e.g. old Hostinger URLs):
-  // Render via normal <img> to avoid Next/Image domain validation error throwing
+  // Legacy remote image from external hostname: render via <img> to avoid Next/Image domain validation
   if (classification.type === "legacy-remote") {
     const imgStyle: React.CSSProperties = fill
       ? {
@@ -175,7 +163,7 @@ export function FallbackImage({
     );
   }
 
-  // Local or Cloudinary images: use Next/Image with optimization
+  // Local images (same-origin /media/products/... /uploads/...): Next/Image with optimization
   return (
     <Image
       src={classification.url}
