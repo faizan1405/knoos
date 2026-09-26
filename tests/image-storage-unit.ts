@@ -168,54 +168,100 @@ async function runTests() {
 
   console.log("\n[Filename Generation]");
   await test("strips special characters from filename", async () => {
-    const name = generateSafeFilename("My Product Photo! (1).jpg");
+    const name = generateSafeFilename("My Product Photo! (1).jpg", "image/jpeg");
     assertOk(!name.includes("!"), "Should strip exclamation marks");
     assertOk(!name.includes("("), "Should strip parentheses");
     assertOk(!name.includes(" "), "Should strip spaces");
+    assertOk(name.endsWith(".jpg"), "Extension should come from MIME, not user filename");
   });
 
   await test("preserves safe characters", async () => {
-    const name = generateSafeFilename("simple_product-name_123.jpg");
+    const name = generateSafeFilename("simple_product-name_123.jpg", "image/webp");
     assertOk(name.includes("simple"), "Should preserve letters");
     assertOk(name.includes("product"), "Should preserve letters");
     assertOk(name.includes("-"), "Should preserve dashes");
     assertOk(name.includes("_"), "Should preserve underscores");
+    assertOk(name.endsWith(".webp"), "Extension should come from MIME, not user filename");
   });
 
   await test("produces unique filenames for same input", async () => {
     const names = new Set<string>();
     for (let i = 0; i < 10; i++) {
-      names.add(generateSafeFilename("same.jpg"));
+      names.add(generateSafeFilename("same.jpg", "image/jpeg"));
     }
     assertEqual(names.size, 10, "All generated names should be unique");
   });
 
   await test("starts with timestamp", async () => {
     const before = Date.now();
-    const name = generateSafeFilename("test.jpg");
+    const name = generateSafeFilename("test.jpg", "image/png");
     const after = Date.now();
     const timestamp = Number.parseInt(name.split("-")[0]!, 10);
     assertOk(timestamp >= before, "Timestamp should be >= creation time");
     assertOk(timestamp <= after, "Timestamp should be <= creation time");
+    assertOk(name.endsWith(".png"), "Extension should come from MIME");
   });
 
   await test("handles empty original filename", async () => {
-    const name = generateSafeFilename("");
+    const name = generateSafeFilename("", "unknown/type");
     assertOk(name.length > 0, "Should produce non-empty filename");
-    assertOk(name.endsWith(".bin"), "Empty filename should default to .bin extension");
+    assertOk(name.endsWith(".bin"), "Unknown MIME should default to .bin");
   });
 
   await test("produces exactly one dot (the extension)", async () => {
-    const name = generateSafeFilename("my.file.name.jpg");
+    const name = generateSafeFilename("my.file.name.jpg", "image/jpeg");
     const dots = (name.match(/\./g) || []).length;
     assertEqual(dots, 1, "Should have exactly one dot for the extension");
+    assertOk(name.endsWith(".jpg"), "Extension should be .jpg from MIME");
+  });
+
+  // ─── MIME-Controlled Extension (regression: extension must match validated MIME) ──
+
+  console.log("\n[MIME-Controlled Extension]");
+
+  // A. image/jpeg + shoe.jpeg → .jpg
+  await test("jpeg mime + jpeg filename yields .jpg", async () => {
+    const name = generateSafeFilename("shoe.jpeg", "image/jpeg");
+    assertOk(name.endsWith(".jpg"), "jpeg MIME should produce .jpg");
+  });
+
+  // B. image/jpeg + shoe.webp → .jpg (mismatch: MIME wins)
+  await test("jpeg mime + webp filename yields .jpg", async () => {
+    const name = generateSafeFilename("shoe.webp", "image/jpeg");
+    assertOk(name.endsWith(".jpg"), "jpeg MIME should override .webp user filename");
+    assertOk(!name.includes(".webp"), "Should not contain .webp");
+  });
+
+  // C. image/webp + shoe.jpg → .webp
+  await test("webp mime + jpg filename yields .webp", async () => {
+    const name = generateSafeFilename("shoe.jpg", "image/webp");
+    assertOk(name.endsWith(".webp"), "webp MIME should override .jpg user filename");
+  });
+
+  // D. image/png + shoe.jpeg → .png
+  await test("png mime + jpeg filename yields .png", async () => {
+    const name = generateSafeFilename("shoe.jpeg", "image/png");
+    assertOk(name.endsWith(".png"), "png MIME should override .jpeg user filename");
+  });
+
+  // E. valid legacy .jpeg filename passes isSafeFilename()
+  await test("legacy .jpeg filename passes isSafeFilename", async () => {
+    assertOk(isSafeFilename("legacy-image.jpeg"), "Legacy .jpeg should be accepted");
+  });
+
+  // F. generated extension always matches validated MIME for all allowed types
+  await test("generated extension always matches validated MIME", async () => {
+    assertEqual(generateSafeFilename("x.jpg", "image/jpeg").split(".").pop(), "jpg");
+    assertEqual(generateSafeFilename("x.jpg", "image/jpg").split(".").pop(), "jpg");
+    assertEqual(generateSafeFilename("x.bin", "image/png").split(".").pop(), "png");
+    assertEqual(generateSafeFilename("x.bin", "image/webp").split(".").pop(), "webp");
   });
 
   // ─── Filename Safety ────────────────────────────────────────────────────
 
   console.log("\n[Filename Safety]");
   await test("accepts valid product filenames", async () => {
-    const valid = ["product-123.jpg", "my_product.webp", "shoe123.png"];
+    const valid = ["product-123.jpg", "my_product.webp", "shoe123.png", "legacy-image.jpeg"];
     for (const f of valid) {
       assertOk(isSafeFilename(f), `Should accept: ${f}`);
     }

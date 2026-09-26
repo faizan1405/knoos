@@ -87,17 +87,20 @@ export function validateImageFile(file: { size: number; type: string }): ImageVa
 /**
  * Generate a safe, unique filename for a product image.
  *
+ * The stored extension is derived from the validated MIME type, never from
+ * the user-supplied filename.  The original filename only influences the
+ * sanitized basename.
+ *
  * Format: {timestamp}-{slugified-original-name}-{random-hex}{ext}
- * All special characters are stripped. The result contains only [a-zA-Z0-9._-].
+ * All special characters are stripped.  The result contains only [a-zA-Z0-9._-].
  */
-export function generateSafeFilename(originalFileName: string): string {
-  // Strip extension first
+export function generateSafeFilename(originalFileName: string, mimeType: string): string {
+  // Strip extension from user filename — MIME controls the stored extension
   const lastDot = originalFileName.lastIndexOf(".");
   const baseName = lastDot >= 0 ? originalFileName.slice(0, lastDot) : originalFileName;
-  const rawExt = lastDot >= 0 ? originalFileName.slice(lastDot) : "";
 
-  // Determine safe extension from MIME-aware source, default to original lowercase ext
-  const ext = rawExt.toLowerCase().replace(/[^a-z0-9.]/g, "") || ".bin";
+  // Derive extension exclusively from the validated MIME type
+  const ext = MIME_TO_EXT[mimeType.toLowerCase()] || ".bin";
 
   // Sanitize base name: only alphanumeric, dash, underscore
   const sanitized = baseName.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").slice(0, 50);
@@ -133,9 +136,10 @@ export function isSafeFilename(filename: string): boolean {
   // Reject backtick, shell metacharacters
   if (/[`$&|;<>]/.test(filename)) return false;
 
-  // Must have a safe extension
+  // Must have a safe extension (allow .jpeg for legacy backward compat)
   const ext = path.extname(filename).toLowerCase();
-  if (!ext || ![...ALLOWED_IMAGE_TYPES].some((t) => MIME_TO_EXT[t] === ext)) return false;
+  const allowedExts = new Set([...new Set(Object.values(MIME_TO_EXT)), ".jpeg"]);
+  if (!ext || !allowedExts.has(ext)) return false;
 
   return true;
 }
@@ -235,8 +239,8 @@ export async function saveProductImage(file: {
     };
   }
 
-  // Generate safe filename
-  const filename = generateSafeFilename(file.name || "product_image");
+  // Generate safe filename — extension derives from validated MIME, not user filename
+  const filename = generateSafeFilename(file.name || "product_image", file.type);
 
   // Double-check the filename is safe (belt-and-suspenders)
   if (!isSafeFilename(filename)) {
