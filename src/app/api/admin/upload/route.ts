@@ -1,19 +1,8 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "products");
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
-
-async function ensureUploadDir() {
-  try {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  } catch {
-    // Directory may already exist
-  }
-}
 
 export async function POST(request: Request) {
   const adminResult = await requireAdmin();
@@ -47,25 +36,16 @@ export async function POST(request: Request) {
       );
     }
 
-    await ensureUploadDir();
-
-    // Generate unique filename with timestamp to avoid collisions
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/\s+/g, "_");
-    const ext = path.extname(originalName).toLowerCase();
-    const baseName = path.basename(originalName, ext).replace(/[^a-zA-Z0-9_-]/g, "");
-    const filename = `${timestamp}-${baseName}${ext}`;
-    const filepath = path.join(UPLOAD_DIR, filename);
-
+    // Convert to base64 data URL and store in database via product images endpoint
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
+    const base64 = buffer.toString("base64");
+    const mimeType = file.type;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
-    // Return the public URL path (absolute URL so it passes Zod's .url() validation)
-    const baseUrl = `${request.headers.get("x-forwarded-proto") === "https" ? "https" : "http"}://${request.headers.get("host")}`;
     return NextResponse.json({
-      url: `${baseUrl}/uploads/products/${filename}`,
-      filename,
+      url: dataUrl,
+      filename: file.name,
     });
   } catch (err) {
     console.error("Upload error:", err);

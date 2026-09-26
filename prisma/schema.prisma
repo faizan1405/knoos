@@ -86,7 +86,7 @@ model Product {
 model ProductImage {
   id        String  @id @default(cuid())
   productId String  @db.VarChar(36)
-  imageUrl  String  @db.VarChar(500)
+  imageUrl  String  @db.Text
   isVideo   Boolean @default(false)
   sortOrder Int     @default(0)
 
