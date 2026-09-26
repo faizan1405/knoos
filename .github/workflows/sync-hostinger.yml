@@ -73,13 +73,11 @@ jobs:
           cd "${DEST}"
 
           if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes detected — deployment already in sync."
+            echo "No changes detected - deployment already in sync."
             exit 0
           fi
 
           git add -A
-          git commit -m "deploy: sync faizan1405/knoos@${GITHUB_SHA}
-
-Source: https://github.com/faizan1405/knoos/commit/${GITHUB_SHA}"
+          git commit -m "deploy: sync faizan1405/knoos@${GITHUB_SHA}"
 
           git push origin "HEAD:${TARGET_BRANCH}"
