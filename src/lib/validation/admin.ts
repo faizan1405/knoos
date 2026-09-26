@@ -72,7 +72,16 @@ export type ProductVariantInput = z.infer<typeof productVariantSchema>;
 
 // Product image
 export const productImageSchema = z.object({
-  imageUrl: z.string().url("Invalid image URL"),
+  imageUrl: z
+    .string()
+    .refine(
+      (val) => {
+        if (val.startsWith("/media/products/")) return true;
+        if (val.startsWith("/uploads/")) return true;
+        return z.string().url().safeParse(val).success;
+      },
+      { message: "Invalid image URL" }
+    ),
   sortOrder: z.number().int().nonnegative().optional(),
 });
 

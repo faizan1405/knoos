@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 const GENDERS = ["MEN", "WOMEN"] as const;
 
@@ -723,16 +723,13 @@ export default function AdminProductForm({ productId }: { productId?: string }) 
 
                 return (
                   <div key={img.id ?? index} className="relative group border border-brand-gray-100 rounded-lg p-1.5 bg-brand-gray-50/50">
-                    <Image
+                    <FallbackImage
                       src={img.imageUrl}
                       alt={`Product ${index + 1}`}
                       width={100}
                       height={100}
                       className="w-full aspect-square object-cover border border-brand-gray-200 rounded"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%239a9a9a' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='12'%3EImage Broken%3C/text%3E%3C/svg%3E";
-                      }}
+                      fallbackType="product"
                     />
                     {isLegacyImage && (
                       <p className="mt-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-center leading-tight font-mono">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 import { ChevronLeft, ChevronRight, X, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import type { PublicReview } from "@/lib/reviews";
@@ -151,9 +151,10 @@ export function ReviewCarousel({ reviews, title, subtitle }: ReviewCarouselProps
                         className="relative w-11 h-11 rounded-full overflow-hidden border border-brand-gray-200 shrink-0 hover:ring-2 hover:ring-brand-blue/50 transition-all cursor-zoom-in"
                         title="Click to view photo"
                       >
-                        <Image
+                        <FallbackImage
                           src={review.customerPhotoUrl}
                           alt={review.displayName}
+                          fallbackType="product"
                           fill
                           sizes="44px"
                           className="object-cover"
@@ -211,9 +212,10 @@ export function ReviewCarousel({ reviews, title, subtitle }: ReviewCarouselProps
                     }
                     className="mt-2 relative w-full h-36 rounded-xl overflow-hidden border border-brand-gray-100 bg-brand-gray-50 hover:opacity-95 transition-opacity cursor-zoom-in"
                   >
-                    <Image
+                    <FallbackImage
                       src={review.productPhotoUrl}
                       alt={`Product review by ${review.displayName}`}
+                      fallbackType="product"
                       fill
                       sizes="(max-width: 640px) 85vw, 360px"
                       className="object-cover"
@@ -296,9 +298,10 @@ export function ReviewCarousel({ reviews, title, subtitle }: ReviewCarouselProps
               </button>
             </div>
             <div className="relative w-full h-[65vh] rounded-xl overflow-hidden bg-black/50">
-              <Image
+              <FallbackImage
                 src={lightboxImage.url}
                 alt={lightboxImage.title}
+                fallbackType="product"
                 fill
                 sizes="(max-width: 1024px) 100vw, 800px"
                 className="object-contain"

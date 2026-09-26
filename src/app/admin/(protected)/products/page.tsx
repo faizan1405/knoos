@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 import ProductImportPanel from "./ProductImportPanel";
 import NormalizeSlugsModal from "./NormalizeSlugsModal";
 
@@ -279,12 +279,13 @@ export default function AdminProductsPage() {
                     <tr key={product.id} className="border-b border-brand-gray-50 hover:bg-brand-gray-50">
                       <td className="px-4 py-3">
                         {product.images[0] && (
-                          <Image
+                          <FallbackImage
                             src={product.images[0].imageUrl}
                             alt={product.name}
                             width={40}
                             height={40}
                             className="object-cover border border-brand-gray-100"
+                            fallbackType="product"
                           />
                         )}
                       </td>
